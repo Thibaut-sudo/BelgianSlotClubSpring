@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/belgianslotclub
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    web:
+      resources:
+        static-locations: classpath:/static/, file:./images/
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  thymeleaf:
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+server:
+  port: 8080
+
+
+

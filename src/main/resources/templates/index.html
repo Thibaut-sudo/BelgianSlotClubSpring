@@ -1,0 +1,124 @@
+
+
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accueil Clubs Slot Racing</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 50px;
+    }
+    .club {
+      text-decoration: none;
+      color: #000;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .club img {
+      width: 300px;
+      height: auto;
+      border-radius: 10px;
+      transition: transform 0.3s;
+    }
+    .club img:hover {
+      transform: scale(1.1);
+    }
+
+    /* NAVIGATION BAR */
+    nav {
+      background-color: #2c3e50;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      position: sticky;
+      top: 0;
+      width: 100%;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+    }
+
+    .nav-links li {
+      margin: 0 15px;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #3498db;
+    }
+
+    /* RESPONSIVE NAVIGATION */
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .nav-links {
+        padding-top: 10px;
+      }
+
+      .nav-links li {
+        margin: 10px 0;
+      }
+    }
+
+  </style>
+</head>
+
+<nav>
+  <div class="logo">🏁 Courses</div>
+  <ul class="nav-links">
+    <li><a href="/home">Accueil</a></li>
+    <li><a href="/courses">Courses</a></li>
+    <li><a href="/championnat?club=<%= club %>">Championnat</a></li>
+    <li><a href="/contact">Contact</a></li>
+    <li><a href="#" id="uploadButton">Ajouter une course</a></li>
+  </ul>
+</nav>
+<body>
+<h1>Bienvenue sur le site des Clubs Slot Racing</h1>
+<div class="container">
+  <a class="club" href="pages/selectRace?club=slot4000">
+    <img src="images/images.jfif" alt="Slot4000">
+    <p>Slot4000</p>
+  </a>
+  <a class="club" href="pages/selectRace?club=srcs">
+    <img src="/images/SRCS.png" alt="SRCS">
+    <p>SRCS</p>
+  </a>
+</div>
+</body>
+</html>

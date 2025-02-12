@@ -4,14 +4,16 @@ import lombok.Getter;
 import lombok.Setter;
 import org.example.belgianslotclubspring.entities.Qualif;
 import org.example.belgianslotclubspring.entities.RaceResult;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Setter
 @Getter
+@Component
 public class ExcelFilleResult {
     private List<Qualif> qualif;
-    @Setter
+
     private List<RaceResult> raceResult; ;
     private String categoryName;
 
@@ -19,6 +21,9 @@ public class ExcelFilleResult {
 
     public void setQualifs(List<Qualif> qualifs) {
         this.qualif = qualifs;
+    }
+    public void setRaceResults(List<RaceResult> raceResults) {
+        this.raceResult = raceResults;
     }
     public void setCategoriseName(String categoryName) {
         this.categoryName = categoryName;

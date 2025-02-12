@@ -38,6 +38,8 @@ public class Qualif {
 
 
     }
+    public Qualif() {
+    }
 
 
 

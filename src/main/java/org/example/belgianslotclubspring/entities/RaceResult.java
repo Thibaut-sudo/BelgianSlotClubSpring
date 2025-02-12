@@ -22,7 +22,7 @@ public class RaceResult {
     @Setter
     private LocalDate date;
     private String categoryName;
-    @Setter
+
     private String ClubName;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -66,5 +66,8 @@ public class RaceResult {
     }
 
 
+    public void setClub(String club) {
+        this.ClubName = club;
+    }
 }
 

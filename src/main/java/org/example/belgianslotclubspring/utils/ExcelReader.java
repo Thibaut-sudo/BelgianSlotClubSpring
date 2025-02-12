@@ -5,12 +5,14 @@ import org.apache.poi.ss.usermodel.*;
 import org.example.belgianslotclubspring.entities.Qualif;
 import org.example.belgianslotclubspring.entities.RaceResult;
 import org.example.belgianslotclubspring.models.ExcelFilleResult;
+import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class ExcelReader {
 
     private final List<Qualif> qualifs = new ArrayList<>();
@@ -72,10 +74,10 @@ public class ExcelReader {
 
 
             }
-//            excelFilleResult.setQualifs(qualifs);
-//            excelFilleResult.setRaceResult(raceResults);
+            excelFilleResult.setQualifs(qualifs);
+            excelFilleResult.setRaceResults(raceResults);
 
-            //excelFilleResult.setCategoriseName(sheet.getRow(0).getCell(0).getStringCellValue());
+            excelFilleResult.setCategoriseName(sheet.getRow(0).getCell(0).getStringCellValue());
 
 
         } catch (IOException e) {

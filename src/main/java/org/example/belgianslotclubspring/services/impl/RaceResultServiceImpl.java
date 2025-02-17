@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Service
 public class RaceResultServiceImpl implements RaceResultService {
 
-    private RaceResultRepo raceResultRepo;
+    private final RaceResultRepo raceResultRepo;
 
     public RaceResultServiceImpl(RaceResultRepo raceResultRepo) {
         this.raceResultRepo = raceResultRepo;

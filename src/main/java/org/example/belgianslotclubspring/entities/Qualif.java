@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-@NoArgsConstructor
+
 @AllArgsConstructor
 @EqualsAndHashCode
 @ToString
@@ -22,6 +22,8 @@ public class Qualif {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private float bestTime;
+
+    @Getter
     private String pilotName;
     private LocalDate date;
 

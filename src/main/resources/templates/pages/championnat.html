@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Classement du Championnat</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #000;
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        th, td {
+            border: 1px solid red;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+        th {
+            background-color: #333;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(odd) { background-color: #222; }
+        tr:nth-child(even) { background-color: #111; }
+        td:first-child { font-weight: bold; }
+        .total { font-weight: bold; background-color: #444; }
+        .debug {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            background-color: #efefef;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<h1 style="text-align: center;">Classement du Championnat</h1>
+
+<!-- Filtres par catégorie -->
+<div style="text-align: center;">
+    <label for="categorie">Catégorie :</label>
+    <select id="categorie" name="categorie" onchange="updateURL()">
+        <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${selectedCategory == cat}"></option>
+    </select>
+</div>
+
+<script>
+    function updateURL() {
+        let select = document.getElementById("categorie");
+        let selectedValue = select.value;
+
+        if (!selectedValue) return;
+
+        let url = new URL(window.location.href);
+        url.searchParams.set('categorie', selectedValue);
+
+        console.log("Redirection vers : " + url.toString());
+        window.location.href = url.toString();
+    }
+</script>
+
+
+
+
+
+<script th:inline="javascript">
+    const raceResults = /*[[${raceResults}]]*/ {};
+
+
+    console.log("Données raceResults :", raceResults);
+</script>
+<table id="raceTable">
+    <thead>
+    <tr id="headerRow">
+
+        <th>Nom</th>
+        <th>Total</th>
+        <th>Total - 1</th>
+    </tr>
+    </thead>
+    <tbody id="raceBody"></tbody>
+</table>
+
+<script>
+    const tableHeader = document.getElementById("headerRow");
+    const tableBody = document.getElementById("raceBody");
+
+    // Ajouter les dates comme en-têtes de colonne
+    const dates = Object.keys(raceResults);
+    dates.forEach(date => {
+        let th = document.createElement("th");
+        th.textContent = date;
+        tableHeader.appendChild(th);
+    });
+
+    // Récupérer tous les noms uniques
+    let allNames = new Set();
+    dates.forEach(date => {
+        Object.keys(raceResults[date]).forEach(name => allNames.add(name));
+    });
+
+    // Remplir le tableau
+    allNames.forEach(name => {
+        let tr = document.createElement("tr");
+        let tdName = document.createElement("td");
+        tdName.textContent = name;
+        tr.appendChild(tdName);
+        let total = 0;
+        dates.forEach(date => {
+            total += raceResults[date][name] ?? 0;
+        });
+        let tdTotal = document.createElement("td");
+        tdTotal.textContent = total;
+        tr.appendChild(tdTotal);
+
+        //cree un total - 1 ou tu retire le resulta le plus faible du pilot
+        let total1 = 0;
+        dates.forEach(date => {
+            total1 += raceResults[date][name] ?? 0;
+        });
+        total1 -= Math.min(...Object.values(raceResults).map(r => r[name] ?? 0));
+        let tdTotal1 = document.createElement("td");
+        tdTotal1.textContent = total1;
+        tr.appendChild(tdTotal1);
+
+
+        tableBody.appendChild(tr);
+
+        // Ajouter les scores pour chaque date
+        dates.forEach(date => {
+            let td = document.createElement("td");
+            td.textContent = raceResults[date][name] ?? "-";  // Afficher "-" si pas de score
+            tr.appendChild(td);
+        });
+        //ajoute une colune qui additionne les scrole de chaque pilote
+
+
+        //trie le table par le total
+        let rows = Array.from(tableBody.querySelectorAll("tr"));
+        rows.sort((a, b) => {
+            let aTotal = parseInt(a.lastChild.textContent);
+            let bTotal = parseInt(b.lastChild.textContent);
+            return bTotal - aTotal;
+        });
+        tableBody.innerHTML = "";
+        rows.forEach(row => tableBody.appendChild(row));
+
+
+    });
+
+</script>
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -27,8 +27,6 @@ public class BestTime {
         this.bestLapTime = bestLapTime;
         this.raceDate = raceDate;
     }
-    public BestTime() {
-    }
 
     @Override
     public String toString() {

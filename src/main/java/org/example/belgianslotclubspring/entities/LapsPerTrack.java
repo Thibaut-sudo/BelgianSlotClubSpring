@@ -27,9 +27,6 @@ public class LapsPerTrack {
         this.laps = laps;
         this.raceDate = raceDate;
     }
-    public LapsPerTrack() {
-
-    }
 
     @Override
     public String toString() {

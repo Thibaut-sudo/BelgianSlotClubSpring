@@ -10,4 +10,7 @@ import java.util.List;
 @Repository
 public interface QualifRepo extends JpaRepository<Qualif, Integer> {
 
+    Qualif findQualifById(Long id);
+
+    List<Qualif> getQualifByDate(LocalDate selectedDate);
 }

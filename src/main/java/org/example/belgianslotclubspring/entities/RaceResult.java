@@ -44,7 +44,7 @@ public class RaceResult {
     }
 
     public void addTrackPerformance(int trackNumber, int laps, double bestTime) {
-        System.out.println(this.date);
+
         this.lapsPerTrack.add(new LapsPerTrack(trackNumber, laps, this.date));
         this.bestTime.add(new BestTime(trackNumber, bestTime, this.date));
 

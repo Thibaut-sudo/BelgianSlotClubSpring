@@ -83,8 +83,8 @@ public class RaceResultServiceImpl implements RaceResultService {
     }
 
     @Override
-    public Map<LocalDate, Map<String, Double>> getChampionshipResults(String category) {
-        List<Object[]> results = raceResultRepo.getChampionshipResultsRaw(category);
+    public Map<LocalDate, Map<String, Double>> getChampionshipResults(String category,String club) {
+        List<Object[]> results = raceResultRepo.getChampionshipResultsRaw(category,club);
 
         Map<LocalDate, Map<String, Double>> championshipResults = new LinkedHashMap<>();
 
@@ -101,7 +101,8 @@ public class RaceResultServiceImpl implements RaceResultService {
 
         // Mettre à jour les résultats en attribuant les points
         for (Map<String, Double> raceResults : championshipResults.values()) {
-            updateRaceResults(raceResults);
+           // updateRaceResults(raceResults);
+            updateRaceResultsWithStar(raceResults);
         }
 
         return championshipResults;
@@ -136,4 +137,50 @@ public class RaceResultServiceImpl implements RaceResultService {
 
 
     }
+    private static void updateRaceResultsWithStar(Map<String, Double> raceResults) {
+        int[] pointsTable = {
+                50, 40, 35, 32, 30, 28, 26, 24, 22, 20,
+                19, 18, 17, 16, 15, 14, 13, 12, 11, 10,
+                9, 8, 7, 6, 5, 4, 3, 2
+        };
+
+        // Séparer les pilotes avec '*' et les autres
+        List<Map.Entry<String, Double>> normalList = new ArrayList<>();
+        List<Map.Entry<String, Double>> starList = new ArrayList<>();
+
+        for (Map.Entry<String, Double> entry : raceResults.entrySet()) {
+            if (entry.getKey().contains("*")) {
+                starList.add(entry);
+            } else {
+                normalList.add(entry);
+            }
+        }
+
+        // Trier les deux listes par nombre de tours effectués (ordre décroissant)
+        normalList.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+        starList.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+
+        // Map temporaire pour stocker les résultats mis à jour
+        Map<String, Double> updatedResults = new LinkedHashMap<>();
+
+        // Attribution des points pour les pilotes normaux
+        for (int i = 0; i < normalList.size(); i++) {
+            String pilot = normalList.get(i).getKey();
+            int points = (i < pointsTable.length) ? pointsTable[i] : 1;
+            updatedResults.put(pilot, (double) points);
+        }
+
+        // Attribution des points pour les pilotes avec '*'
+        for (int i = 0; i < starList.size(); i++) {
+            String pilot = starList.get(i).getKey();
+            int points = (i < pointsTable.length) ? pointsTable[i] : 1;
+            updatedResults.put(pilot, (double) points);
+        }
+
+        // Mettre à jour la Map d'origine
+        raceResults.clear();
+        raceResults.putAll(updatedResults);
+    }
+
+
 }

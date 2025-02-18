@@ -11,44 +11,32 @@
 <nav>
   <div class="logo">🏁 Courses</div>
   <ul class="nav-links">
-    <li><a th:href="@{/home}">Accueil</a></li>
+    <li><a th:href="@{/}">Accueil</a></li>
     <li><a th:href="@{/courses}">Courses</a></li>
     <li><a th:href="@{/championnat(club=${club})}">Championnat</a></li>
     <li><a th:href="@{/contact}">Contact</a></li>
     <li><a href="#" id="uploadButton">Ajouter une course</a></li>
-
   </ul>
 </nav>
+
 <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" style="display: none;">
   <input type="file" id="fileInput" name="file" accept=".xls,.xlsx">
   <input type="hidden" id="clubInput" name="club" th:value="${club}">
 </form>
 
 <div style="display: flex">
-  <!-- ASIDE : FILTRES -->
   <aside>
     <h3>Filtres</h3>
-
-    <label for="clubFilter">Club :</label>
-    <select id="clubFilter">
-      <option value="">Tous</option>
-      <option value="slot4000">Slot4000</option>
-      <option value="srcs">SRCS</option>
-    </select>
-
     <label for="categoryFilter">Catégorie :</label>
     <select id="categoryFilter">
       <option value="">Toutes</option>
       <option th:each="categorie : ${listeCategorie}" th:value="${categorie}" th:text="${categorie}"></option>
     </select>
-
     <button onclick="applyFilters()">Appliquer</button>
   </aside>
 
-  <!-- MAIN : LISTE DES COURSES -->
   <main>
     <h2>Liste des Courses</h2>
-
     <img th:if="${club == 'slot4000'}" src="../images/images.jfif" alt="Slot4000">
     <img th:if="${club == 'srcs'}" src="../images/SRCS.png" alt="SRCS">
 
@@ -63,70 +51,65 @@
           </button>
         </form>
       </th:block>
-
       <p class="no-race" th:if="${#maps.isEmpty(raceResultDate)}">Aucune course disponible.</p>
     </div>
-
     <a th:href="@{/home}" class="back-home">Retour à l'accueil</a>
   </main>
 </div>
 
-<!-- SCRIPT : FILTRAGE DES COURSES -->
 <script>
   function applyFilters() {
-    let clubFilter = document.getElementById("clubFilter").value;
-    let categoryFilter = document.getElementById("categoryFilter").value;
-
+    let categoryFilter = document.getElementById("categoryFilter").value.toLowerCase();
     let raceCards = document.querySelectorAll(".race-card");
 
     raceCards.forEach(card => {
-      let cardClub = card.getAttribute("data-club");
-      let cardCategory = card.getAttribute("data-category");
-
-      let showCard = true;
-
-      if (clubFilter && clubFilter !== cardClub) {
-        showCard = false;
-      }
-
-      if (categoryFilter && categoryFilter !== cardCategory) {
-        showCard = false;
-      }
-
+      let cardCategory = card.getAttribute("data-category").toLowerCase();
+      let showCard = categoryFilter === "" || categoryFilter === cardCategory;
       card.style.display = showCard ? "" : "none";
     });
   }
-</script>
 
-<script>
   document.getElementById("uploadButton").addEventListener("click", function () {
-    document.getElementById("fileInput").click();
+    let password = prompt("Veuillez entrer le mot de passe pour ajouter un fichier :");
+
+    if (!password) {
+      alert("Mot de passe requis !");
+      return;
+    }
+
+    fetch("/api/verify-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: password })
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                document.getElementById("fileInput").click();
+              } else {
+                alert("Mot de passe incorrect !");
+              }
+            })
+            .catch(error => console.error("Erreur lors de la validation du mot de passe", error));
   });
 
   document.getElementById("fileInput").addEventListener("change", function () {
     let formData = new FormData(document.getElementById("uploadForm"));
     let club = document.getElementById("clubInput").value;
 
-    console.log(club);
-
     if (!club) {
       alert("Erreur : Club non spécifié !");
       return;
     }
 
-    // Vérifier si le club est déjà dans l'URL
-    let url = new URL(window.location.origin + "/upload");
-    url.searchParams.append("club", club);
-
-    fetch(url, {
+    fetch("/upload", {
       method: "POST",
       body: formData
     })
             .then(response => response.text())
             .then(data => {
               alert(`Fichier téléchargé avec succès pour le club : ${club}`);
-
-                window.location.reload();
+              window.location.reload();
             })
             .catch(error => {
               console.error("Erreur lors de l'upload :", error);
@@ -134,10 +117,6 @@
             });
   });
 </script>
-
-
-
-
 
 </body>
 </html>

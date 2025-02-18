@@ -24,5 +24,5 @@ public interface RaceResultService {
 
     List<String> getAllCategoriesClub(String club);
 
-    Map<LocalDate, Map<String, Double>> getChampionshipResults(String category);
+    Map<LocalDate, Map<String, Double>> getChampionshipResults(String category, String club);
 }

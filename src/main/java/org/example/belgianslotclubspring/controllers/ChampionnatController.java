@@ -43,7 +43,7 @@ public class ChampionnatController {
         model.addAttribute("raceDates", raceDates);
 
         // Récupération des résultats du championnat
-        Map<LocalDate, Map<String, Double>> raceResults = raceResultService.getChampionshipResults(category);
+        Map<LocalDate, Map<String, Double>> raceResults = raceResultService.getChampionshipResults(category,club);
         model.addAttribute("raceResults", raceResults);
 
         return "pages/championnat"; // Redirige vers la vue Thymeleaf "championnat.html"

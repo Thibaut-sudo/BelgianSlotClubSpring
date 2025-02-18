@@ -8,6 +8,7 @@
             background-color: #f8f9fa;
             color: #000;
             font-family: Arial, sans-serif;
+            margin: 0;
         }
         table {
             width: 90%;
@@ -34,11 +35,75 @@
         tr:nth-child(odd) { background-color: #222; }
         tr:nth-child(even) { background-color: #111; }
         td:first-child { font-weight: bold; }
-        .total { font-weight: bold; background-color: #444; }
+        /* NAVIGATION BAR */
+        nav {
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+        }
+
+        .nav-links li {
+            margin: 0 15px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #3498db;
+        }
+
+        /* RESPONSIVE NAVIGATION */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-links {
+                padding-top: 10px;
+            }
+
+            .nav-links li {
+                margin: 10px 0;
+            }
+        }
     </style>
 </head>
 <body>
+<nav>
+    <div class="logo">🏁 Courses</div>
+    <ul class="nav-links">
+        <li><a th:href="@{/}">Accueil</a></li>
+        <li><a th:href="@{/courses}">Courses</a></li>
+        <li><a th:href="@{/championnat(club=${club})}">Championnat</a></li>
+        <li><a th:href="@{/contact}">Contact</a></li>
 
+    </ul>
+</nav>
 <h1 style="text-align: center;">Classement du Championnat</h1>
 
 <!-- Filtres par catégorie -->
@@ -53,48 +118,74 @@
     function updateURL() {
         let select = document.getElementById("categorie");
         let selectedValue = select.value;
-
         if (!selectedValue) return;
-
         let url = new URL(window.location.href);
         url.searchParams.set('categorie', selectedValue);
-
-        console.log("Redirection vers : " + url.toString());
         window.location.href = url.toString();
     }
 </script>
 
 <script th:inline="javascript">
     const raceResults = /*[[${raceResults}]]*/ {};
-    console.log("Données raceResults :", raceResults);
 </script>
 
+<!-- Tableau principal -->
+<h2 style="text-align: center;">Classement Général</h2>
 <table id="raceTable">
     <thead>
     <tr id="headerRow">
+        <th>Position</th>
         <th>Nom</th>
         <th>Total</th>
-        <th id="sortTotal1">Total - 1 🔽</th> <!-- Click pour trier -->
+        <th id="sortTotal1">Total - 1 🔽</th>
     </tr>
     </thead>
     <tbody id="raceBody"></tbody>
 </table>
+
+<!-- Tableau pour les pilotes avec * -->
+<h2 style="text-align: center;">Classement catégorie bis </h2>
+<table id="excludedTable">
+    <thead>
+    <tr id="excludedHeaderRow">
+
+        <th>Position</th>
+        <th>Nom</th>
+        <th>Total</th>
+        <th>Total - 1</th>
+    </tr>
+    </thead>
+    <tbody id="excludedBody"></tbody>
+</table>
+
 <script>
     const tableHeader = document.getElementById("headerRow");
+    const excludedHeader = document.getElementById("excludedHeaderRow");
     const tableBody = document.getElementById("raceBody");
+    const excludedBody = document.getElementById("excludedBody");
     const sortButton = document.getElementById("sortTotal1");
 
     const dates = Object.keys(raceResults);
 
-    // Ajouter les dates comme en-têtes de colonne
+    // Ajouter les dates comme en-têtes de colonne pour les deux tableaux
     dates.forEach(date => {
-        let th = document.createElement("th");
-        th.textContent = date;
-        tableHeader.appendChild(th);
+        let th1 = document.createElement("th");
+        th1.textContent = date;
+        tableHeader.appendChild(th1);
+
+        let th2 = document.createElement("th");
+        th2.textContent = date;
+        excludedHeader.appendChild(th2);
     });
 
-    function updateTable() {
-        tableBody.innerHTML = ""; // Réinitialisation du tableau avant affichage
+    function processPilotes() {
+        tableBody.innerHTML = "";
+        excludedBody.innerHTML = "";
+
+
+
+
+
 
         let allNames = new Set();
         dates.forEach(date => {
@@ -111,21 +202,30 @@
                 scores.push(score);
             });
 
-            // Suppression du plus mauvais score seulement s'il y a plusieurs scores
             let total1 = total;
-            if (scores.length > 1) {
-                let minScore = Math.min(...scores);
+            let nonZeroScores = scores.filter(s => s > 0);
+
+            if (nonZeroScores.length > 1) {
+                let minScore = Math.min(...nonZeroScores);
                 total1 -= minScore;
             }
 
             return { name, total, total1, scores };
         });
 
-        // Tri par "Total - 1" (ordre décroissant)
-        pilotes.sort((a, b) => b.total1 - a.total1);
+        let excludedPilotes = pilotes.filter(p => p.name.includes("*"));
+        let validPilotes = pilotes.filter(p => !p.name.includes("*"));
 
-        pilotes.forEach(pilote => {
+        // Trier par Total - 1
+        validPilotes.sort((a, b) => b.total1 - a.total1);
+
+        function appendToTable(body, pilote) {
             let tr = document.createElement("tr");
+            //affiche dans le table un compteur de 1 a au nombre de pilotes
+            let tdPosition = document.createElement("td");
+            tdPosition.textContent = body.children.length + 1;
+            tr.appendChild(tdPosition);
+
 
             let tdName = document.createElement("td");
             tdName.textContent = pilote.name;
@@ -136,7 +236,7 @@
             tr.appendChild(tdTotal);
 
             let tdTotal1 = document.createElement("td");
-            tdTotal1.textContent = (pilote.scores.length > 1) ? pilote.total1 : pilote.total; // Correction ici
+            tdTotal1.textContent = pilote.total1;
             tr.appendChild(tdTotal1);
 
             pilote.scores.forEach(score => {
@@ -145,21 +245,17 @@
                 tr.appendChild(td);
             });
 
-            tableBody.appendChild(tr);
-        });
+            body.appendChild(tr);
+        }
+
+        validPilotes.forEach(p => appendToTable(tableBody, p));
+        excludedPilotes.forEach(p => appendToTable(excludedBody, p));
     }
 
-    // Mettre à jour le tableau au chargement
-    updateTable();
+    processPilotes();
 
-    // Ajoute un événement pour trier au clic sur "Total - 1"
-    sortButton.addEventListener("click", () => {
-        updateTable();
-    });
-
+    sortButton.addEventListener("click", processPilotes);
 </script>
-
-
 
 </body>
 </html>

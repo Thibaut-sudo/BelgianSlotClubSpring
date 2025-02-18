@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public interface RaceResultRepo extends JpaRepository<RaceResult, Integer> {
@@ -16,12 +15,12 @@ public interface RaceResultRepo extends JpaRepository<RaceResult, Integer> {
     @Query("SELECT DISTINCT r.date, r.categoryName FROM RaceResult r WHERE r.ClubName = :club")
     List<Object[]> getRaceResultDateByClubName(@Param("club") String club);
 
-    @Query("SELECT DISTINCT concat(upper(substring(lower(r.categoryName), 1, 1)), substring(lower(r.categoryName), 2)) FROM RaceResult r")
+    @Query("SELECT DISTINCT concat(upper(substring(lower(r.categoryName), 1, 1)), substring(lower(r.categoryName), 2)) FROM RaceResult r WHERE  lower(r.ClubName) = lower(:club)")
     List<String> getAllCategoriesClub(String club);
 
 
     List<RaceResult> getRaceResultByDate(LocalDate date);
 
-    @Query("SELECT r.date, r.nom, r.totalTours FROM RaceResult r WHERE lower(r.categoryName) = lower( :category) ORDER BY r.date")
-    List<Object[]> getChampionshipResultsRaw(@Param("category") String category);
+    @Query("SELECT r.date, r.nom, r.totalTours FROM RaceResult r WHERE lower(r.categoryName) = lower( :category) and  lower(r.ClubName) = lower(:club) ORDER BY r.date")
+    List<Object[]> getChampionshipResultsRaw(@Param("category") String category, String club);
 }

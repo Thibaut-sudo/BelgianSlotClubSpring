@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <title>Résultats des courses</title>
     <style>
+        body {
+            background-color: #f8f9fa;
+            color: #000;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -46,21 +53,84 @@
         .track-4 { background-color: #fd8547; } /* Orange clair */
         .track-5 { background-color: #a5c5f8; } /* Bleu clair */
         .track-6 { background-color: #f8f5a5; } /* Jaune clair */
+        /* NAVIGATION BAR */
+        nav {
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+        }
+
+        .nav-links li {
+            margin: 0 15px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #3498db;
+        }
+
+        /* RESPONSIVE NAVIGATION */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-links {
+                padding-top: 10px;
+            }
+
+            .nav-links li {
+                margin: 10px 0;
+            }
+        }
     </style>
 </head>
 <body>
+<nav>
+    <div class="logo">🏁 Courses</div>
+    <ul class="nav-links">
+        <li><a th:href="@{/}">Accueil</a></li>
+        <li><a th:href="@{/courses}">Courses</a></li>
+        <li><a th:href="@{/championnat(club=${club})}">Championnat</a></li>
+        <li><a th:href="@{/contact}">Contact</a></li>
+
+
+    </ul>
+</nav>
 
 <div class="container">
     <h1>Résultats des Courses</h1>
-    <a href="/home" class="back-home">Retour à l'accueil</a>
+
 </div>
 
-<!-- Navigation des types de résultats -->
-<div>
-    <a href="/home" class="back-home">Qualif</a>
-    <a href="/home" class="back-home">Général</a>
-    <a href="/home" class="back-home">LMP2</a>
-</div>
+
+
 
 <!-- Conteneur Flex pour afficher les tableaux côte à côte -->
 <div class="tables-container">

@@ -1,5 +1,6 @@
 package org.example.belgianslotclubspring.utils;
 
+
 import org.apache.poi.ss.usermodel.*;
 import org.example.belgianslotclubspring.entities.Qualif;
 import org.example.belgianslotclubspring.entities.RaceResult;
@@ -11,76 +12,73 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Classe utilitaire pour la lecture et l'extraction des données d'un fichier Excel.
- * Cette classe utilise Apache POI pour manipuler les fichiers Excel (.xls et .xlsx).
- */
 @Component
 public class ExcelReader {
 
     private final List<Qualif> qualifs = new ArrayList<>();
     private final List<RaceResult> raceResults = new ArrayList<>();
+
     private final ExcelFilleResult excelFilleResult;
 
-    /**
-     * Constructeur de la classe ExcelReader.
-     *
-     * @param excelFilleResult Objet contenant les résultats extraits du fichier Excel.
-     */
     public ExcelReader(ExcelFilleResult excelFilleResult) {
         this.excelFilleResult = excelFilleResult;
     }
 
     /**
-     * Lit un fichier Excel et extrait les résultats des courses et qualifications.
+     * Lit un fichier Excel et extrait les résultats de course.
      *
-     * @param filePath Chemin du fichier Excel à lire.
-     * @return Un objet {@link ExcelFilleResult} contenant les données extraites.
+     * @param filePath Chemin du fichier Excel
+     * @return Liste des résultats de course
      */
     public ExcelFilleResult readRaceResults(String filePath) {
+
+
+        System.out.println("Fichier sélectionné : " + filePath);
+
         try (FileInputStream fis = new FileInputStream(filePath);
-             Workbook workbook = WorkbookFactory.create(fis)) {  // Compatible avec XLS et XLSX
+             Workbook workbook = WorkbookFactory.create(fis)) {  // Supporte XLS et XLSX
 
-            Sheet sheet = workbook.getSheetAt(0); // Lecture de la première feuille
+            Sheet sheet = workbook.getSheetAt(0); // Prend la première feuille
 
-            // Récupération de la date de la course depuis la cellule concernée
+
             String date = String.valueOf(sheet.getRow(0).getCell(6));
 
-            // Parcours des lignes du fichier Excel, en commençant après les en-têtes
-            for (int i = 3; i <= sheet.getLastRowNum(); i++) {
+
+            for (int i = 3; i <= sheet.getLastRowNum(); i++) { // Ignore la première ligne (en-têtes)
                 Row row = sheet.getRow(i);
                 if (row == null) continue; // Ignore les lignes vides
 
-                // Extraction des données de qualification
-                String qualifName = getStringCellValue(row.getCell(1));
-                String qualifTime = getStringCellValue(row.getCell(2));
 
-                // Vérification que les valeurs ne sont pas vides avant d'ajouter
-                if (!qualifName.isEmpty() && !qualifTime.isEmpty()) {
-                    Qualif qualif = new Qualif(qualifName, qualifTime, date);
-                    qualifs.add(qualif);
-                }
+                String QualifName = getStringCellValue(row.getCell(1));
+                String QualiTime = getStringCellValue(row.getCell(2));
 
-                // Extraction des données de course
-                RaceResult pilot = new RaceResult(
-                        row.getCell(4).getStringCellValue(),
-                        getDoubleCellValue(row.getCell(5)),
-                        String.valueOf(sheet.getRow(0).getCell(6)),
-                        sheet.getRow(0).getCell(0).getStringCellValue()
-                );
 
-                // Ajout des performances sur chaque piste
-                for (int track = 1, col = 6; track <= 6; track++, col += 2) {
-                    pilot.addTrackPerformance(track, getIntCellValue(row.getCell(col)), getDoubleCellValue(row.getCell(col + 1)));
-                }
+                if (QualifName.isEmpty() || QualiTime.isEmpty()) continue;
+
+                Qualif qualif = new Qualif(QualifName, QualiTime, date);
+                qualifs.add(qualif);
+
+
+                RaceResult pilot = new RaceResult(row.getCell(4).getStringCellValue(), getDoubleCellValue(row.getCell(5)),String.valueOf(sheet.getRow(0).getCell(6)),sheet.getRow(0).getCell(0).getStringCellValue());
+
+
+
+                pilot.addTrackPerformance(1, getIntCellValue(row.getCell(6)), getDoubleCellValue(row.getCell(7)));
+                pilot.addTrackPerformance(2, getIntCellValue(row.getCell(8)), getDoubleCellValue(row.getCell(9)));
+                pilot.addTrackPerformance(3, getIntCellValue(row.getCell(10)), getDoubleCellValue(row.getCell(11)));
+                pilot.addTrackPerformance(4, getIntCellValue(row.getCell(12)), getDoubleCellValue(row.getCell(13)));
+                pilot.addTrackPerformance(5, getIntCellValue(row.getCell(14)), getDoubleCellValue(row.getCell(15)));
+                pilot.addTrackPerformance(6, getIntCellValue(row.getCell(16)), getDoubleCellValue(row.getCell(17)));
 
                 raceResults.add(pilot);
-            }
 
-            // Mise à jour de l'objet contenant les résultats
+
+            }
             excelFilleResult.setQualifs(qualifs);
             excelFilleResult.setRaceResults(raceResults);
+
             excelFilleResult.setCategoriseName(sheet.getRow(0).getCell(0).getStringCellValue());
+
 
         } catch (IOException e) {
             System.err.println("Erreur de lecture du fichier Excel : " + e.getMessage());
@@ -89,12 +87,7 @@ public class ExcelReader {
         return excelFilleResult;
     }
 
-    /**
-     * Récupère la valeur d'une cellule sous forme de chaîne de caractères.
-     *
-     * @param cell La cellule à lire.
-     * @return La valeur de la cellule en String.
-     */
+
     private String getStringCellValue(Cell cell) {
         if (cell == null) return "";
         return switch (cell.getCellType()) {
@@ -104,25 +97,19 @@ public class ExcelReader {
         };
     }
 
-    /**
-     * Récupère la valeur d'une cellule sous forme d'entier.
-     *
-     * @param cell La cellule à lire.
-     * @return La valeur entière de la cellule.
-     */
     private int getIntCellValue(Cell cell) {
         if (cell == null) return 0;
         return (int) cell.getNumericCellValue();
     }
 
-    /**
-     * Récupère la valeur d'une cellule sous forme de nombre décimal.
-     *
-     * @param cell La cellule à lire.
-     * @return La valeur décimale de la cellule.
-     */
     private double getDoubleCellValue(Cell cell) {
         if (cell == null) return 0;
         return cell.getNumericCellValue();
     }
+
+
 }
+
+
+
+

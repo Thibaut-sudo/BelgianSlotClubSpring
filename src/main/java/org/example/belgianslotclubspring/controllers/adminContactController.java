@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class adminContactController {
 
 
-    //private final JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
 
 
@@ -27,15 +27,15 @@ public class adminContactController {
     public String sendEmail(@RequestParam String name, @RequestParam String email, @RequestParam String message) {
         try {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
-            mailMessage.setTo("admin@example.com"); // Remplacez par l'adresse de l'admin
+            mailMessage.setTo("thibaut.lenertz@gmail.com"); // Remplacez par l'adresse de l'admin
             mailMessage.setSubject("Nouveau message de contact");
             mailMessage.setText("Nom: " + name + "\nEmail: " + email + "\nMessage: " + message);
 
             //mailSender.send(mailMessage);
-            return "Email envoyé avec succès !";
+
         } catch (Exception e) {
             System.out.println("Erreur lors de l'envoi de l'email: " + e.getMessage());
         }
-        return "redirect:/pages/contact.html";
+        return "redirect:/";
     }
 }

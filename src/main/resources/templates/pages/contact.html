@@ -1,34 +1,61 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Icône de l'onglet du navigateur -->
+<link rel="icon" type="image/x-icon" href="/images/favicon.png">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Définition du jeu de caractères en UTF-8 -->
+    <meta charset="UTF-8">
+
+    <!-- Permet un affichage responsive sur les appareils mobiles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Inclusion du fichier CSS pour le style -->
     <link rel="stylesheet" href="css/Style.css">
-  <title>Contact - Clubs Slot Racing</title>
 
+    <!-- Titre de la page affiché dans l'onglet du navigateur -->
+    <title>Contact - Clubs Slot Racing</title>
 </head>
+
 <body>
+
+<!-- Barre de navigation -->
 <nav>
-  <div class="logo">🏁 Courses</div>
-  <ul class="nav-links">
-    <li><a href="/">Accueil</a></li>
-    <li><a href="/contact">Contact</a></li>
-  </ul>
+    <!-- Logo du site -->
+    <div class="logo">🏁 Courses</div>
+
+    <!-- Menu de navigation -->
+    <ul class="nav-links">
+        <li><a href="/">Accueil</a></li> <!-- Lien vers la page d'accueil -->
+        <li><a href="/contact">Contact</a></li> <!-- Lien vers la page contact -->
+    </ul>
 </nav>
+
+<!-- Titre principal de la page -->
 <h1>Contactez-nous</h1>
+
+<!-- Conteneur du formulaire de contact -->
 <div class="container">
-    <form action="/contact" method="post">
-    <label for="name">Nom :</label>
-    <input type="text" id="name" name="name" required>
+    <!-- Formulaire permettant aux utilisateurs d'envoyer un message -->
+    <form action="/contact/send" method="post">
 
-    <label for="email">Email :</label>
-    <input type="email" id="email" name="email" required>
+        <!-- Champ pour le nom -->
+        <label for="name">Nom :</label>
+        <input type="text" id="name" name="name" required>
 
-    <label for="message">Message :</label>
-    <textarea id="message" name="message" rows="5" required></textarea>
+        <!-- Champ pour l'email -->
+        <label for="email">Email :</label>
+        <input type="email" id="email" name="email" required>
 
-    <button type="submit">Envoyer</button>
-  </form>
+        <!-- Zone de texte pour le message -->
+        <label for="message">Message :</label>
+        <textarea id="message" name="message" rows="5" required></textarea>
+
+        <!-- Bouton d'envoi du formulaire -->
+        <button type="submit">Envoyer</button>
+    </form>
 </div>
+
 </body>
 </html>

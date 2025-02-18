@@ -1,0 +1,104 @@
+/* Style général */
+body {
+    background-color: #f8f9fa;
+    color: #000;
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+/* Style du titre et sous-titres */
+.title, .subtitle {
+    text-align: center;
+}
+
+/* Conteneur des filtres */
+.filters {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Style de la barre de navigation */
+nav {
+    background-color: #2c3e50;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    position: sticky;
+    top: 0;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+}
+
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    transition: 0.3s;
+}
+
+.nav-links a:hover {
+    color: #3498db;
+}
+
+/* Style des tableaux */
+table {
+    width: 90%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #1a1a1a;
+    color: white;
+}
+
+th, td {
+    border: 1px solid red;
+    padding: 8px;
+    text-align: center;
+    font-size: 14px;
+}
+
+th {
+    background-color: #333;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+th:hover {
+    background-color: #555;
+}
+
+tr:nth-child(odd) { background-color: #222; }
+tr:nth-child(even) { background-color: #111; }
+td:first-child { font-weight: bold; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .nav-links {
+        padding-top: 10px;
+    }
+
+    .nav-links li {
+        margin: 10px 0;
+    }
+}

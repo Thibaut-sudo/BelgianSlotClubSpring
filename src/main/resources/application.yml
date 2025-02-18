@@ -1,4 +1,18 @@
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: thibaut.lenertz@gmail.com
+    password: 9b2zSrEn3Y36Ac
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+
   datasource:
     url: jdbc:postgresql://localhost:5432/belgianslotclub
     username: postgres

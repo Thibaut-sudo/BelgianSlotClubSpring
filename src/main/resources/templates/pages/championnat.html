@@ -1,113 +1,36 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
 <head>
+    <!-- Définition du jeu de caractères et des paramètres de mise en page responsive -->
     <meta charset="UTF-8">
     <title>Classement du Championnat</title>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            color: #000;
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
-        table {
-            width: 90%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            background-color: #1a1a1a;
-            color: white;
-        }
-        th, td {
-            border: 1px solid red;
-            padding: 8px;
-            text-align: center;
-            font-size: 14px;
-        }
-        th {
-            background-color: #333;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        th:hover {
-            background-color: #555;
-        }
-        tr:nth-child(odd) { background-color: #222; }
-        tr:nth-child(even) { background-color: #111; }
-        td:first-child { font-weight: bold; }
-        /* NAVIGATION BAR */
-        nav {
-            background-color: #2c3e50;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 30px;
-            position: sticky;
-            top: 0;
 
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
+    <!-- Icône affichée dans l'onglet du navigateur -->
+    <link rel="icon" type="image/x-icon" href="/images/favicon.png">
 
-        }
+    <!-- Inclusion du fichier CSS externe pour le style -->
+    <link rel="stylesheet" href="/css/StyleChamp.css">
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .nav-links {
-            list-style: none;
-            display: flex;
-        }
-
-        .nav-links li {
-            margin: 0 15px;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-size: 18px;
-            transition: 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: #3498db;
-        }
-
-        /* RESPONSIVE NAVIGATION */
-        @media (max-width: 768px) {
-            nav {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .nav-links {
-                padding-top: 10px;
-            }
-
-            .nav-links li {
-                margin: 10px 0;
-            }
-        }
-    </style>
 </head>
+
 <body>
+
+<!-- Barre de navigation -->
 <nav>
     <div class="logo">🏁 Courses</div>
     <ul class="nav-links">
         <li><a th:href="@{/}">Accueil</a></li>
-        <li><a th:href="@{/courses}">Courses</a></li>
         <li><a th:href="@{/championnat(club=${club})}">Championnat</a></li>
         <li><a th:href="@{/contact}">Contact</a></li>
-
     </ul>
 </nav>
-<h1 style="text-align: center;">Classement du Championnat</h1>
+
+<!-- Titre principal -->
+<h1 class="title">Classement du Championnat</h1>
 
 <!-- Filtres par catégorie -->
-<div style="text-align: center;">
+<div class="filters">
     <label for="categorie">Catégorie :</label>
     <select id="categorie" name="categorie" onchange="updateURL()">
         <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${selectedCategory == cat}"></option>
@@ -130,7 +53,7 @@
 </script>
 
 <!-- Tableau principal -->
-<h2 style="text-align: center;">Classement Général</h2>
+<h2 class="subtitle">Classement Général</h2>
 <table id="raceTable">
     <thead>
     <tr id="headerRow">
@@ -144,11 +67,10 @@
 </table>
 
 <!-- Tableau pour les pilotes avec * -->
-<h2 style="text-align: center;">Classement catégorie bis </h2>
+<h2 class="subtitle">Classement catégorie bis</h2>
 <table id="excludedTable">
     <thead>
     <tr id="excludedHeaderRow">
-
         <th>Position</th>
         <th>Nom</th>
         <th>Total</th>
@@ -181,11 +103,6 @@
     function processPilotes() {
         tableBody.innerHTML = "";
         excludedBody.innerHTML = "";
-
-
-
-
-
 
         let allNames = new Set();
         dates.forEach(date => {
@@ -221,11 +138,10 @@
 
         function appendToTable(body, pilote) {
             let tr = document.createElement("tr");
-            //affiche dans le table un compteur de 1 a au nombre de pilotes
+
             let tdPosition = document.createElement("td");
             tdPosition.textContent = body.children.length + 1;
             tr.appendChild(tdPosition);
-
 
             let tdName = document.createElement("td");
             tdName.textContent = pilote.name;
@@ -253,7 +169,6 @@
     }
 
     processPilotes();
-
     sortButton.addEventListener("click", processPilotes);
 </script>
 

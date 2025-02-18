@@ -1,40 +1,47 @@
-
-
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accueil Clubs Slot Racing</title>
+
+  <!-- Lien vers la feuille de style CSS -->
   <link rel="stylesheet" href="/css/Style.css">
+
+  <!-- Favicon pour l'icône de l'onglet du navigateur -->
+  <link rel="icon" type="image/x-icon" href="/images/favicon.png">
 </head>
 <body>
+
+<!-- Barre de navigation -->
 <nav>
   <div class="logo">🏁 Courses</div>
   <ul class="nav-links">
     <li><a href="/">Accueil</a></li>
 
-
+    <!-- Lien vers la page de contact avec Thymeleaf -->
     <li><a th:href="@{/contact}">Contact</a></li>
-
   </ul>
 </nav>
 
-<style>
-
-
-</style>
+<!-- En-tête de la page -->
 <h1>Bienvenue sur le site des Clubs Slot Racing</h1>
+
+<!-- Conteneur principal avec les clubs disponibles -->
 <div class="containerIndex">
+
+  <!-- Lien vers la page de sélection des courses pour le club Slot4000 -->
   <a class="club" th:href="@{selectRace/{club} (club = slot4000)}">
     <img src="images/images.jfif" alt="Slot4000">
     <p>Slot4000</p>
   </a>
+
+  <!-- Lien vers la page de sélection des courses pour le club SRCS -->
   <a class="club" th:href="@{selectRace/{club} (club = srcs)}">
     <img src="/images/SRCS.png" alt="SRCS">
     <p>SRCS</p>
   </a>
 </div>
+
 </body>
 </html>
-

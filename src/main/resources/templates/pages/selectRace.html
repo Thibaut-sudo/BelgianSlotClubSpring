@@ -3,70 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <title>Sélection de la Course</title>
+
+  <!-- Icône de l'onglet du navigateur -->
+  <link rel="icon" type="image/x-icon" href="/images/favicon.png">
+
+  <!-- Lien vers la feuille de style CSS -->
   <link rel="stylesheet" href="../css/SelectRaceStyle.css">
 </head>
 <body>
 
-<!-- NAVIGATION BAR -->
+<!-- Barre de navigation -->
 <nav>
   <div class="logo">🏁 Courses</div>
   <ul class="nav-links">
-    <li><a th:href="@{/}">Accueil</a></li>
-    <li><a th:href="@{/courses}">Courses</a></li>
-    <li><a th:href="@{/championnat(club=${club})}">Championnat</a></li>
-    <li><a th:href="@{/contact}">Contact</a></li>
-    <li><a href="#" id="uploadButton">Ajouter une course</a></li>
+    <li><a th:href="@{/}">Accueil</a></li> <!-- Lien vers la page d'accueil -->
+    <li><a th:href="@{/championnat(club=${club})}">Championnat</a></li> <!-- Lien vers la page du championnat, dynamique selon le club -->
+    <li><a th:href="@{/contact}">Contact</a></li> <!-- Lien vers la page de contact -->
+    <li><a href="#" id="uploadButton">Ajouter une course</a></li> <!-- Bouton pour ajouter une course -->
   </ul>
 </nav>
 
+<!-- Formulaire caché pour l'upload de fichier Excel -->
 <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" style="display: none;">
-  <input type="file" id="fileInput" name="file" accept=".xls,.xlsx">
-  <input type="hidden" id="clubInput" name="club" th:value="${club}">
+  <input type="file" id="fileInput" name="file" accept=".xls,.xlsx"> <!-- Sélection du fichier Excel -->
+  <input type="hidden" id="clubInput" name="club" th:value="${club}"> <!-- Stocke le club sélectionné -->
 </form>
 
+<!-- Conteneur principal divisé en une barre latérale (filtres) et un contenu principal -->
 <div style="display: flex">
+
+  <!-- Section Filtres -->
   <aside>
     <h3>Filtres</h3>
 
+    <!-- Filtre par catégorie -->
     <label for="categoryFilter">Catégorie :</label>
     <select id="categoryFilter">
-      <option value="">Toutes</option>
-      <option th:each="categorie : ${listeCategorie}" th:value="${categorie}" th:text="${categorie}"></option>
+      <option value="">Toutes</option> <!-- Option pour afficher toutes les catégories -->
+      <option th:each="categorie : ${listeCategorie}" th:value="${categorie}" th:text="${categorie}"></option> <!-- Catégories dynamiques -->
     </select>
 
+    <!-- Filtre par année -->
     <label for="yearFilter">Année :</label>
     <select id="yearFilter">
-      <option value="">Toutes</option>
-      <option th:each="annee : ${listeAnnees}" th:value="${annee}" th:text="${annee}"></option>
+      <option value="">Toutes</option> <!-- Option pour afficher toutes les années -->
+      <option th:each="annee : ${listeAnnees}" th:value="${annee}" th:text="${annee}"></option> <!-- Années dynamiques -->
     </select>
 
+    <!-- Bouton pour appliquer les filtres -->
     <button onclick="applyFilters()">Appliquer</button>
   </aside>
 
-
+  <!-- Contenu Principal -->
   <main>
     <h2>Liste des Courses</h2>
+
+    <!-- Affichage du logo du club en fonction du club sélectionné -->
     <img th:if="${club == 'slot4000'}" src="../images/images.jfif" alt="Slot4000">
     <img th:if="${club == 'srcs'}" src="../images/SRCS.png" alt="SRCS">
 
+    <!-- Conteneur pour afficher les courses disponibles -->
     <div class="container" id="raceContainer">
       <th:block th:if="${raceResultDate != null and not #maps.isEmpty(raceResultDate)}">
+        <!-- Boucle Thymeleaf pour afficher chaque course -->
         <form th:each="entry : ${raceResultDate}" th:action="@{/processRaceDate}" method="post">
           <button type="submit" class="race-card"
                   th:attr="data-club=${club}, data-category=${entry.value}">
-            <div class="race-date" th:text="${entry.key}"></div>
-            <div class="race-category" th:text="${entry.value}"></div>
+            <div class="race-date" th:text="${entry.key}"></div> <!-- Affiche la date de la course -->
+            <div class="race-category" th:text="${entry.value}"></div> <!-- Affiche la catégorie de la course -->
             <input type="hidden" name="raceDate" th:value="${entry.key}">
           </button>
         </form>
       </th:block>
+      <!-- Message affiché si aucune course n'est disponible -->
       <p class="no-race" th:if="${#maps.isEmpty(raceResultDate)}">Aucune course disponible.</p>
     </div>
 
   </main>
 </div>
 
+<!-- Script JavaScript -->
 <script>
+  /**
+   * Applique les filtres sélectionnés sur la liste des courses.
+   */
   function applyFilters() {
     let categoryFilter = document.getElementById("categoryFilter").value.toLowerCase();
     let yearFilter = document.getElementById("yearFilter").value;
@@ -87,10 +107,13 @@
         showCard = false;
       }
 
-      card.style.display = showCard ? "" : "none";
+      card.style.display = showCard ? "" : "none"; // Masquer ou afficher la carte de course
     });
   }
 
+  /**
+   * Gère l'affichage du formulaire d'upload après validation du mot de passe.
+   */
   document.getElementById("uploadButton").addEventListener("click", function () {
     let password = prompt("Veuillez entrer le mot de passe pour ajouter un fichier :");
 
@@ -115,6 +138,9 @@
             .catch(error => console.error("Erreur lors de la validation du mot de passe", error));
   });
 
+  /**
+   * Gère l'upload du fichier sélectionné et envoie au serveur.
+   */
   document.getElementById("fileInput").addEventListener("change", function () {
     let formData = new FormData(document.getElementById("uploadForm"));
     let club = document.getElementById("clubInput").value;

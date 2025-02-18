@@ -27,13 +27,22 @@
 <div style="display: flex">
   <aside>
     <h3>Filtres</h3>
+
     <label for="categoryFilter">Catégorie :</label>
     <select id="categoryFilter">
       <option value="">Toutes</option>
       <option th:each="categorie : ${listeCategorie}" th:value="${categorie}" th:text="${categorie}"></option>
     </select>
+
+    <label for="yearFilter">Année :</label>
+    <select id="yearFilter">
+      <option value="">Toutes</option>
+      <option th:each="annee : ${listeAnnees}" th:value="${annee}" th:text="${annee}"></option>
+    </select>
+
     <button onclick="applyFilters()">Appliquer</button>
   </aside>
+
 
   <main>
     <h2>Liste des Courses</h2>
@@ -53,18 +62,31 @@
       </th:block>
       <p class="no-race" th:if="${#maps.isEmpty(raceResultDate)}">Aucune course disponible.</p>
     </div>
-    <a th:href="@{/home}" class="back-home">Retour à l'accueil</a>
+
   </main>
 </div>
 
 <script>
   function applyFilters() {
     let categoryFilter = document.getElementById("categoryFilter").value.toLowerCase();
+    let yearFilter = document.getElementById("yearFilter").value;
     let raceCards = document.querySelectorAll(".race-card");
 
     raceCards.forEach(card => {
       let cardCategory = card.getAttribute("data-category").toLowerCase();
-      let showCard = categoryFilter === "" || categoryFilter === cardCategory;
+      let cardDate = card.querySelector(".race-date").textContent;
+      let cardYear = cardDate.split("-")[0]; // Extraction de l'année
+
+      let showCard = true;
+
+      if (categoryFilter && categoryFilter !== cardCategory) {
+        showCard = false;
+      }
+
+      if (yearFilter && yearFilter !== cardYear) {
+        showCard = false;
+      }
+
       card.style.display = showCard ? "" : "none";
     });
   }

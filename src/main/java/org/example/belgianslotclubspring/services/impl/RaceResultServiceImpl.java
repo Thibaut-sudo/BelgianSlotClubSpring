@@ -108,6 +108,10 @@ public class RaceResultServiceImpl implements RaceResultService {
         return championshipResults;
     }
 
+    @Override
+    public List<String> getAllYearsClub(String club) {
+        return raceResultRepo.getAllYearsClub(club);
+    }
 
 
     private static void updateRaceResults(Map<String, Double> raceResults) {

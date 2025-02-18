@@ -35,11 +35,12 @@ public class RaceController {
 
 
         List<String> listeCategorie = raceResultService.getAllCategoriesClub(club);
-
+        List<String>listeAnnees = raceResultService.getAllYearsClub(club);
 
         model.addAttribute("club", club);
         model.addAttribute("listeCategorie", listeCategorie);
         model.addAttribute("raceResultDate", raceResultDate);
+        model.addAttribute("listeAnnees", listeAnnees);
 
         return "pages/selectRace.html"; // Retourne la page Thymeleaf "selectRace.html"
     }

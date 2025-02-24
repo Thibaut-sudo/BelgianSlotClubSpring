@@ -19,12 +19,17 @@ public interface RaceResultRepo extends JpaRepository<RaceResult, Integer> {
     List<String> getAllCategoriesClub(String club);
 
 
+
     List<RaceResult> getRaceResultByDate(LocalDate date);
 
-    @Query("SELECT r.date, r.nom, r.totalTours FROM RaceResult r WHERE lower(r.categoryName) = lower( :category) and  lower(r.ClubName) = lower(:club) ORDER BY r.date")
+    @Query("SELECT r.date, r.nom, r.totalTours FROM RaceResult r WHERE lower(r.categoryName) = lower( :category) and  lower(r.ClubName) = lower(:club) ORDER BY r.date ASC")
     List<Object[]> getChampionshipResultsRaw(@Param("category") String category, String club);
 
 
     @Query("SELECT DISTINCT year(r.date) FROM RaceResult r WHERE lower(r.ClubName) = lower(:club)")
     List<String> getAllYearsClub(String club);
+
+    @Query("SELECT DISTINCT year(r.date) FROM RaceResult r WHERE lower(r.ClubName) = lower(:club) ORDER BY year(r.date)")
+    List<Integer> getAvailableYears(String club);
+
 }

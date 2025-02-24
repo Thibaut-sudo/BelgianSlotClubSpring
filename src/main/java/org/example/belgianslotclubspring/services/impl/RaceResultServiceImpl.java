@@ -72,7 +72,7 @@ public class RaceResultServiceImpl implements RaceResultService {
     }
 
     @Override
-    public List<String> getRaceDates(String cathegorie) {
+    public List<String> getRaceDates(String cathegorie, Integer year) {
         return List.of();
     }
 
@@ -83,7 +83,7 @@ public class RaceResultServiceImpl implements RaceResultService {
     }
 
     @Override
-    public Map<LocalDate, Map<String, Double>> getChampionshipResults(String category,String club) {
+    public Map<LocalDate, Map<String, Double>> getChampionshipResults(String category, String club, Integer year) {
         List<Object[]> results = raceResultRepo.getChampionshipResultsRaw(category,club);
 
         Map<LocalDate, Map<String, Double>> championshipResults = new LinkedHashMap<>();
@@ -111,6 +111,11 @@ public class RaceResultServiceImpl implements RaceResultService {
     @Override
     public List<String> getAllYearsClub(String club) {
         return raceResultRepo.getAllYearsClub(club);
+    }
+
+    @Override
+    public List<Integer> getAvailableYears(String club) {
+        return raceResultRepo.getAvailableYears(club);
     }
 
 

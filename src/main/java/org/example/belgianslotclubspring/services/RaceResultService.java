@@ -20,11 +20,13 @@ public interface RaceResultService {
 
     List<String> getAllCategories();
 
-    List<String> getRaceDates(String cathegorie);
+    List<String> getRaceDates(String cathegorie, Integer year);
 
     List<String> getAllCategoriesClub(String club);
 
-    Map<LocalDate, Map<String, Double>> getChampionshipResults(String category, String club);
+    Map<LocalDate, Map<String, Double>> getChampionshipResults(String category, String club, Integer year);
 
     List<String> getAllYearsClub(String club);
+
+    List<Integer> getAvailableYears(String club);
 }

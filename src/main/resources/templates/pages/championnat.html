@@ -2,21 +2,14 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <!-- Définition du jeu de caractères et des paramètres de mise en page responsive -->
     <meta charset="UTF-8">
     <title>Classement du Championnat</title>
-
-    <!-- Icône affichée dans l'onglet du navigateur -->
     <link rel="icon" type="image/x-icon" href="/images/favicon.png">
-
-    <!-- Inclusion du fichier CSS externe pour le style -->
     <link rel="stylesheet" href="/css/StyleChamp.css">
-
 </head>
 
 <body>
 
-<!-- Barre de navigation -->
 <nav>
     <div class="logo">🏁 Courses</div>
     <ul class="nav-links">
@@ -26,11 +19,14 @@
     </ul>
 </nav>
 
-<!-- Titre principal -->
 <h1 class="title">Classement du Championnat</h1>
 
-<!-- Filtres par catégorie -->
 <div class="filters">
+    <label for="year">Année :</label>
+    <select id="year" name="year" onchange="updateURL()">
+        <option th:each="year : ${years}" th:value="${year}" th:text="${year}" th:selected="${selectedYear == year}"></option>
+    </select>
+
     <label for="categorie">Catégorie :</label>
     <select id="categorie" name="categorie" onchange="updateURL()">
         <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${selectedCategory == cat}"></option>
@@ -39,20 +35,29 @@
 
 <script>
     function updateURL() {
-        let select = document.getElementById("categorie");
-        let selectedValue = select.value;
-        if (!selectedValue) return;
+        let yearSelect = document.getElementById("year");
+        let categorySelect = document.getElementById("categorie");
+        let selectedYear = yearSelect.value;
+        let selectedCategory = categorySelect.value;
+
         let url = new URL(window.location.href);
-        url.searchParams.set('categorie', selectedValue);
+
+        if (selectedYear) {
+            url.searchParams.set('year', selectedYear);
+        }
+        if (selectedCategory) {
+            url.searchParams.set('categorie', selectedCategory);
+        }
+
         window.location.href = url.toString();
     }
+
 </script>
 
 <script th:inline="javascript">
     const raceResults = /*[[${raceResults}]]*/ {};
 </script>
 
-<!-- Tableau principal -->
 <h2 class="subtitle">Classement Général</h2>
 <table id="raceTable">
     <thead>
@@ -66,7 +71,6 @@
     <tbody id="raceBody"></tbody>
 </table>
 
-<!-- Tableau pour les pilotes avec * -->
 <h2 class="subtitle">Classement catégorie bis</h2>
 <table id="excludedTable">
     <thead>
@@ -89,7 +93,6 @@
 
     const dates = Object.keys(raceResults);
 
-    // Ajouter les dates comme en-têtes de colonne pour les deux tableaux
     dates.forEach(date => {
         let th1 = document.createElement("th");
         th1.textContent = date;
@@ -133,7 +136,6 @@
         let excludedPilotes = pilotes.filter(p => p.name.includes("*"));
         let validPilotes = pilotes.filter(p => !p.name.includes("*"));
 
-        // Trier par Total - 1
         validPilotes.sort((a, b) => b.total1 - a.total1);
 
         function appendToTable(body, pilote) {
@@ -173,4 +175,14 @@
 </script>
 
 </body>
+<footer>
+    <div class="footer-container">
+        <p>&copy; 2025 Thibaut Lenertz. Tous droits réservés.</p>
+        <ul class="footer-links">
+            <li><a href="#">Mentions légales</a></li>
+            <li><a href="#">Politique de confidentialité</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </div>
+</footer>
 </html>

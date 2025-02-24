@@ -10,57 +10,44 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Contrôleur gérant l'affichage du classement du championnat.
- * Il récupère les informations depuis le service RaceResultService et les transmet à la vue Thymeleaf.
- */
 @Controller
 public class ChampionnatController {
 
     private final RaceResultService raceResultService;
 
-    /**
-     * Constructeur du contrôleur injectant le service de gestion des résultats de course.
-     *
-     * @param raceResultService Service permettant de récupérer les résultats de course.
-     */
     public ChampionnatController(RaceResultService raceResultService) {
         this.raceResultService = raceResultService;
     }
 
-    /**
-     * Gère la requête GET pour afficher le classement du championnat.
-     *
-     * @param club     Nom du club sélectionné (optionnel).
-     * @param category Catégorie sélectionnée (optionnelle).
-     * @param model    Modèle pour transmettre les données à la vue.
-     * @return Le nom de la vue Thymeleaf "championnat.html".
-     */
     @GetMapping("/championnat")
     public String getChampionnat(@RequestParam(value = "club", required = false) String club,
                                  @RequestParam(value = "categorie", required = false) String category,
+                                 @RequestParam(value = "year", required = false) Integer year,
                                  Model model) {
+
+        // Liste des années disponibles
+        List<Integer> years = raceResultService.getAvailableYears(club);
+        model.addAttribute("years", years);
+
+        // Sélection de l'année actuelle si aucune n'est spécifiée
+        if (year == null) {
+            year = LocalDate.now().getYear();
+        }
+        model.addAttribute("selectedYear", year);
 
         // Récupération des catégories disponibles pour le club donné
         List<String> categories = raceResultService.getAllCategoriesClub(club);
         model.addAttribute("categories", categories);
 
-        // Sélection de la première catégorie par défaut si aucune n'est spécifiée
         if (category == null && !categories.isEmpty()) {
-            category = categories.get(0);
+            category = categories.getFirst();
         }
         model.addAttribute("selectedCategory", category);
 
-        // Récupération des dates des courses pour la catégorie sélectionnée
-        List<String> raceDates = raceResultService.getRaceDates(category);
-        model.addAttribute("raceDates", raceDates);
-
-        // Récupération des résultats du championnat sous forme de Map
-        // Clé : Date de course | Valeur : Map contenant les pilotes et leurs scores
-        Map<LocalDate, Map<String, Double>> raceResults = raceResultService.getChampionshipResults(category, club);
+        // Récupération des résultats pour l'année et la catégorie choisies
+        Map<LocalDate, Map<String, Double>> raceResults = raceResultService.getChampionshipResults(category, club, year);
         model.addAttribute("raceResults", raceResults);
 
-        // Redirige vers la page Thymeleaf "championnat.html"
         return "pages/championnat";
     }
 }

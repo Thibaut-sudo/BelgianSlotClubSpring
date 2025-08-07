@@ -1,188 +1,1495 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
-    <title>Classement du Championnat</title>
-    <link rel="icon" type="image/x-icon" href="/images/favicon.png">
-    <link rel="stylesheet" href="/css/StyleChamp.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classement du Championnat - Belgian Slot Club</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="icon" type="image/png" href="/images/favicon.png">
 </head>
-
 <body>
+    <!-- Navigation -->
+    <nav class="nav-container">
+        <div class="nav-content">
+            <a href="/" class="logo">
+                <div class="logo-icon">🏁</div>
+                <span>Belgian Slot Club</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/">Accueil</a></li>
+                <li><a th:href="@{/championnat(club=${club})}" class="active">Championnat</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
 
-<nav>
-    <div class="logo">🏁 Courses</div>
-    <ul class="nav-links">
-        <li><a th:href="@{/}">Accueil</a></li>
-        <li><a th:href="@{/championnat(club=${club})}">Championnat</a></li>
-        <li><a th:href="@{/contact}">Contact</a></li>
-    </ul>
-</nav>
+    <!-- Nouvelle en-tête moderne -->
+    <section class="hero-header">
+        <div class="hero-background">
+            <div class="hero-pattern"></div>
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-main">
+                    <div class="hero-badge">
+                        <span class="badge-icon">🏆</span>
+                        <span class="badge-text">Championnat</span>
+                    </div>
+                    <h1 class="hero-title">
+                        <span class="title-line">Classement</span>
+                        <span class="title-accent">Championnat</span>
+                    </h1>
+                    <p class="hero-description">
+                        Découvrez les performances exceptionnelles de nos pilotes et suivez l'évolution 
+                        du classement en temps réel. Chaque course compte dans cette compétition intense !
+                    </p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="heroTotalPilotes">0</div>
+                            <div class="stat-label">Pilotes</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="heroTotalCourses">0</div>
+                            <div class="stat-label">Courses</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="heroLeaderPoints">0</div>
+                            <div class="stat-label">Points Leader</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-sidebar">
+                    <div class="championship-card">
+                        <div class="card-header">
+                            <h3>🏁 Informations Championnat</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-row">
+                                <div class="info-icon">🏢</div>
+                                <div class="info-details">
+                                    <div class="info-label">Club</div>
+                                    <div class="info-value" th:text="${club}">Club</div>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon">📅</div>
+                                <div class="info-details">
+                                    <div class="info-label">Saison</div>
+                                    <div class="info-value" th:text="${selectedYear}">2025</div>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon">🏅</div>
+                                <div class="info-details">
+                                    <div class="info-label">Catégorie</div>
+                                    <div class="info-value" th:text="${selectedCategory}">Catégorie</div>
+                                </div>
+                            </div>
+                        </div>
 
-<h1 class="title">Classement du Championnat</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<div class="filters">
-    <label for="year">Année :</label>
-    <select id="year" name="year" onchange="updateURL()">
-        <option th:each="year : ${years}" th:value="${year}" th:text="${year}" th:selected="${selectedYear == year}"></option>
-    </select>
+    <!-- Contenu principal -->
+    <section class="page-content">
+        <div class="container">
+            <!-- Filtres -->
+            <div class="filters-section">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="year" class="filter-label">Année</label>
+                        <select id="year" name="year" class="filter-select" onchange="updateURL()">
+                            <option th:each="year : ${years}" th:value="${year}" th:text="${year}" th:selected="${selectedYear == year}"></option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="categorie" class="filter-label">Catégorie</label>
+                        <select id="categorie" name="categorie" class="filter-select" onchange="updateURL()">
+                            <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${selectedCategory == cat}"></option>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" onclick="refreshData()">
+                            🔄 Actualiser
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-    <label for="categorie">Catégorie :</label>
-    <select id="categorie" name="categorie" onchange="updateURL()">
-        <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${selectedCategory == cat}"></option>
-    </select>
-</div>
+            <!-- Statistiques du championnat -->
+            <div class="championship-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalPilotes">0</div>
+                        <div class="stat-label">Pilotes</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏁</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalCourses">0</div>
+                        <div class="stat-label">Courses</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👑</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="leaderPoints">0</div>
+                        <div class="stat-label">Points Leader</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalPoints">0</div>
+                        <div class="stat-label">Points Total</div>
+                    </div>
+                </div>
+            </div>
 
-<script>
-    function updateURL() {
-        let yearSelect = document.getElementById("year");
-        let categorySelect = document.getElementById("categorie");
-        let selectedYear = yearSelect.value;
-        let selectedCategory = categorySelect.value;
+            <!-- Calendrier des événements -->
+            <div class="calendar-section">
+                <div class="calendar-header">
+                    <h3>📅 Calendrier SLOT4000 2025</h3>
+                    <p>Découvrez tous les événements de la saison</p>
+                    <a href="/prochain-evenement" class="btn btn-primary">
+                        🎯 Prochain événement
+                    </a>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Le calendrier sera généré par JavaScript -->
+                </div>
+            </div>
 
-        let url = new URL(window.location.href);
+            <!-- Système de points du championnat -->
+            <div class="points-system-section">
+                <div class="points-system-card">
+                    <div class="points-system-header" onclick="togglePointsSystem()">
+                        <div class="header-content">
+                            <h3>📋 Système de Points du Championnat</h3>
+                            <p>Calcul des points selon le règlement officiel Slot 4000</p>
+                        </div>
+                        <div class="toggle-button">
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                    </div>
+                    
+                    <div class="points-system-content" id="pointsSystemContent" style="display: none;">
+                        <div class="points-explanation">
+                            <h4>🏆 Comment sont calculés les points ?</h4>
+                            <ul class="points-rules">
+                                <li><strong>1er place :</strong> 50 points</li>
+                                <li><strong>2ème place :</strong> 40 points</li>
+                                <li><strong>3ème place :</strong> 35 points</li>
+                                <li><strong>4ème place :</strong> 32 points</li>
+                                <li><strong>5ème place :</strong> 30 points</li>
+                                <li><strong>6ème à 10ème :</strong> 28, 26, 24, 22, 20 points</li>
+                                <li><strong>11ème à 15ème :</strong> 19, 18, 17, 16, 15 points</li>
+                                <li><strong>16ème à 20ème :</strong> 14, 13, 12, 11, 10 points</li>
+                                <li><strong>21ème à 28ème :</strong> 9, 8, 7, 6, 5, 4, 3, 2 points</li>
+                                <li><strong>29ème et plus :</strong> 1 point</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="points-table-mini">
+                            <h4>📊 Tableau de Points Rapide</h4>
+                            <div class="points-grid-two-columns">
+                                <div class="points-column">
+                                    <div class="points-row">
+                                        <span class="position">1</span>
+                                        <span class="points">50</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">2</span>
+                                        <span class="points">40</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">3</span>
+                                        <span class="points">35</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">4</span>
+                                        <span class="points">32</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">5</span>
+                                        <span class="points">30</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">6</span>
+                                        <span class="points">28</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">7</span>
+                                        <span class="points">26</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">8</span>
+                                        <span class="points">24</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">9</span>
+                                        <span class="points">22</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">10</span>
+                                        <span class="points">20</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">11</span>
+                                        <span class="points">19</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">12</span>
+                                        <span class="points">18</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">13</span>
+                                        <span class="points">17</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">14</span>
+                                        <span class="points">16</span>
+                                    </div>
+                                </div>
+                                <div class="points-column">
+                                    <div class="points-row">
+                                        <span class="position">15</span>
+                                        <span class="points">15</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">16</span>
+                                        <span class="points">14</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">17</span>
+                                        <span class="points">13</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">18</span>
+                                        <span class="points">12</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">19</span>
+                                        <span class="points">11</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">20</span>
+                                        <span class="points">10</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">21</span>
+                                        <span class="points">9</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">22</span>
+                                        <span class="points">8</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">23</span>
+                                        <span class="points">7</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">24</span>
+                                        <span class="points">6</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">25</span>
+                                        <span class="points">5</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">26</span>
+                                        <span class="points">4</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">27</span>
+                                        <span class="points">3</span>
+                                    </div>
+                                    <div class="points-row">
+                                        <span class="position">28+</span>
+                                        <span class="points">2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="points-notes">
+                            <h4>📝 Notes importantes</h4>
+                            <ul class="notes-list">
+                                <li>Les points sont attribués selon la position finale de chaque course</li>
+                                <li>En cas d'égalité, le meilleur résultat en course départage</li>
+                                <li>Les pénalités peuvent réduire le nombre de points obtenus</li>
+                                <li>Le classement final est basé sur le total des points de toutes les courses</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        if (selectedYear) {
-            url.searchParams.set('year', selectedYear);
+            <!-- Classement Général -->
+            <div class="table-container championship-table-container">
+                <div class="table-header">
+                    <h2>Classement Général</h2>
+                    <p>Classement principal du championnat</p>
+                </div>
+                <div class="table-wrapper">
+                    <table class="championship-table" id="raceTable">
+                        <thead>
+                            <tr id="headerRow">
+                                <th class="position">Pos</th>
+                                <th>Pilote</th>
+                                <th>Total</th>
+                                <th id="sortTotal1" class="sortable">Total - 1 🔽</th>
+                            </tr>
+                        </thead>
+                        <tbody id="raceBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Classement Catégorie Bis -->
+            <div class="table-container excluded-table-container">
+                <div class="table-header">
+                    <h2>Classement Catégorie Bis</h2>
+                    <p>Classement des pilotes en catégorie bis</p>
+                </div>
+                <div class="table-wrapper">
+                    <table class="championship-table" id="excludedTable">
+                        <thead>
+                            <tr id="excludedHeaderRow">
+                                <th class="position">Pos</th>
+                                <th>Pilote</th>
+                                <th>Total</th>
+                                <th>Total - 1</th>
+                            </tr>
+                        </thead>
+                        <tbody id="excludedBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions-section">
+                <div class="export-actions">
+                    <button class="btn-export excel" onclick="exportToExcel()">
+                        📊 Exporter Excel
+                    </button>
+                    <button class="btn-export pdf" onclick="exportToPDF()">
+                        📄 Exporter PDF
+                    </button>
+                    <button class="btn-export share" onclick="shareChampionship()">
+                        🔗 Partager
+                    </button>
+                </div>
+                <div class="navigation-actions">
+                    <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-primary">
+                        🏁 Voir Courses
+                    </a>
+                    <a href="/" class="btn btn-secondary">
+                        🏠 Retour Accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script th:inline="javascript">
+        const raceResults = /*[[${raceResults}]]*/ {};
+    </script>
+
+    <style>
+        /* Nouvelle en-tête moderne */
+        .hero-header {
+            position: relative;
+            background: linear-gradient(135deg, #1e293b, #334155, #475569, #64748b);
+            background-size: 400% 400%;
+            color: var(--white);
+            padding: var(--spacing-20) 0 var(--spacing-16) 0;
+            overflow: hidden;
+            animation: gradientShift 10s ease-in-out infinite;
         }
-        if (selectedCategory) {
-            url.searchParams.set('categorie', selectedCategory);
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
-        window.location.href = url.toString();
-    }
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
 
-</script>
+        .hero-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+                linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.03) 50%, transparent 60%);
+            animation: patternFloat 15s ease-in-out infinite;
+        }
 
-<script th:inline="javascript">
-    const raceResults = /*[[${raceResults}]]*/ {};
-</script>
+        @keyframes patternFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+        }
 
-<h2 class="subtitle">Classement Général</h2>
-<table id="raceTable">
-    <thead>
-    <tr id="headerRow">
-        <th>Position</th>
-        <th>Nom</th>
-        <th>Total</th>
-        <th id="sortTotal1">Total - 1 🔽</th>
-    </tr>
-    </thead>
-    <tbody id="raceBody"></tbody>
-</table>
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.15));
+            backdrop-filter: blur(1px);
+        }
 
-<h2 class="subtitle">Classement catégorie bis</h2>
-<table id="excludedTable">
-    <thead>
-    <tr id="excludedHeaderRow">
-        <th>Position</th>
-        <th>Nom</th>
-        <th>Total</th>
-        <th>Total - 1</th>
-    </tr>
-    </thead>
-    <tbody id="excludedBody"></tbody>
-</table>
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--spacing-12);
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-<script>
-    const tableHeader = document.getElementById("headerRow");
-    const excludedHeader = document.getElementById("excludedHeaderRow");
-    const tableBody = document.getElementById("raceBody");
-    const excludedBody = document.getElementById("excludedBody");
-    const sortButton = document.getElementById("sortTotal1");
+        .hero-main {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-8);
+        }
 
-    const dates = Object.keys(raceResults);
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+            padding: var(--spacing-2) var(--spacing-4);
+            border-radius: var(--border-radius-full);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            width: fit-content;
+            animation: badgeGlow 3s ease-in-out infinite alternate;
+        }
 
-    dates.forEach(date => {
-        let th1 = document.createElement("th");
-        th1.textContent = date;
-        tableHeader.appendChild(th1);
+        @keyframes badgeGlow {
+            0% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+            100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
+        }
 
-        let th2 = document.createElement("th");
-        th2.textContent = date;
-        excludedHeader.appendChild(th2);
-    });
+        .badge-icon {
+            font-size: var(--font-size-lg);
+        }
 
-    function processPilotes() {
-        tableBody.innerHTML = "";
-        excludedBody.innerHTML = "";
+        .badge-text {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
 
-        let allNames = new Set();
-        dates.forEach(date => {
-            Object.keys(raceResults[date]).forEach(name => allNames.add(name));
-        });
+        .hero-title {
+            font-size: var(--font-size-8xl);
+            font-weight: 900;
+            line-height: 0.9;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2);
+        }
 
-        let pilotes = [...allNames].map(name => {
-            let total = 0;
-            let scores = [];
+        .title-line {
+            background: linear-gradient(135deg, #ffffff, #f0f9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
 
-            dates.forEach(date => {
-                let score = raceResults[date][name] ?? 0;
-                total += score;
-                scores.push(score);
-            });
+        .title-accent {
+            background: linear-gradient(135deg, #10b981, #059669, #047857);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            animation: accentPulse 3s ease-in-out infinite;
+        }
 
-            let total1 = total;
-            let nonZeroScores = scores.filter(s => s > 0);
+        @keyframes accentPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
 
-            if (nonZeroScores.length > 1) {
-                let minScore = Math.min(...nonZeroScores);
-                total1 -= minScore;
+        .hero-description {
+            font-size: var(--font-size-xl);
+            line-height: 1.6;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0;
+        }
+
+        .hero-stats {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-6);
+            margin-top: var(--spacing-4);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: var(--spacing-4);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: var(--border-radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-number {
+            font-size: var(--font-size-3xl);
+            font-weight: 800;
+            color: #10b981;
+            margin-bottom: var(--spacing-1);
+        }
+
+        .stat-label {
+            font-size: var(--font-size-sm);
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        .stat-divider {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        .hero-sidebar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .championship-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+            border-radius: var(--border-radius-xl);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .championship-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.12));
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #10b981, #059669);
+            padding: var(--spacing-6);
+            text-align: center;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .card-content {
+            padding: var(--spacing-6);
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+            padding: var(--spacing-3) 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-icon {
+            font-size: var(--font-size-xl);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .info-details {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: var(--font-size-xs);
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: var(--spacing-1);
+        }
+
+        .info-value {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            color: var(--white);
+        }
+
+
+
+        .page-content {
+            padding: var(--spacing-16) 0;
+        }
+
+        /* Filtres */
+        .filters-section {
+            margin-bottom: var(--spacing-8);
+        }
+
+        .filters-container {
+            display: flex;
+            gap: var(--spacing-6);
+            align-items: end;
+            background: var(--white);
+            padding: var(--spacing-6);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-200);
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2);
+            min-width: 150px;
+        }
+
+        .filter-label {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--gray-700);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-select {
+            padding: var(--spacing-3);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-base);
+            background: var(--white);
+            transition: var(--transition-normal);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: var(--spacing-3);
+        }
+
+        /* Statistiques du championnat */
+        .championship-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-6);
+            margin-bottom: var(--spacing-12);
+        }
+
+        .championship-stats .stat-card {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-6);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-200);
+            text-align: center;
+            transition: var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .championship-stats .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-color), #059669);
+        }
+
+        .championship-stats .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .championship-stats .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-4);
+            display: block;
+        }
+
+        .championship-stats .stat-number {
+            font-size: var(--font-size-3xl);
+            font-weight: 800;
+            color: var(--accent-color);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .championship-stats .stat-label {
+            font-size: var(--font-size-sm);
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        /* Styles pour le calendrier */
+        .calendar-section {
+            margin-bottom: var(--spacing-12);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-6);
+            padding: var(--spacing-6);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: var(--white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .calendar-header h3 {
+            margin: 0;
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+        }
+
+        .calendar-header p {
+            margin: var(--spacing-1) 0 0 0;
+            opacity: 0.9;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-2);
+            background: var(--white);
+            padding: var(--spacing-6);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            overflow-x: auto;
+        }
+
+        .calendar-month {
+            display: flex;
+            flex-direction: column;
+            min-width: 80px;
+        }
+
+        .month-header {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: var(--spacing-2);
+            text-align: center;
+            font-weight: 600;
+            font-size: var(--font-size-xs);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .month-days {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .calendar-day {
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: var(--transition-normal);
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .calendar-day.has-event {
+            color: var(--white);
+            font-weight: 700;
+            font-size: var(--font-size-xs);
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--primary-color);
+            background: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* Couleurs des événements */
+        .event-proto32 { background: #10b981; }
+        .event-gt32 { background: #f59e0b; }
+        .event-tcr-scale { background: #ec4899; }
+        .event-slot-it { background: #84cc16; }
+        .event-gr5 { background: #10b981; }
+        .event-proto24 { background: #f97316; }
+        .event-gt24 { background: #8b5cf6; }
+        .event-1000kms { background: #ef4444; }
+        .event-scaleauto { background: #6b7280; }
+        .event-bpc { background: #6b7280; }
+        .event-bel-lms { background: #6b7280; }
+
+        /* Tooltip pour les événements */
+        .calendar-day.has-event::after {
+            content: attr(data-event);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gray-900);
+            color: var(--white);
+            padding: var(--spacing-2) var(--spacing-3);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-xs);
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition-normal);
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .calendar-day.has-event:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Tables de championnat */
+        .championship-table-container,
+        .excluded-table-container {
+            margin-bottom: var(--spacing-8);
+        }
+
+        .championship-table th {
+            background: var(--accent-color);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .championship-table .sortable {
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .championship-table .sortable:hover {
+            background: #059669;
+        }
+
+        /* Positions spéciales */
+        .position-1 {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: var(--white);
+        }
+
+        .position-2 {
+            background: linear-gradient(135deg, #9ca3af, #6b7280);
+            color: var(--white);
+        }
+
+        .position-3 {
+            background: linear-gradient(135deg, #f87171, #dc2626);
+            color: var(--white);
+        }
+
+        /* Actions */
+        .actions-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-4);
+            margin-top: var(--spacing-8);
+            padding: var(--spacing-6);
+            background: var(--gray-50);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--gray-200);
+        }
+
+        .navigation-actions {
+            display: flex;
+            gap: var(--spacing-3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-8);
+                text-align: center;
             }
 
-            return { name, total, total1, scores };
-        });
+            .hero-title {
+                font-size: var(--font-size-5xl);
+                text-align: center;
+            }
 
-        let excludedPilotes = pilotes.filter(p => p.name.includes("*"));
-        let validPilotes = pilotes.filter(p => !p.name.includes("*"));
+            .hero-description {
+                font-size: var(--font-size-lg);
+                text-align: center;
+                max-width: 100%;
+            }
 
-        validPilotes.sort((a, b) => b.total1 - a.total1);
+            .hero-stats {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
 
-        function appendToTable(body, pilote) {
-            let tr = document.createElement("tr");
+            .stat-divider {
+                display: none;
+            }
 
-            let tdPosition = document.createElement("td");
-            tdPosition.textContent = body.children.length + 1;
-            tr.appendChild(tdPosition);
+            .championship-card {
+                max-width: 100%;
+            }
 
-            let tdName = document.createElement("td");
-            tdName.textContent = pilote.name;
-            tr.appendChild(tdName);
+            .filters-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
 
-            let tdTotal = document.createElement("td");
-            tdTotal.textContent = pilote.total;
-            tr.appendChild(tdTotal);
+            .filter-group {
+                min-width: auto;
+            }
 
-            let tdTotal1 = document.createElement("td");
-            tdTotal1.textContent = pilote.total1;
-            tr.appendChild(tdTotal1);
+            .championship-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
 
-            pilote.scores.forEach(score => {
-                let td = document.createElement("td");
-                td.textContent = score || "-";
-                tr.appendChild(td);
-            });
+            .actions-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
 
-            body.appendChild(tr);
+            .navigation-actions {
+                justify-content: center;
+            }
         }
 
-        validPilotes.forEach(p => appendToTable(tableBody, p));
-        excludedPilotes.forEach(p => appendToTable(excludedBody, p));
-    }
+        @media (max-width: 480px) {
+            .championship-stats {
+                grid-template-columns: 1fr;
+            }
+        }
 
-    processPilotes();
-    sortButton.addEventListener("click", processPilotes);
-</script>
+        /* Styles pour le tableau de points en deux colonnes */
+        .points-grid-two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-6);
+            margin-top: var(--spacing-4);
+        }
 
+        .points-column {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2);
+        }
+
+        .points-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-3) var(--spacing-4);
+            background: var(--white);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition-normal);
+        }
+
+        .points-row:hover {
+            background: var(--gray-50);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .points-row .position {
+            font-weight: 700;
+            color: var(--accent-color);
+            font-size: var(--font-size-base);
+            min-width: 30px;
+        }
+
+        .points-row .points {
+            font-weight: 800;
+            color: var(--gray-900);
+            font-size: var(--font-size-lg);
+        }
+
+        /* Styles pour le système de points pliable */
+        .points-system-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: var(--spacing-6);
+            background: linear-gradient(135deg, var(--accent-color), #059669);
+            color: var(--white);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            transition: var(--transition-normal);
+        }
+
+        .points-system-header:hover {
+            background: linear-gradient(135deg, #059669, var(--accent-color));
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .toggle-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: var(--transition-normal);
+        }
+
+        .toggle-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .toggle-icon {
+            font-size: var(--font-size-lg);
+            font-weight: bold;
+            transition: var(--transition-normal);
+        }
+
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .points-system-content {
+            background: var(--white);
+            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+            border: 1px solid var(--gray-200);
+            border-top: none;
+            overflow: hidden;
+            transition: var(--transition-normal);
+        }
+
+        /* Responsive pour les deux colonnes */
+        @media (max-width: 768px) {
+            .points-grid-two-columns {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-4);
+            }
+            
+            .points-system-header {
+                flex-direction: column;
+                gap: var(--spacing-3);
+                text-align: center;
+            }
+            
+            .toggle-button {
+                align-self: center;
+            }
+        }
+
+        /* Animations supprimées pour éviter les animations au chargement */
+    </style>
+
+    <script>
+        // Variables globales
+        const tableHeader = document.getElementById("headerRow");
+        const excludedHeader = document.getElementById("excludedHeaderRow");
+        const tableBody = document.getElementById("raceBody");
+        const excludedBody = document.getElementById("excludedBody");
+        const sortButton = document.getElementById("sortTotal1");
+
+        const dates = Object.keys(raceResults);
+
+        // Initialisation
+        function initializeTable() {
+            // Ajouter les colonnes de dates
+            dates.forEach(date => {
+                let th1 = document.createElement("th");
+                th1.textContent = formatDate(date);
+                tableHeader.appendChild(th1);
+
+                let th2 = document.createElement("th");
+                th2.textContent = formatDate(date);
+                excludedHeader.appendChild(th2);
+            });
+
+            processPilotes();
+            updateStats();
+        }
+
+        // Traitement des pilotes
+        function processPilotes() {
+            tableBody.innerHTML = "";
+            excludedBody.innerHTML = "";
+
+            let allNames = new Set();
+            dates.forEach(date => {
+                Object.keys(raceResults[date]).forEach(name => allNames.add(name));
+            });
+
+            let pilotes = [...allNames].map(name => {
+                let total = 0;
+                let scores = [];
+
+                dates.forEach(date => {
+                    let score = raceResults[date][name] ?? 0;
+                    total += score;
+                    scores.push(score);
+                });
+
+                let total1 = total;
+                let nonZeroScores = scores.filter(s => s > 0);
+
+                if (nonZeroScores.length > 1) {
+                    let minScore = Math.min(...nonZeroScores);
+                    total1 -= minScore;
+                }
+
+                return { name, total, total1, scores };
+            });
+
+            let excludedPilotes = pilotes.filter(p => p.name.includes("*"));
+            let validPilotes = pilotes.filter(p => !p.name.includes("*"));
+
+            validPilotes.sort((a, b) => b.total1 - a.total1);
+
+            function appendToTable(body, pilote, isExcluded = false) {
+                let tr = document.createElement("tr");
+                if (isExcluded) tr.classList.add("excluded-row");
+
+                let tdPosition = document.createElement("td");
+                tdPosition.className = "position";
+                let position = body.children.length + 1;
+                if (position <= 3) {
+                    tdPosition.className += ` position-${position}`;
+                }
+                tdPosition.textContent = position;
+                tr.appendChild(tdPosition);
+
+                let tdName = document.createElement("td");
+                tdName.className = "pilot-name";
+                tdName.textContent = pilote.name;
+                tr.appendChild(tdName);
+
+                let tdTotal = document.createElement("td");
+                tdTotal.className = "total-points";
+                tdTotal.textContent = pilote.total;
+                tr.appendChild(tdTotal);
+
+                let tdTotal1 = document.createElement("td");
+                tdTotal1.className = "total-points-1";
+                tdTotal1.textContent = pilote.total1;
+                tr.appendChild(tdTotal1);
+
+                pilote.scores.forEach(score => {
+                    let td = document.createElement("td");
+                    td.className = "race-score";
+                    td.textContent = score || "-";
+                    if (score > 0) {
+                        td.style.backgroundColor = "rgba(16, 185, 129, 0.1)";
+                        td.style.fontWeight = "600";
+                    }
+                    tr.appendChild(td);
+                });
+
+                body.appendChild(tr);
+            }
+
+            validPilotes.forEach(p => appendToTable(tableBody, p));
+            excludedPilotes.forEach(p => appendToTable(excludedBody, p, true));
+        }
+
+        // Mise à jour des statistiques
+        function updateStats() {
+            let allNames = new Set();
+            dates.forEach(date => {
+                Object.keys(raceResults[date]).forEach(name => allNames.add(name));
+            });
+
+            let pilotes = [...allNames].map(name => {
+                let total = 0;
+                dates.forEach(date => {
+                    total += raceResults[date][name] ?? 0;
+                });
+                return { name, total };
+            });
+
+            pilotes.sort((a, b) => b.total - a.total);
+
+            // Statistiques principales
+            document.getElementById("totalPilotes").textContent = allNames.size;
+            document.getElementById("totalCourses").textContent = dates.length;
+            document.getElementById("leaderPoints").textContent = pilotes.length > 0 ? pilotes[0].total : 0;
+            
+            let avgPoints = pilotes.length > 0 ? 
+                Math.round(pilotes.reduce((sum, p) => sum + p.total, 0) / pilotes.length) : 0;
+            document.getElementById("totalPoints").textContent = avgPoints;
+
+            // Statistiques de l'en-tête
+            document.getElementById("heroTotalPilotes").textContent = allNames.size;
+            document.getElementById("heroTotalCourses").textContent = dates.length;
+            document.getElementById("heroLeaderPoints").textContent = pilotes.length > 0 ? pilotes[0].total : 0;
+        }
+
+        // Formatage de date
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: '2-digit' 
+            });
+        }
+
+        // Mise à jour de l'URL
+        function updateURL() {
+            let yearSelect = document.getElementById("year");
+            let categorySelect = document.getElementById("categorie");
+            let selectedYear = yearSelect.value;
+            let selectedCategory = categorySelect.value;
+
+            let url = new URL(window.location.href);
+
+            if (selectedYear) {
+                url.searchParams.set('year', selectedYear);
+            }
+            if (selectedCategory) {
+                url.searchParams.set('categorie', selectedCategory);
+            }
+
+            window.location.href = url.toString();
+        }
+
+        // Actualisation des données
+        function refreshData() {
+            location.reload();
+        }
+
+        // Fonctions d'export
+        function exportToExcel() {
+            alert('Fonctionnalité d\'export Excel en cours de développement');
+        }
+
+        function exportToPDF() {
+            alert('Fonctionnalité d\'export PDF en cours de développement');
+        }
+
+        function shareChampionship() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Classement Championnat',
+                    text: 'Consultez le classement du championnat',
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Lien copié dans le presse-papiers !');
+            }
+        }
+
+        // Animations au scroll supprimées pour éviter les animations au chargement
+
+        // Initialisation au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTable();
+            initializeCalendar();
+        });
+
+        // Gestionnaire de tri
+        sortButton.addEventListener("click", processPilotes);
+
+        // Fonction pour basculer l'affichage du système de points
+        function togglePointsSystem() {
+            const content = document.getElementById('pointsSystemContent');
+            const icon = document.querySelector('.toggle-icon');
+            
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                icon.classList.add('rotated');
+            } else {
+                content.style.display = 'none';
+                icon.classList.remove('rotated');
+            }
+        }
+
+        // Données des événements SLOT4000 2025 (corrigées selon le calendrier officiel)
+        const events2025 = {
+            '01-10': 'GT32',
+            '01-24': 'GR5',
+            '01-31': 'PROTO24',
+            '02-07': 'PROTO32, GT32',
+            '02-14': 'TCR-SCALE, PROTO24',
+            '02-21': 'SLOT.IT, SCALEAUTO',
+            '02-22': 'BPC',
+            '02-23': 'BPC',
+            '02-28': 'GT24',
+            '03-07': 'GT32',
+            '03-21': 'GR5',
+            '03-27': '1000KMS',
+            '03-28': '1000KMS',
+            '03-29': '1000KMS',
+            '04-04': 'PROTO32',
+            '04-11': 'GT24',
+            '04-18': 'SLOT.IT',
+            '04-25': 'PROTO24',
+            '05-02': 'GT32',
+            '05-09': 'TCR-SCALE',
+            '05-16': 'GR5',
+            '05-30': 'PROTO32',
+            '06-06': 'PROTO24',
+            '06-13': 'SLOT.IT',
+            '06-20': 'TCR-SCALE',
+            '06-27': 'GT32',
+            '09-05': 'GR5',
+            '09-12': 'PROTO24',
+            '09-19': 'PROTO32',
+            '09-26': 'GT24',
+            '10-03': 'SLOT.IT',
+            '10-10': 'TCR-SCALE',
+            '10-17': 'GT32',
+            '10-24': 'PROTO24',
+            '10-31': 'GR5',
+            '11-07': 'GT24',
+            '11-14': 'PROTO24',
+            '11-21': 'TCR-SCALE',
+            '11-27': 'GT24, BEL LMS',
+            '12-05': 'PROTO24',
+            '12-12': 'SLOT.IT',
+            '12-19': 'GT24',
+            '12-26': 'PROTO32'
+        };
+
+        // Initialisation du calendrier
+        function initializeCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            const months = ['JANVIER', 'FÉVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN', 
+                           'JUILLET', 'AOÛT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DÉCEMBRE'];
+            
+            months.forEach((month, monthIndex) => {
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'calendar-month';
+                
+                const monthHeader = document.createElement('div');
+                monthHeader.className = 'month-header';
+                monthHeader.textContent = month;
+                
+                const monthDays = document.createElement('div');
+                monthDays.className = 'month-days';
+                
+                // Générer les jours pour ce mois
+                const daysInMonth = new Date(2025, monthIndex + 1, 0).getDate();
+                const today = new Date();
+                const isCurrentMonth = today.getFullYear() === 2025 && today.getMonth() === monthIndex;
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'calendar-day';
+                    dayDiv.textContent = day.toString().padStart(2, '0');
+                    
+                    const eventKey = `${(monthIndex + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                    const event = events2025[eventKey];
+                    
+                    if (event) {
+                        dayDiv.classList.add('has-event');
+                        dayDiv.setAttribute('data-event', event);
+                        
+                        // Appliquer la classe de couleur selon le type d'événement
+                        const eventTypes = event.split(', ');
+                        const firstEvent = eventTypes[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+                        dayDiv.classList.add(`event-${firstEvent}`);
+                        
+                        // Afficher le premier événement dans la cellule
+                        dayDiv.textContent = eventTypes[0];
+                    }
+                    
+                    // Marquer aujourd'hui
+                    if (isCurrentMonth && day === today.getDate()) {
+                        dayDiv.classList.add('today');
+                    }
+                    
+                    monthDays.appendChild(dayDiv);
+                }
+                
+                monthDiv.appendChild(monthHeader);
+                monthDiv.appendChild(monthDays);
+                calendarGrid.appendChild(monthDiv);
+            });
+        }
+    </script>
 </body>
-<footer>
-    <div class="footer-container">
-        <p>&copy; 2025 Thibaut Lenertz. Tous droits réservés.</p>
-        <ul class="footer-links">
-            <li><a href="#">Mentions légales</a></li>
-            <li><a href="#">Politique de confidentialité</a></li>
-            <li><a href="#">Contact</a></li>
-        </ul>
-    </div>
-</footer>
 </html>

@@ -25,6 +25,9 @@ public class ChampionnatController {
                                  @RequestParam(value = "year", required = false) Integer year,
                                  Model model) {
 
+        // Ajout du club au modèle
+        model.addAttribute("club", club);
+
         // Liste des années disponibles
         List<Integer> years = raceResultService.getAvailableYears(club);
         model.addAttribute("years", years);

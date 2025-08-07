@@ -1,0 +1,40 @@
+spring:
+  # Configuration de la base de données H2 pour le développement
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  
+  # Configuration H2 Console
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # Configuration JPA
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  
+  # Configuration Thymeleaf
+  thymeleaf:
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+
+# Configuration du serveur
+server:
+  port: 8080
+
+# Configuration des logs
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE 

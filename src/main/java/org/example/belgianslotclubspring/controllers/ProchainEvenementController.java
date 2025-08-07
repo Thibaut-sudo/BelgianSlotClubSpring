@@ -1,54 +1,23 @@
 package org.example.belgianslotclubspring.controllers;
 
-import org.example.belgianslotclubspring.services.RaceResultService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
-/**
- * Contrôleur gérant la sélection des courses pour un club donné.
- * Ce contrôleur permet de récupérer les courses enregistrées et d'afficher
- * les catégories et années disponibles pour un club.
- */
 @Controller
-@RequestMapping("/selectRace")
-public class RaceController {
+public class ProchainEvenementController {
 
-    private final RaceResultService raceResultService;
-
-    /**
-     * Constructeur injectant le service de gestion des résultats de courses.
-     *
-     * @param raceResultService Service permettant la récupération des résultats des courses.
-     */
-    public RaceController(RaceResultService raceResultService) {
-        this.raceResultService = raceResultService;
-    }
-
-    /**
-     * Endpoint permettant d'afficher la liste des courses disponibles pour un club donné.
-     *
-     * @param club  Le nom du club pour lequel les courses doivent être affichées.
-     * @param model L'objet Model permettant de passer les données à la vue.
-     * @return La page Thymeleaf "selectRace.html" affichant la liste des courses disponibles.
-     */
-    @GetMapping("/{club}")
-    public String selectRace(@PathVariable String club, Model model) {
-        // Récupération des dates des courses disponibles pour le club
-        Map<LocalDate, String> raceResultDate = raceResultService.getRaceResultDateByClub(club);
-
-        // Récupération des catégories disponibles pour le club
-        List<String> listeCategorie = raceResultService.getAllCategoriesClub(club);
-
-        // Récupération des années de course disponibles pour le club
-        List<String> listeAnnees = raceResultService.getAllYearsClub(club);
-
+    @GetMapping("/prochain-evenement")
+    public String prochainEvenement(@RequestParam(defaultValue = "slot4000") String club, Model model) {
         // Données des événements selon le club
-        java.util.Map<String, String> events2025 = new java.util.TreeMap<>();
+        Map<String, String> events2025 = new TreeMap<>();
         
         if ("slot4000".equals(club)) {
             // Données des événements SLOT4000 2025 (corrigées selon le calendrier officiel)
@@ -174,7 +143,7 @@ public class RaceController {
         String nextEventName = null;
         long daysUntilNext = 0;
 
-        for (java.util.Map.Entry<String, String> entry : events2025.entrySet()) {
+        for (Map.Entry<String, String> entry : events2025.entrySet()) {
             LocalDate eventDate = LocalDate.parse(entry.getKey());
             if (eventDate.isAfter(today) || eventDate.isEqual(today)) {
                 nextEventDate = entry.getKey();
@@ -192,26 +161,20 @@ public class RaceController {
         }
 
         // Formater la date
-        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH);
         LocalDate eventDate = LocalDate.parse(nextEventDate);
         String formattedDate = eventDate.format(formatter);
 
         // Déterminer le type d'événement pour la couleur
         String eventType = nextEventName.split(",")[0].trim().toLowerCase().replaceAll("[^a-z0-9]", "");
 
-        // Ajout des données au modèle pour les passer à la vue
         model.addAttribute("club", club);
-        model.addAttribute("listeCategorie", listeCategorie);
-        model.addAttribute("raceResultDate", raceResultDate);
-        model.addAttribute("listeAnnees", listeAnnees);
-        
-        // Ajout des données du prochain événement
         model.addAttribute("nextEventDate", formattedDate);
         model.addAttribute("nextEventName", nextEventName);
         model.addAttribute("daysUntilNext", daysUntilNext);
         model.addAttribute("eventType", eventType);
+        model.addAttribute("allEvents", events2025);
 
-        // Retourne la vue Thymeleaf "selectRace.html" pour affichage
-        return "pages/selectRace.html";
+        return "pages/prochainEvenement";
     }
-}
+} 

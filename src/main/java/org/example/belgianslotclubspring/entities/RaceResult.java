@@ -52,7 +52,7 @@ public class RaceResult {
 
     @Override
     public String toString() {
-        return STR."RaceResult{nom='\{nom}', totalTours=\{totalTours}, lapsPerTrack=\{lapsPerTrack}, bestTimes=\{bestTime}}";
+        return "RaceResult{nom='" + nom + "', totalTours=" + totalTours + ", lapsPerTrack=" + lapsPerTrack + ", bestTimes=" + bestTime + "}";
     }
 
     private static LocalDate convertStringToLocalDate(String dateString) {

@@ -21,6 +21,7 @@
             <ul class="nav-links">
                 <li><a href="/">Accueil</a></li>
                 <li><a th:href="@{/championnat(club=${club})}">Championnat</a></li>
+                <li><a href="/calendar/upload">📅 Calendrier</a></li>
                 <li><a href="/reglement">Règlement</a></li>
                 <li><a href="/contact">Contact</a></li>
                 <li><a href="#" id="uploadButton" class="btn btn-orange">📁 Ajouter une course</a></li>
@@ -91,7 +92,7 @@
     <section class="section" style="background: var(--gray-50);">
         <div class="container">
             <h2 class="section-title">Fonctionnalités</h2>
-            <div class="grid grid-3">
+            <div class="grid grid-4">
                 <div class="card feature-card">
                     <div class="feature-icon">📊</div>
                     <h3>Résultats en temps réel</h3>
@@ -101,6 +102,11 @@
                     <div class="feature-icon">🏆</div>
                     <h3>Championnats officiels</h3>
                     <p>Consultez les classements des championnats belges officiels et les archives des saisons précédentes avec historique complet.</p>
+                </div>
+                <div class="card feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3>Calendrier intelligent</h3>
+                    <p>Téléchargez une image de calendrier et laissez notre OCR extraire automatiquement les dates et événements pour votre club.</p>
                 </div>
                 <div class="card feature-card">
                     <div class="feature-icon">📱</div>

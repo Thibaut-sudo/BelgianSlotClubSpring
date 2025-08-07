@@ -20,7 +20,9 @@
             </a>
             <ul class="nav-links">
                 <li><a href="/">Accueil</a></li>
-                <li><a th:href="@{/championnat(club=${club})}">Championnat</a></li>
+                <li><a th:href="@{/championnat(club=${club})}" class="active">Championnat</a></li>
+                <li><a href="/calendar/upload">📅 Calendrier</a></li>
+                <li><a href="/reglement">Règlement</a></li>
                 <li><a href="/contact">Contact</a></li>
             </ul>
         </div>

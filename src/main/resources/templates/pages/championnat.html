@@ -21,6 +21,8 @@
             <ul class="nav-links">
                 <li><a href="/">Accueil</a></li>
                 <li><a th:href="@{/championnat(club=${club})}" class="active">Championnat</a></li>
+                <li><a href="/calendar/upload">📅 Calendrier</a></li>
+                <li><a href="/reglement">Règlement</a></li>
                 <li><a href="/contact">Contact</a></li>
             </ul>
         </div>
@@ -157,19 +159,7 @@
                 </div>
             </div>
 
-            <!-- Calendrier des événements -->
-            <div class="calendar-section">
-                <div class="calendar-header">
-                    <h3>📅 Calendrier SLOT4000 2025</h3>
-                    <p>Découvrez tous les événements de la saison</p>
-                    <a href="/prochain-evenement" class="btn btn-primary">
-                        🎯 Prochain événement
-                    </a>
-                </div>
-                <div class="calendar-grid" id="calendarGrid">
-                    <!-- Le calendrier sera généré par JavaScript -->
-                </div>
-            </div>
+
 
             <!-- Système de points du championnat -->
             <div class="points-system-section">
@@ -685,74 +675,111 @@
             padding: var(--spacing-16) 0;
         }
 
-        /* Filtres */
+        /* Filtres améliorés */
         .filters-section {
-            margin-bottom: var(--spacing-8);
+            margin-bottom: var(--spacing-12);
         }
 
         .filters-container {
             display: flex;
-            gap: var(--spacing-6);
+            gap: var(--spacing-8);
             align-items: end;
-            background: var(--white);
-            padding: var(--spacing-6);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow);
+            background: linear-gradient(135deg, var(--white), var(--gray-50));
+            padding: var(--spacing-8);
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-xl);
             border: 1px solid var(--gray-200);
             flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filters-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-color), #059669, #047857);
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: var(--spacing-2);
-            min-width: 150px;
+            gap: var(--spacing-3);
+            min-width: 180px;
+            position: relative;
         }
 
         .filter-label {
             font-size: var(--font-size-sm);
-            font-weight: 600;
-            color: var(--gray-700);
+            font-weight: 700;
+            color: var(--gray-800);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.1em;
+            margin-bottom: var(--spacing-1);
         }
 
         .filter-select {
-            padding: var(--spacing-3);
+            padding: var(--spacing-4) var(--spacing-6);
             border: 2px solid var(--gray-200);
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius-lg);
             font-size: var(--font-size-base);
+            font-weight: 500;
             background: var(--white);
-            transition: var(--transition-normal);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-select:hover {
+            border-color: var(--accent-color);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
         }
 
         .filter-select:focus {
             outline: none;
             border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+            transform: translateY(-2px);
         }
 
         .filter-actions {
             display: flex;
-            gap: var(--spacing-3);
+            gap: var(--spacing-4);
         }
 
-        /* Statistiques du championnat */
+        .filter-actions .btn {
+            padding: var(--spacing-4) var(--spacing-8);
+            font-weight: 600;
+            border-radius: var(--border-radius-lg);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-actions .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Statistiques du championnat optimisées */
         .championship-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--spacing-6);
-            margin-bottom: var(--spacing-12);
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-8);
+            margin-bottom: var(--spacing-16);
         }
 
         .championship-stats .stat-card {
             background: var(--white);
-            border-radius: var(--border-radius-lg);
-            padding: var(--spacing-6);
-            box-shadow: var(--shadow);
+            border-radius: var(--border-radius-xl);
+            padding: var(--spacing-8);
+            box-shadow: var(--shadow-lg);
             border: 1px solid var(--gray-200);
             text-align: center;
-            transition: var(--transition-normal);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
         }
@@ -767,15 +794,36 @@
             background: linear-gradient(90deg, var(--accent-color), #059669);
         }
 
+        .championship-stats .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.02));
+            opacity: 0;
+            transition: var(--transition-normal);
+        }
+
         .championship-stats .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: var(--shadow-xl);
         }
 
+        .championship-stats .stat-card:hover::after {
+            opacity: 1;
+        }
+
         .championship-stats .stat-icon {
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin-bottom: var(--spacing-4);
             display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .championship-stats .stat-card:hover .stat-icon {
+            transform: scale(1.1);
         }
 
         .championship-stats .stat-number {
@@ -786,204 +834,292 @@
         }
 
         .championship-stats .stat-label {
-            font-size: var(--font-size-sm);
-            color: var(--gray-600);
+            font-size: var(--font-size-base);
+            color: var(--gray-700);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 500;
+            letter-spacing: 0.1em;
+            font-weight: 600;
         }
 
-        /* Styles pour le calendrier */
-        .calendar-section {
+
+
+        /* Tables de championnat optimisées */
+        .table-container {
             margin-bottom: var(--spacing-12);
+            background: var(--white);
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-6);
-            padding: var(--spacing-6);
+        .table-container:hover {
+            box-shadow: var(--shadow-2xl);
+            transform: translateY(-4px);
+        }
+
+        .table-header {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: var(--white);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
+            padding: var(--spacing-8);
+            text-align: center;
         }
 
-        .calendar-header h3 {
+        .table-header h2 {
+            margin: 0 0 var(--spacing-2) 0;
+            font-size: var(--font-size-3xl);
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-header p {
             margin: 0;
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-        }
-
-        .calendar-header p {
-            margin: var(--spacing-1) 0 0 0;
+            font-size: var(--font-size-lg);
             opacity: 0.9;
         }
 
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: var(--spacing-2);
-            background: var(--white);
-            padding: var(--spacing-6);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--gray-200);
+        .table-wrapper {
             overflow-x: auto;
+            background: var(--white);
         }
 
-        .calendar-month {
-            display: flex;
-            flex-direction: column;
-            min-width: 80px;
-        }
-
-        .month-header {
-            background: var(--primary-color);
-            color: var(--white);
-            padding: var(--spacing-2);
-            text-align: center;
-            font-weight: 600;
-            font-size: var(--font-size-xs);
-            border-radius: var(--border-radius-sm);
-            margin-bottom: var(--spacing-2);
-        }
-
-        .month-days {
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-        }
-
-        .calendar-day {
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: var(--font-size-xs);
-            font-weight: 500;
-            border-radius: var(--border-radius-sm);
-            cursor: pointer;
-            transition: var(--transition-normal);
-            position: relative;
-        }
-
-        .calendar-day:hover {
-            transform: scale(1.1);
-            z-index: 10;
-        }
-
-        .calendar-day.has-event {
-            color: var(--white);
-            font-weight: 700;
-            font-size: var(--font-size-xs);
-            text-align: center;
-            line-height: 1.2;
-        }
-
-        .calendar-day.today {
-            border: 2px solid var(--primary-color);
-            background: var(--primary-light);
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        /* Couleurs des événements */
-        .event-proto32 { background: #10b981; }
-        .event-gt32 { background: #f59e0b; }
-        .event-tcr-scale { background: #ec4899; }
-        .event-slot-it { background: #84cc16; }
-        .event-gr5 { background: #10b981; }
-        .event-proto24 { background: #f97316; }
-        .event-gt24 { background: #8b5cf6; }
-        .event-1000kms { background: #ef4444; }
-        .event-scaleauto { background: #6b7280; }
-        .event-bpc { background: #6b7280; }
-        .event-bel-lms { background: #6b7280; }
-
-        /* Tooltip pour les événements */
-        .calendar-day.has-event::after {
-            content: attr(data-event);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--gray-900);
-            color: var(--white);
-            padding: var(--spacing-2) var(--spacing-3);
-            border-radius: var(--border-radius);
-            font-size: var(--font-size-xs);
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition-normal);
-            z-index: 100;
-            pointer-events: none;
-        }
-
-        .calendar-day.has-event:hover::after {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Tables de championnat */
-        .championship-table-container,
-        .excluded-table-container {
-            margin-bottom: var(--spacing-8);
+        .championship-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--font-size-base);
         }
 
         .championship-table th {
-            background: var(--accent-color);
+            background: linear-gradient(135deg, var(--accent-color), #059669);
             color: var(--white);
-            font-weight: 600;
+            font-weight: 700;
+            padding: var(--spacing-4) var(--spacing-6);
+            text-align: left;
+            border-bottom: 3px solid var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: var(--font-size-sm);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .championship-table th.position {
+            text-align: center;
+            width: 80px;
+        }
+
+        .championship-table th:first-child {
+            border-top-left-radius: var(--border-radius);
+        }
+
+        .championship-table th:last-child {
+            border-top-right-radius: var(--border-radius);
         }
 
         .championship-table .sortable {
             cursor: pointer;
             transition: var(--transition-normal);
+            position: relative;
         }
 
         .championship-table .sortable:hover {
-            background: #059669;
+            background: linear-gradient(135deg, #059669, var(--accent-color));
+            transform: scale(1.02);
         }
 
-        /* Positions spéciales */
+        .championship-table .sortable::after {
+            content: '▼';
+            position: absolute;
+            right: var(--spacing-2);
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: var(--font-size-xs);
+            opacity: 0.7;
+        }
+
+        .championship-table td {
+            padding: var(--spacing-4) var(--spacing-6);
+            border-bottom: 1px solid var(--gray-100);
+            transition: var(--transition-normal);
+        }
+
+        .championship-table tbody tr {
+            transition: background-color 0.3s ease;
+        }
+
+        .championship-table tbody tr:hover {
+            background: var(--gray-50);
+        }
+
+        .championship-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Positions spéciales optimisées */
         .position-1 {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: var(--white);
+            font-weight: 800;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
         }
 
         .position-2 {
             background: linear-gradient(135deg, #9ca3af, #6b7280);
             color: var(--white);
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .position-3 {
             background: linear-gradient(135deg, #f87171, #dc2626);
             color: var(--white);
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
-        /* Actions */
+        /* Colonnes spécifiques */
+        .championship-table td.position {
+            text-align: center;
+            font-weight: 800;
+            font-size: var(--font-size-lg);
+            min-width: 60px;
+        }
+
+        .championship-table td.pilot-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: var(--font-size-lg);
+        }
+
+        .championship-table td.total-points,
+        .championship-table td.total-points-1 {
+            font-weight: 700;
+            color: var(--accent-color);
+            text-align: center;
+            font-size: var(--font-size-lg);
+        }
+
+        .championship-table td.race-score {
+            text-align: center;
+            font-weight: 600;
+            min-width: 50px;
+            transition: background-color 0.3s ease;
+        }
+
+        .championship-table td.race-score:hover {
+            background: var(--accent-color);
+            color: var(--white);
+        }
+
+        /* Ligne exclue */
+        .excluded-row {
+            background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+            opacity: 0.8;
+        }
+
+        .excluded-row:hover {
+            opacity: 1;
+            background: linear-gradient(135deg, var(--gray-200), var(--gray-300));
+        }
+
+        .excluded-row td {
+            color: var(--gray-600);
+            font-style: italic;
+        }
+
+        /* Actions améliorées */
         .actions-section {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: var(--spacing-4);
-            margin-top: var(--spacing-8);
-            padding: var(--spacing-6);
-            background: var(--gray-50);
-            border-radius: var(--border-radius-lg);
+            gap: var(--spacing-6);
+            margin-top: var(--spacing-12);
+            padding: var(--spacing-8);
+            background: linear-gradient(135deg, var(--white), var(--gray-50));
+            border-radius: var(--border-radius-xl);
             border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .export-actions {
+            display: flex;
+            gap: var(--spacing-4);
+            flex-wrap: wrap;
+        }
+
+        .btn-export {
+            padding: var(--spacing-3) var(--spacing-6);
+            border: none;
+            border-radius: var(--border-radius-lg);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-export.excel {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: var(--white);
+        }
+
+        .btn-export.excel:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-export.pdf {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: var(--white);
+        }
+
+        .btn-export.pdf:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-export.share {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: var(--white);
+        }
+
+        .btn-export.share:hover {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
         .navigation-actions {
             display: flex;
-            gap: var(--spacing-3);
+            gap: var(--spacing-4);
+            flex-wrap: wrap;
         }
 
-        /* Responsive */
+        /* Responsive amélioré */
+        @media (max-width: 1024px) {
+            .championship-table th,
+            .championship-table td {
+                padding: var(--spacing-3) var(--spacing-4);
+                font-size: var(--font-size-sm);
+            }
+
+            .championship-table th.position,
+            .championship-table td.position {
+                width: 50px;
+                min-width: 50px;
+            }
+        }
+
         @media (max-width: 768px) {
             .hero-content {
                 grid-template-columns: 1fr;
@@ -1018,6 +1154,7 @@
             .filters-container {
                 flex-direction: column;
                 align-items: stretch;
+                gap: var(--spacing-6);
             }
 
             .filter-group {
@@ -1026,21 +1163,97 @@
 
             .championship-stats {
                 grid-template-columns: repeat(2, 1fr);
+                gap: var(--spacing-6);
+            }
+
+            .championship-stats .stat-card {
+                padding: var(--spacing-6);
+            }
+
+            .championship-stats .stat-icon {
+                font-size: 2.5rem;
+            }
+
+            .championship-stats .stat-number {
+                font-size: var(--font-size-3xl);
             }
 
             .actions-section {
                 flex-direction: column;
                 align-items: stretch;
+                gap: var(--spacing-6);
             }
 
+            .export-actions,
             .navigation-actions {
                 justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .table-header {
+                padding: var(--spacing-6);
+            }
+
+            .table-header h2 {
+                font-size: var(--font-size-2xl);
+            }
+
+            .championship-table th,
+            .championship-table td {
+                padding: var(--spacing-3);
+                font-size: var(--font-size-sm);
+            }
+
+            .championship-table td.pilot-name {
+                font-size: var(--font-size-base);
+            }
+
+            .championship-table td.total-points,
+            .championship-table td.total-points-1 {
+                font-size: var(--font-size-base);
             }
         }
 
         @media (max-width: 480px) {
             .championship-stats {
                 grid-template-columns: 1fr;
+            }
+
+            .championship-stats .stat-card {
+                padding: var(--spacing-5);
+            }
+
+            .championship-stats .stat-icon {
+                font-size: 2rem;
+            }
+
+            .championship-stats .stat-number {
+                font-size: var(--font-size-2xl);
+            }
+
+            .table-header {
+                padding: var(--spacing-4);
+            }
+
+            .table-header h2 {
+                font-size: var(--font-size-xl);
+            }
+
+            .championship-table th,
+            .championship-table td {
+                padding: var(--spacing-2) var(--spacing-3);
+                font-size: var(--font-size-xs);
+            }
+
+            .championship-table th.position,
+            .championship-table td.position {
+                width: 40px;
+                min-width: 40px;
+            }
+
+            .btn-export {
+                padding: var(--spacing-2) var(--spacing-4);
+                font-size: var(--font-size-xs);
             }
         }
 
@@ -1163,7 +1376,7 @@
             }
         }
 
-        /* Animations supprimées pour éviter les animations au chargement */
+
     </style>
 
     <script>
@@ -1367,7 +1580,6 @@
         // Initialisation au chargement
         document.addEventListener('DOMContentLoaded', function() {
             initializeTable();
-            initializeCalendar();
         });
 
         // Gestionnaire de tri
@@ -1387,109 +1599,7 @@
             }
         }
 
-        // Données des événements SLOT4000 2025 (corrigées selon le calendrier officiel)
-        const events2025 = {
-            '01-10': 'GT32',
-            '01-24': 'GR5',
-            '01-31': 'PROTO24',
-            '02-07': 'PROTO32, GT32',
-            '02-14': 'TCR-SCALE, PROTO24',
-            '02-21': 'SLOT.IT, SCALEAUTO',
-            '02-22': 'BPC',
-            '02-23': 'BPC',
-            '02-28': 'GT24',
-            '03-07': 'GT32',
-            '03-21': 'GR5',
-            '03-27': '1000KMS',
-            '03-28': '1000KMS',
-            '03-29': '1000KMS',
-            '04-04': 'PROTO32',
-            '04-11': 'GT24',
-            '04-18': 'SLOT.IT',
-            '04-25': 'PROTO24',
-            '05-02': 'GT32',
-            '05-09': 'TCR-SCALE',
-            '05-16': 'GR5',
-            '05-30': 'PROTO32',
-            '06-06': 'PROTO24',
-            '06-13': 'SLOT.IT',
-            '06-20': 'TCR-SCALE',
-            '06-27': 'GT32',
-            '09-05': 'GR5',
-            '09-12': 'PROTO24',
-            '09-19': 'PROTO32',
-            '09-26': 'GT24',
-            '10-03': 'SLOT.IT',
-            '10-10': 'TCR-SCALE',
-            '10-17': 'GT32',
-            '10-24': 'PROTO24',
-            '10-31': 'GR5',
-            '11-07': 'GT24',
-            '11-14': 'PROTO24',
-            '11-21': 'TCR-SCALE',
-            '11-27': 'GT24, BEL LMS',
-            '12-05': 'PROTO24',
-            '12-12': 'SLOT.IT',
-            '12-19': 'GT24',
-            '12-26': 'PROTO32'
-        };
 
-        // Initialisation du calendrier
-        function initializeCalendar() {
-            const calendarGrid = document.getElementById('calendarGrid');
-            const months = ['JANVIER', 'FÉVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN', 
-                           'JUILLET', 'AOÛT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DÉCEMBRE'];
-            
-            months.forEach((month, monthIndex) => {
-                const monthDiv = document.createElement('div');
-                monthDiv.className = 'calendar-month';
-                
-                const monthHeader = document.createElement('div');
-                monthHeader.className = 'month-header';
-                monthHeader.textContent = month;
-                
-                const monthDays = document.createElement('div');
-                monthDays.className = 'month-days';
-                
-                // Générer les jours pour ce mois
-                const daysInMonth = new Date(2025, monthIndex + 1, 0).getDate();
-                const today = new Date();
-                const isCurrentMonth = today.getFullYear() === 2025 && today.getMonth() === monthIndex;
-                
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const dayDiv = document.createElement('div');
-                    dayDiv.className = 'calendar-day';
-                    dayDiv.textContent = day.toString().padStart(2, '0');
-                    
-                    const eventKey = `${(monthIndex + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-                    const event = events2025[eventKey];
-                    
-                    if (event) {
-                        dayDiv.classList.add('has-event');
-                        dayDiv.setAttribute('data-event', event);
-                        
-                        // Appliquer la classe de couleur selon le type d'événement
-                        const eventTypes = event.split(', ');
-                        const firstEvent = eventTypes[0].toLowerCase().replace(/[^a-z0-9]/g, '');
-                        dayDiv.classList.add(`event-${firstEvent}`);
-                        
-                        // Afficher le premier événement dans la cellule
-                        dayDiv.textContent = eventTypes[0];
-                    }
-                    
-                    // Marquer aujourd'hui
-                    if (isCurrentMonth && day === today.getDate()) {
-                        dayDiv.classList.add('today');
-                    }
-                    
-                    monthDays.appendChild(dayDiv);
-                }
-                
-                monthDiv.appendChild(monthHeader);
-                monthDiv.appendChild(monthDays);
-                calendarGrid.appendChild(monthDiv);
-            });
-        }
     </script>
 </body>
 </html>

@@ -1,0 +1,407 @@
+/* Rallye — interface mobile */
+
+.rallye-share-panel {
+  max-width: 22rem;
+}
+
+.rallye-share-panel .modal-close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-muted, #5c5c5c);
+  padding: 0.15rem 0.4rem;
+}
+
+.rallye-share-panel .modal-close:hover {
+  color: var(--color-ink, #111);
+}
+
+.rallye-share-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.rallye-share-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-muted, #5c5c5c);
+}
+
+.rallye-share-qr {
+  display: block;
+  width: 220px;
+  height: 220px;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.rallye-share-qr[hidden] {
+  display: none;
+}
+
+.rallye-share-url {
+  margin: 0;
+  max-width: 100%;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  word-break: break-all;
+  color: var(--color-ink, #111);
+}
+
+.rallye-share-status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-accent, #c8102e);
+}
+
+.rallye-share-status:not(.is-error) {
+  color: var(--color-success, #1a7f37);
+}
+
+.rallye-mobile-nav {
+  display: none;
+}
+
+.rallye-entry-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .rallye-app {
+    padding-bottom: 5.5rem;
+  }
+
+  .page-hero--rallye-compact {
+    padding-block: 1.25rem !important;
+  }
+
+  .page-hero--rallye-compact .page-hero-title {
+    font-size: clamp(1.6rem, 7vw, 2.2rem);
+  }
+
+  .page-hero-sub--desktop,
+  .page-hero-actions--desktop {
+    display: none !important;
+  }
+
+  .page-hero--rallye-compact .page-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  /* Barre de sections sticky */
+  .rallye-mobile-nav {
+    display: flex;
+    position: sticky;
+    top: var(--nav-height, 3.5rem);
+    z-index: 30;
+    gap: 0.35rem;
+    padding: 0.45rem 0.75rem;
+    background: color-mix(in srgb, var(--color-white, #fff) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--color-border, #e2ddd3);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .rallye-mobile-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rallye-mobile-nav__link {
+    flex: 0 0 auto;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    background: var(--color-paper-2, #f3f1eb);
+    color: var(--color-ink, #111);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .rallye-mobile-nav__link:active {
+    background: var(--color-accent, #c8102e);
+    color: #fff;
+  }
+
+  .rallye-block {
+    margin-bottom: 2.5rem;
+    scroll-margin-top: calc(var(--nav-height, 3.5rem) + 3.25rem);
+  }
+
+  .rallye-block-header {
+    margin-bottom: 1rem;
+  }
+
+  .rallye-block-header .section-lead {
+    font-size: 0.9rem;
+  }
+
+  .rallye-inline-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .rallye-inline-form .form-input,
+  .rallye-inline-form .btn {
+    width: 100%;
+  }
+
+  .rallye-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.15rem;
+    scrollbar-width: none;
+  }
+
+  .rallye-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rallye-tab {
+    flex: 0 0 auto;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  .rallye-tabs-row--es {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Saisie : cartes au lieu du tableau */
+  .rallye-entry-desktop {
+    display: none !important;
+  }
+
+  .rallye-entry-mobile {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .rallye-entry-card {
+    background: var(--color-white, #fff);
+    border: 1px solid var(--color-border, #e2ddd3);
+    border-radius: 12px;
+    padding: 0.85rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  .rallye-entry-card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--color-border, #eee);
+  }
+
+  .rallye-entry-card__num {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    background: var(--color-asphalt, #2b2b2e);
+    color: #fff;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  .rallye-entry-card__head strong {
+    display: block;
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+
+  .rallye-entry-card__fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .rallye-entry-field {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-muted, #666);
+  }
+
+  .rallye-entry-field .form-input--time {
+    width: 100%;
+    min-height: 2.75rem;
+    font-size: 1.05rem;
+    text-align: right;
+    padding: 0.55rem 0.65rem;
+    border-width: 1.5px;
+  }
+
+  .rallye-entry-field--peno {
+    grid-column: 1 / -1;
+  }
+
+  .rallye-save-bar--sticky {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--color-white, #fff) 94%, transparent);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--color-border, #e2ddd3);
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.06);
+  }
+
+  .btn-block-mobile {
+    width: 100%;
+    min-height: 2.85rem;
+    font-size: 1rem;
+  }
+
+  .rallye-save-bar--sticky .rallye-hint {
+    font-size: 0.72rem;
+    text-align: center;
+  }
+
+  .filters-bar {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .table-wrap {
+    margin-inline: -0.25rem;
+  }
+
+  .rallye-table th,
+  .rallye-table td {
+    padding: 0.45rem 0.4rem;
+    font-size: 0.82rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .rallye-mobile-nav {
+    display: none !important;
+  }
+
+  .rallye-entry-mobile {
+    display: none !important;
+  }
+}
+
+/* Liste rallyes + grilles */
+@media (max-width: 768px) {
+  .rallye-card {
+    padding: 1rem 1.1rem;
+  }
+
+  .rallye-card-name {
+    font-size: 1.2rem;
+  }
+
+  .grille-toolbar {
+    padding: 0.65rem 0;
+  }
+
+  .grille-toolbar-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .grille-toolbar-title {
+    font-size: 1.25rem;
+  }
+
+  .grille-toolbar-sub {
+    font-size: 0.82rem;
+  }
+
+  .grille-toolbar-inner .cluster {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+
+  .grille-toolbar-inner .rallye-tabs {
+    grid-column: 1 / -1;
+  }
+
+  .grille-toolbar-inner .btn {
+    width: 100%;
+    min-height: 2.6rem;
+    font-size: 0.85rem;
+    padding-inline: 0.5rem;
+  }
+
+  .grille-base-groups {
+    grid-template-columns: 1fr !important;
+  }
+
+  .grille-pilot-item {
+    min-height: 2.75rem;
+    padding: 0.55rem 0.6rem;
+  }
+
+  .print-boucle-grid,
+  .print-es-passages {
+    grid-template-columns: 1fr !important;
+  }
+
+  .print-sheet {
+    padding: 0.75rem !important;
+  }
+
+  .time-input {
+    min-height: 2.6rem !important;
+    font-size: 1rem !important;
+  }
+
+  .scan-layout {
+    padding-inline: 0.25rem;
+  }
+
+  .scan-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .scan-actions .btn,
+  .scan-actions .scan-file-btn {
+    width: 100%;
+    min-height: 2.75rem;
+    text-align: center;
+  }
+
+  .scan-review-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local runtime / tunnel ###
+app.log
+.cloudflared.pid
+.cloudflared.log
+.cloudflared.url
+
+### Local data / temp ###
+.tmp_py/
+data/
+uploads/

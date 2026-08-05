@@ -3,7 +3,15 @@
 # Script pour arrêter l'application Belgian Slot Club Spring Boot
 # Usage: ./stop.sh
 
+ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$ROOT_DIR"
+
 echo "🛑 Arrêt de l'application Belgian Slot Club..."
+
+# Arrêter le tunnel Cloudflare s'il tourne
+if [ -x "./tunnel.sh" ]; then
+    ./tunnel.sh stop
+fi
 
 # Trouver le processus sur le port 8080
 PID=$(lsof -ti:8080)
@@ -37,5 +45,3 @@ else
     echo "✅ Application arrêtée avec succès"
     exit 0
 fi
-
-

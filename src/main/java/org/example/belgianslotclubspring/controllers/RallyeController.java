@@ -351,6 +351,69 @@ public class RallyeController {
         return "pages/rallyeGrilles";
     }
 
+    @PostMapping("/{id}/groups")
+    public String saveGroups(
+            @PathVariable Long id,
+            @RequestParam int boucle,
+            @RequestParam Map<String, String> allParams,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            List<List<Long>> groups = parseGroupsFromParams(allParams);
+            rallyeService.saveGroupAssignments(id, boucle, groups);
+            redirectAttributes.addFlashAttribute("success", "Composition des groupes enregistrée.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/rallye/" + id + "/grilles?boucle=" + boucle;
+    }
+
+    @PostMapping("/{id}/groups/reset")
+    public String resetGroups(
+            @PathVariable Long id,
+            @RequestParam int boucle,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            rallyeService.clearGroupAssignments(id, boucle);
+            redirectAttributes.addFlashAttribute("success", "Groupes remis sur la répartition automatique.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/rallye/" + id + "/grilles?boucle=" + boucle;
+    }
+
+    /** Params group_1=3,7 & group_2=4 … (ids séparés par virgule, ordre = ordre dans le groupe). */
+    private static List<List<Long>> parseGroupsFromParams(Map<String, String> allParams) {
+        TreeMap<Integer, List<Long>> byGroup = new TreeMap<>();
+        for (Map.Entry<String, String> entry : allParams.entrySet()) {
+            String key = entry.getKey();
+            if (!key.startsWith("group_")) {
+                continue;
+            }
+            int groupNum = Integer.parseInt(key.substring("group_".length()));
+            List<Long> ids = new ArrayList<>();
+            String raw = entry.getValue() == null ? "" : entry.getValue().trim();
+            if (!raw.isEmpty()) {
+                for (String part : raw.split(",")) {
+                    if (!part.isBlank()) {
+                        ids.add(Long.parseLong(part.trim()));
+                    }
+                }
+            }
+            byGroup.put(groupNum, ids);
+        }
+        if (byGroup.isEmpty()) {
+            throw new IllegalArgumentException("Aucun groupe reçu.");
+        }
+        int max = byGroup.lastKey();
+        List<List<Long>> groups = new ArrayList<>();
+        for (int g = 1; g <= max; g++) {
+            groups.add(byGroup.getOrDefault(g, List.of()));
+        }
+        return groups;
+    }
+
     /**
      * Scan photo d'une feuille groupe (QR + OCR conservateur + validation).
      */

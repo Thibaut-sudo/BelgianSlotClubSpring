@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(title=${rallye.name} + ' — Rallye')}"></head>
-<body>
+<link rel="stylesheet" href="/css/rallye-mobile.css">
+<body class="rallye-app">
 <header th:replace="~{fragments/layout :: nav(active='rallye', club=${club})}"></header>
 
-<section class="page-hero page-hero--club"
+<section class="page-hero page-hero--club page-hero--rallye-compact"
          th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
     <div class="page-hero-content container">
         <p class="page-hero-eyebrow">
             <a th:href="@{/rallye(club=${club})}" class="page-hero-back">← Rallyes</a>
         </p>
         <h1 class="page-hero-title" th:text="${rallye.name}">Rallye</h1>
-        <p class="page-hero-sub">Saisie simplifiée des temps · classements recalculés automatiquement</p>
+        <p class="page-hero-sub page-hero-sub--desktop">Saisie simplifiée des temps · classements recalculés automatiquement</p>
         <div class="page-hero-meta">
             <span th:text="${#temporals.format(rallye.date, 'dd/MM/yyyy')}">01/01/2026</span>
             <span th:text="${clubDisplayName}">SRCS</span>
@@ -19,14 +20,45 @@
             <span th:text="${rallye.stagesPerBoucle} + ' ES'">5 ES</span>
             <span th:text="${#lists.size(rallye.pilots)} + ' pilotes'">0 pilotes</span>
         </div>
-        <div class="page-hero-actions cluster">
+        <div class="page-hero-actions cluster page-hero-actions--desktop">
             <a href="#saisie" class="btn btn-primary">Saisir les temps</a>
             <a th:href="@{/rallye/{id}/grilles(id=${rallye.id})}" class="btn btn-secondary">Grilles à imprimer</a>
             <a href="#classement" class="btn btn-outline">Classement</a>
             <a href="#pilotes" class="btn btn-outline">Pilotes</a>
+            <button type="button" class="btn btn-outline" id="rallyeSharePhoneBtn" aria-haspopup="dialog">
+                Sur téléphone
+            </button>
         </div>
     </div>
 </section>
+
+<div id="rallyeShareModal" class="modal" style="display: none;" role="dialog"
+     aria-labelledby="rallyeShareTitle" aria-modal="true">
+    <div class="modal-panel rallye-share-panel">
+        <div class="modal-header">
+            <h2 id="rallyeShareTitle">Ouvrir sur un téléphone</h2>
+            <button type="button" class="modal-close" id="rallyeShareClose" aria-label="Fermer">&times;</button>
+        </div>
+        <div class="modal-body rallye-share-body">
+            <p class="rallye-share-hint" id="rallyeShareHint">Scanne ce QR avec ton téléphone.</p>
+            <img id="rallyeShareQr" class="rallye-share-qr" width="220" height="220" alt="QR code du lien rallye" hidden>
+            <p class="rallye-share-url mono" id="rallyeShareUrl"></p>
+            <p class="rallye-share-status" id="rallyeShareStatus" hidden></p>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-outline" id="rallyeShareCopy">Copier le lien</button>
+            <button type="button" class="btn btn-primary" id="rallyeShareNative">Partager…</button>
+        </div>
+    </div>
+</div>
+
+<nav class="rallye-mobile-nav no-print" aria-label="Sections rallye">
+    <a href="#saisie" class="rallye-mobile-nav__link">Saisie</a>
+    <a th:href="@{/rallye/{id}/grilles(id=${rallye.id})}" class="rallye-mobile-nav__link">Grilles</a>
+    <a href="#classement" class="rallye-mobile-nav__link">Classement</a>
+    <a href="#pilotes" class="rallye-mobile-nav__link">Pilotes</a>
+    <a th:href="@{/rallye/{id}/scan(id=${rallye.id}, boucle=${activeBoucle})}" class="rallye-mobile-nav__link">Scan</a>
+</nav>
 
 <section class="section">
     <div class="container">
@@ -136,9 +168,13 @@
             </div>
 
             <form th:if="${!#lists.isEmpty(rallye.pilots)}"
+                  id="rallyeTimesForm"
+                  class="rallye-times-form"
                   th:action="@{/rallye/{id}/times(id=${rallye.id})}" method="post">
                 <input type="hidden" name="boucle" th:value="${activeBoucle}">
-                <div class="table-wrap table-wrap--wide">
+
+                <!-- Desktop : tableau -->
+                <div class="table-wrap table-wrap--wide rallye-entry-desktop">
                     <table class="data-table rallye-table rallye-entry-table">
                         <thead>
                         <tr>
@@ -178,9 +214,45 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="rallye-save-bar">
-                    <button type="submit" class="btn btn-primary">Enregistrer boucle <span th:text="${activeBoucle}">1</span></button>
-                    <span class="rallye-hint">Les classements ci-dessous se mettent à jour après enregistrement.</span>
+
+                <!-- Mobile : cartes par pilote (mêmes champs, pas de doublon — bascule CSS) -->
+                <div class="rallye-entry-mobile" aria-hidden="true">
+                    <article class="rallye-entry-card" th:each="p : ${rallye.pilots}">
+                        <header class="rallye-entry-card__head">
+                            <span class="rallye-entry-card__num" th:text="${p.startNumber}">1</span>
+                            <div>
+                                <strong th:text="${p.name}">Nom</strong>
+                                <span class="rallye-pilot-car" th:text="${p.car != null and !#strings.isEmpty(p.car)} ? ${p.car} : ''"></span>
+                            </div>
+                        </header>
+                        <div class="rallye-entry-card__fields">
+                            <label class="rallye-entry-field" th:each="s : ${#numbers.sequence(1, rallye.stagesPerBoucle)}">
+                                <span th:text="'ES ' + ${s}">ES 1</span>
+                                <input class="form-input form-input--time"
+                                       type="text"
+                                       inputmode="decimal"
+                                       th:attr="data-mirror=${'time_' + p.id + '_' + s}"
+                                       th:value="${timeDisplay[p.id + '_' + s]}"
+                                       placeholder="—"
+                                       autocomplete="off">
+                            </label>
+                            <label class="rallye-entry-field rallye-entry-field--peno">
+                                <span>PENO</span>
+                                <input class="form-input form-input--time form-input--peno"
+                                       type="text"
+                                       inputmode="decimal"
+                                       th:attr="data-mirror=${'time_' + p.id + '_0'}"
+                                       th:value="${timeDisplay[p.id + '_0']}"
+                                       placeholder="—"
+                                       autocomplete="off">
+                            </label>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="rallye-save-bar rallye-save-bar--sticky">
+                    <button type="submit" class="btn btn-primary btn-block-mobile">Enregistrer boucle <span th:text="${activeBoucle}">1</span></button>
+                    <span class="rallye-hint">Les classements se mettent à jour après enregistrement.</span>
                 </div>
             </form>
             <p th:if="${#lists.isEmpty(rallye.pilots)}" class="empty-state">Ajoutez des pilotes avant de saisir les temps.</p>
@@ -190,8 +262,8 @@
         <div id="classement" class="rallye-block">
             <div class="rallye-block-header">
                 <div>
-                    <h2 class="section-title">Classement</h2>
-                    <p class="section-lead">Classement cumulé après un nombre d’ES courues (toutes boucles confondues).</p>
+                    <h2 class="section-title">Classement général</h2>
+                    <p class="section-lead">Cumul de toutes les ES (toutes boucles). Choisissez un seuil pour un classement intermédiaire.</p>
                 </div>
             </div>
 
@@ -199,11 +271,14 @@
                 <div class="filter-group">
                     <label class="filter-label">Après</label>
                     <div class="rallye-tabs rallye-tabs--compact">
+                        <a th:href="@{/rallye/{id}(id=${rallye.id}, boucle=${activeBoucle}, after=${rallye.totalStages()}, category=${selectedCategory})} + '#classement'"
+                           class="rallye-tab"
+                           th:classappend="${afterStages == rallye.totalStages()} ? ' is-active'">Général</a>
                         <a th:each="cp : ${checkpoints}"
                            th:href="@{/rallye/{id}(id=${rallye.id}, boucle=${activeBoucle}, after=${cp}, category=${selectedCategory})} + '#classement'"
                            class="rallye-tab"
-                           th:classappend="${cp == afterStages} ? ' is-active'"
-                           th:text="${cp} + ' ES'">5 ES</a>
+                           th:classappend="${cp == afterStages and afterStages != rallye.totalStages()} ? ' is-active'"
+                           th:text="'Après ' + ${cp} + ' ES'">Après 5 ES</a>
                     </div>
                 </div>
                 <div class="filter-group" th:if="${!#lists.isEmpty(categories)}">
@@ -269,6 +344,155 @@
         if (value) url += '&category=' + encodeURIComponent(value);
         window.location.href = url + '#classement';
     }
+
+    (function () {
+        var form = document.getElementById('rallyeTimesForm');
+        if (!form) return;
+
+        function syncMirrorsToNamed() {
+            form.querySelectorAll('[data-mirror]').forEach(function (inp) {
+                var name = inp.getAttribute('data-mirror');
+                var target = form.querySelector('[name="' + name + '"]');
+                if (target) target.value = inp.value;
+            });
+        }
+
+        form.querySelectorAll('[data-mirror]').forEach(function (inp) {
+            inp.addEventListener('input', syncMirrorsToNamed);
+            inp.addEventListener('change', syncMirrorsToNamed);
+        });
+        form.addEventListener('submit', syncMirrorsToNamed);
+    })();
+
+    (function () {
+        var openBtn = document.getElementById('rallyeSharePhoneBtn');
+        var modal = document.getElementById('rallyeShareModal');
+        var closeBtn = document.getElementById('rallyeShareClose');
+        var urlEl = document.getElementById('rallyeShareUrl');
+        var hintEl = document.getElementById('rallyeShareHint');
+        var statusEl = document.getElementById('rallyeShareStatus');
+        var qrImg = document.getElementById('rallyeShareQr');
+        var copyBtn = document.getElementById('rallyeShareCopy');
+        var shareBtn = document.getElementById('rallyeShareNative');
+        var currentUrl = '';
+        var rallyeName = /*[[${rallye.name}]]*/ 'Rallye';
+
+        if (!openBtn || !modal) return;
+
+        function setStatus(msg, isError) {
+            if (!statusEl) return;
+            if (!msg) {
+                statusEl.hidden = true;
+                statusEl.textContent = '';
+                return;
+            }
+            statusEl.hidden = false;
+            statusEl.textContent = msg;
+            statusEl.classList.toggle('is-error', !!isError);
+        }
+
+        function closeModal() {
+            modal.classList.remove('is-open');
+            modal.style.display = 'none';
+        }
+
+        function openModal() {
+            modal.style.display = 'flex';
+            modal.classList.add('is-open');
+        }
+
+        function buildPath() {
+            // Sans hash : plus fiable pour le scan QR
+            return window.location.pathname + window.location.search;
+        }
+
+        function sourceHint(source) {
+            if (source === 'tunnel') {
+                return 'Tunnel 4G actif — scanne le QR (même hors Wi‑Fi).';
+            }
+            if (source === 'lan') {
+                return 'Même Wi‑Fi requis — scanne le QR avec ton téléphone.';
+            }
+            return 'Lien local — lance le tunnel (./tunnel.sh) pour la 4G.';
+        }
+
+        function renderQr(url) {
+            if (!qrImg) return;
+            qrImg.hidden = true;
+            qrImg.onload = function () {
+                qrImg.hidden = false;
+                setStatus('');
+            };
+            qrImg.onerror = function () {
+                qrImg.hidden = true;
+                setStatus('QR indisponible — utilise « Copier le lien ».', true);
+            };
+            qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data='
+                + encodeURIComponent(url);
+        }
+
+        async function prepareShare() {
+            setStatus('Préparation du lien…');
+            urlEl.textContent = '';
+            currentUrl = '';
+            if (qrImg) {
+                qrImg.hidden = true;
+                qrImg.removeAttribute('src');
+            }
+            openModal();
+            try {
+                var res = await fetch('/api/share-base', { cache: 'no-store' });
+                if (!res.ok) throw new Error('API');
+                var data = await res.json();
+                currentUrl = (data.baseUrl || window.location.origin) + buildPath();
+                urlEl.textContent = currentUrl;
+                hintEl.textContent = sourceHint(data.source);
+                renderQr(currentUrl);
+            } catch (e) {
+                currentUrl = window.location.origin + buildPath();
+                urlEl.textContent = currentUrl;
+                hintEl.textContent = 'Lien de la page actuelle.';
+                setStatus('Impossible de détecter le tunnel — lien local affiché.', true);
+                renderQr(currentUrl);
+            }
+        }
+
+        openBtn.addEventListener('click', prepareShare);
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+        });
+
+        copyBtn.addEventListener('click', async function () {
+            if (!currentUrl) return;
+            try {
+                await navigator.clipboard.writeText(currentUrl);
+                setStatus('Lien copié.');
+            } catch (e) {
+                setStatus('Copie impossible.', true);
+            }
+        });
+
+        shareBtn.addEventListener('click', async function () {
+            if (!currentUrl) return;
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: rallyeName,
+                        text: 'Ouvre ce rallye sur ton téléphone',
+                        url: currentUrl
+                    });
+                } catch (e) {
+                    /* annulé */
+                }
+            } else {
+                copyBtn.click();
+            }
+        });
+    })();
 </script>
 </body>
 </html>

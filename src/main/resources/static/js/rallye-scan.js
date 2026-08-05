@@ -326,7 +326,7 @@
       article.className = 'scan-stage';
       var header = document.createElement('header');
       header.className = 'scan-stage-header';
-      header.innerHTML = '<span>ES ' + stage.esNumber + '</span><span>' + stage.passageOrder + 'ᵉ passage</span>';
+      header.innerHTML = '<span>ES ' + stage.esNumber + '</span>';
       article.appendChild(header);
 
       var table = document.createElement('table');

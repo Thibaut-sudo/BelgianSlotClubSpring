@@ -2,6 +2,7 @@ package org.example.belgianslotclubspring.services.impl;
 
 import org.apache.poi.ss.usermodel.*;
 import org.example.belgianslotclubspring.entities.Rallye;
+import org.example.belgianslotclubspring.entities.RallyeGroupAssignment;
 import org.example.belgianslotclubspring.entities.RallyePilot;
 import org.example.belgianslotclubspring.entities.RallyeStageTime;
 import org.example.belgianslotclubspring.models.Club;
@@ -10,6 +11,7 @@ import org.example.belgianslotclubspring.models.RallyeGroupEsBlock;
 import org.example.belgianslotclubspring.models.RallyeGroupSheet;
 import org.example.belgianslotclubspring.models.RallyeGridPilot;
 import org.example.belgianslotclubspring.models.RallyeStandingRow;
+import org.example.belgianslotclubspring.repo.RallyeGroupAssignmentRepo;
 import org.example.belgianslotclubspring.repo.RallyePilotRepo;
 import org.example.belgianslotclubspring.repo.RallyeRepo;
 import org.example.belgianslotclubspring.services.RallyeService;
@@ -29,10 +31,16 @@ public class RallyeServiceImpl implements RallyeService {
 
     private final RallyeRepo rallyeRepo;
     private final RallyePilotRepo pilotRepo;
+    private final RallyeGroupAssignmentRepo groupAssignmentRepo;
 
-    public RallyeServiceImpl(RallyeRepo rallyeRepo, RallyePilotRepo pilotRepo) {
+    public RallyeServiceImpl(
+            RallyeRepo rallyeRepo,
+            RallyePilotRepo pilotRepo,
+            RallyeGroupAssignmentRepo groupAssignmentRepo
+    ) {
         this.rallyeRepo = rallyeRepo;
         this.pilotRepo = pilotRepo;
+        this.groupAssignmentRepo = groupAssignmentRepo;
     }
 
     @Override
@@ -44,15 +52,11 @@ public class RallyeServiceImpl implements RallyeService {
     @Override
     @Transactional(readOnly = true)
     public Rallye get(Long id) {
-        Rallye rallye = rallyeRepo.findDetailedById(id)
+        // Ne pas remplacer pilots (Set) : avec orphanRemoval, setPilots(new …)
+        // provoque "collection with orphan deletion was no longer referenced".
+        // L'ordre vient de @OrderBy sur Rallye.pilots.
+        return rallyeRepo.findDetailedById(id)
                 .orElseThrow(() -> new NoSuchElementException("Rallye introuvable: " + id));
-        // Reordonne en LinkedHashSet (OrderBy + JOIN FETCH peuvent laisser un ordre instable)
-        List<RallyePilot> ordered = new ArrayList<>(rallye.getPilots());
-        ordered.sort(Comparator
-                .comparing((RallyePilot p) -> p.getStartNumber() == null ? Integer.MAX_VALUE : p.getStartNumber())
-                .thenComparing(RallyePilot::getId));
-        rallye.setPilots(new LinkedHashSet<>(ordered));
-        return rallye;
     }
 
     @Override
@@ -310,11 +314,14 @@ public class RallyeServiceImpl implements RallyeService {
         }
 
         SeedingOrder seeding = orderPilotsForBoucle(rallye, boucle);
-        List<List<RallyeGridPilot>> baseGroups = dealRoundRobin(seeding.pilots(), groupCount);
+        boolean manual = groupAssignmentRepo.existsByRallyeIdAndBoucle(rallyeId, boucle);
+        List<List<RallyeGridPilot>> baseGroups = manual
+                ? groupsFromAssignments(rallyeId, boucle, groupCount, seeding.pilots())
+                : dealRoundRobin(seeding.pilots(), groupCount);
 
         // Une feuille par groupe : toutes les ES de la boucle, dans l'ordre de parcours.
         // Groupe g démarre sur ES g, puis ES+1, ES+2… jusqu'à avoir tout fait.
-        // Ordre des pilotes dans le groupe : composition figée (classement),
+        // Ordre des pilotes dans le groupe : composition figée (classement / manuel),
         // mais rotation du départ à chaque ES pour que chacun mène une spéciale si possible.
         List<RallyeGroupSheet> groupSheets = new ArrayList<>();
         for (int groupIndex = 0; groupIndex < groupCount; groupIndex++) {
@@ -339,8 +346,109 @@ public class RallyeServiceImpl implements RallyeService {
                 groupSheets,
                 seeding.seededFromResults(),
                 seeding.sourceBoucle(),
-                seeding.pilotsRanked()
+                seeding.pilotsRanked(),
+                manual
         );
+    }
+
+    @Override
+    public void saveGroupAssignments(Long rallyeId, int boucle, List<List<Long>> groups) {
+        Rallye rallye = get(rallyeId);
+        if (boucle < 1 || boucle > rallye.getBoucleCount()) {
+            throw new IllegalArgumentException("Boucle invalide: " + boucle);
+        }
+        int groupCount = rallye.getStagesPerBoucle();
+        if (groups == null || groups.size() != groupCount) {
+            throw new IllegalArgumentException("Nombre de groupes attendu: " + groupCount);
+        }
+
+        Map<Long, RallyePilot> pilotsById = new HashMap<>();
+        for (RallyePilot p : rallye.getPilots()) {
+            pilotsById.put(p.getId(), p);
+        }
+
+        Set<Long> seen = new HashSet<>();
+        List<RallyeGroupAssignment> toSave = new ArrayList<>();
+        for (int g = 0; g < groups.size(); g++) {
+            List<Long> pilotIds = groups.get(g) != null ? groups.get(g) : List.of();
+            int pos = 0;
+            for (Long pilotId : pilotIds) {
+                if (pilotId == null) {
+                    continue;
+                }
+                RallyePilot pilot = pilotsById.get(pilotId);
+                if (pilot == null) {
+                    throw new IllegalArgumentException("Pilote inconnu: " + pilotId);
+                }
+                if (!seen.add(pilotId)) {
+                    throw new IllegalArgumentException("Pilote en double dans les groupes: " + pilot.getName());
+                }
+                toSave.add(new RallyeGroupAssignment(rallye, boucle, pilot, g + 1, pos++));
+            }
+        }
+        if (seen.size() != pilotsById.size()) {
+            throw new IllegalArgumentException("Tous les pilotes doivent être placés dans un groupe.");
+        }
+
+        groupAssignmentRepo.deleteByRallyeIdAndBoucle(rallyeId, boucle);
+        groupAssignmentRepo.flush();
+        groupAssignmentRepo.saveAll(toSave);
+    }
+
+    @Override
+    public void clearGroupAssignments(Long rallyeId, int boucle) {
+        Rallye rallye = get(rallyeId);
+        if (boucle < 1 || boucle > rallye.getBoucleCount()) {
+            throw new IllegalArgumentException("Boucle invalide: " + boucle);
+        }
+        groupAssignmentRepo.deleteByRallyeIdAndBoucle(rallyeId, boucle);
+    }
+
+    private List<List<RallyeGridPilot>> groupsFromAssignments(
+            Long rallyeId,
+            int boucle,
+            int groupCount,
+            List<RallyeGridPilot> seededPilots
+    ) {
+        Map<Long, RallyeGridPilot> byId = new LinkedHashMap<>();
+        for (RallyeGridPilot p : seededPilots) {
+            byId.put(p.id(), p);
+        }
+
+        List<List<RallyeGridPilot>> groups = new ArrayList<>();
+        for (int i = 0; i < groupCount; i++) {
+            groups.add(new ArrayList<>());
+        }
+
+        Set<Long> placed = new HashSet<>();
+        for (RallyeGroupAssignment a : groupAssignmentRepo
+                .findByRallyeIdAndBoucleOrderByGroupNumberAscPositionInGroupAsc(rallyeId, boucle)) {
+            int g = a.getGroupNumber() - 1;
+            if (g < 0 || g >= groupCount) {
+                continue;
+            }
+            RallyeGridPilot pilot = byId.get(a.getPilot().getId());
+            if (pilot == null) {
+                continue;
+            }
+            groups.get(g).add(pilot);
+            placed.add(pilot.id());
+        }
+
+        // Pilotes non assignés → groupe le moins chargé
+        for (RallyeGridPilot p : seededPilots) {
+            if (placed.contains(p.id())) {
+                continue;
+            }
+            int best = 0;
+            for (int i = 1; i < groupCount; i++) {
+                if (groups.get(i).size() < groups.get(best).size()) {
+                    best = i;
+                }
+            }
+            groups.get(best).add(p);
+        }
+        return groups;
     }
 
     /**

@@ -46,6 +46,15 @@ public interface RallyeService {
      */
     RallyeBoucleGrid buildGroupGrid(Long rallyeId, int boucle);
 
+    /**
+     * Enregistre une composition manuelle des groupes pour une boucle.
+     * {@code groups} = liste de groupes, chaque groupe = liste ordonnée d'ids pilotes.
+     */
+    void saveGroupAssignments(Long rallyeId, int boucle, List<List<Long>> groups);
+
+    /** Efface la composition manuelle et revient à la répartition automatique. */
+    void clearGroupAssignments(Long rallyeId, int boucle);
+
     /** Ajoute une boucle (passage) supplémentaire. */
     Rallye addBoucle(Long rallyeId);
 

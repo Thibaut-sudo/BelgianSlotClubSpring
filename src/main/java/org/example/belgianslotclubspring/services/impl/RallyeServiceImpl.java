@@ -10,6 +10,11 @@ import org.example.belgianslotclubspring.models.RallyeBoucleGrid;
 import org.example.belgianslotclubspring.models.RallyeGroupEsBlock;
 import org.example.belgianslotclubspring.models.RallyeGroupSheet;
 import org.example.belgianslotclubspring.models.RallyeGridPilot;
+import org.example.belgianslotclubspring.models.RallyeBoucleRecap;
+import org.example.belgianslotclubspring.models.RallyeFinalRecap;
+import org.example.belgianslotclubspring.models.RallyeRecaps;
+import org.example.belgianslotclubspring.models.RallyeScratchTally;
+import org.example.belgianslotclubspring.models.RallyeStageHighlight;
 import org.example.belgianslotclubspring.models.RallyeStandingRow;
 import org.example.belgianslotclubspring.repo.RallyeGroupAssignmentRepo;
 import org.example.belgianslotclubspring.repo.RallyePilotRepo;
@@ -245,6 +250,355 @@ public class RallyeServiceImpl implements RallyeService {
             }
         }
         return result;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RallyeRecaps buildRecaps(Long rallyeId) {
+        Rallye rallye = get(rallyeId);
+        List<RallyeBoucleRecap> boucles = new ArrayList<>();
+        Map<Long, Integer> totalScratches = new HashMap<>();
+        Map<Long, String> names = new HashMap<>();
+        Map<Long, List<Integer>> scratchStagesGlobal = new HashMap<>();
+
+        for (RallyePilot p : rallye.getPilots()) {
+            names.put(p.getId(), p.getName());
+            totalScratches.put(p.getId(), 0);
+            scratchStagesGlobal.put(p.getId(), new ArrayList<>());
+        }
+
+        boolean allFinished = true;
+        for (int b = 1; b <= rallye.getBoucleCount(); b++) {
+            RallyeBoucleRecap recap = buildBoucleRecap(rallye, b);
+            if (!recap.finished()) {
+                allFinished = false;
+            }
+            // Uniquement boucles en cours ou terminées (au moins un temps)
+            if (!recap.hasData()) {
+                continue;
+            }
+            boucles.add(recap);
+            for (RallyeScratchTally t : recap.scratchLeaders()) {
+                Long id = findPilotIdByName(rallye, t.pilotName());
+                if (id == null) {
+                    continue;
+                }
+                totalScratches.merge(id, t.count(), Integer::sum);
+                for (Integer es : t.stageNumbers()) {
+                    scratchStagesGlobal.get(id).add((b - 1) * rallye.getStagesPerBoucle() + es);
+                }
+            }
+        }
+
+        // Résumé final seulement quand toutes les boucles sont terminées
+        RallyeFinalRecap finale = null;
+        if (allFinished && !boucles.isEmpty()) {
+            finale = buildFinalRecap(rallye, totalScratches, names, scratchStagesGlobal, boucles);
+        }
+        return new RallyeRecaps(boucles, finale);
+    }
+
+    private RallyeBoucleRecap buildBoucleRecap(Rallye rallye, int boucle) {
+        int stages = rallye.getStagesPerBoucle();
+        List<RallyeStageHighlight> highlights = new ArrayList<>();
+        Map<Long, Integer> scratchCount = new HashMap<>();
+        Map<Long, List<Integer>> scratchEs = new HashMap<>();
+        Map<Long, Double> boucleTotals = new HashMap<>();
+        Map<Long, String> pilotNames = new HashMap<>();
+
+        for (RallyePilot p : rallye.getPilots()) {
+            pilotNames.put(p.getId(), p.getName());
+            scratchCount.put(p.getId(), 0);
+            scratchEs.put(p.getId(), new ArrayList<>());
+            Double total = null;
+            for (int s = 1; s <= stages; s++) {
+                Double t = p.getStageSeconds(boucle, s);
+                if (t != null) {
+                    total = (total == null ? 0 : total) + t;
+                }
+            }
+            Double peno = p.getPenaltySeconds(boucle);
+            if (peno != null) {
+                total = (total == null ? 0 : total) + peno;
+            }
+            if (total != null) {
+                boucleTotals.put(p.getId(), total);
+            }
+        }
+
+        int stagesWithTimes = 0;
+        String hardestName = null;
+        String hardestEs = null;
+        String hardestGap = null;
+        double hardestGapSec = -1;
+
+        for (int s = 1; s <= stages; s++) {
+            Long bestId = null;
+            Double best = null;
+            Long worstId = null;
+            Double worst = null;
+
+            for (RallyePilot p : rallye.getPilots()) {
+                Double t = p.getStageSeconds(boucle, s);
+                if (t == null) {
+                    continue;
+                }
+                if (best == null || t < best) {
+                    best = t;
+                    bestId = p.getId();
+                }
+                if (worst == null || t > worst) {
+                    worst = t;
+                    worstId = p.getId();
+                }
+            }
+
+            if (bestId == null) {
+                continue;
+            }
+            stagesWithTimes++;
+            scratchCount.merge(bestId, 1, Integer::sum);
+            scratchEs.get(bestId).add(s);
+
+            String worstGapFmt = "—";
+            if (worstId != null && worst != null && best != null && !worstId.equals(bestId)) {
+                double gap = worst - best;
+                worstGapFmt = RallyeTimeFormat.formatGap(gap);
+                if (gap > hardestGapSec) {
+                    hardestGapSec = gap;
+                    hardestName = pilotNames.get(worstId);
+                    hardestEs = "ES " + s;
+                    hardestGap = worstGapFmt;
+                }
+            }
+
+            highlights.add(new RallyeStageHighlight(
+                    s,
+                    pilotNames.get(bestId),
+                    RallyeTimeFormat.format(best),
+                    worstId != null ? pilotNames.get(worstId) : "—",
+                    worst != null ? RallyeTimeFormat.format(worst) : "—",
+                    worstGapFmt
+            ));
+        }
+
+        if (stagesWithTimes == 0) {
+            return new RallyeBoucleRecap(
+                    boucle, false, false, 0, null, null, List.of(), List.of(),
+                    List.of("Pas encore de temps saisis pour la boucle " + boucle + ".")
+            );
+        }
+
+        boolean finished = stagesWithTimes >= stages;
+
+        List<RallyeScratchTally> scratchLeaders = scratchCount.entrySet().stream()
+                .filter(e -> e.getValue() > 0)
+                .sorted((a, b) -> {
+                    int c = Integer.compare(b.getValue(), a.getValue());
+                    if (c != 0) {
+                        return c;
+                    }
+                    return pilotNames.getOrDefault(a.getKey(), "").compareToIgnoreCase(
+                            pilotNames.getOrDefault(b.getKey(), ""));
+                })
+                .map(e -> new RallyeScratchTally(
+                        pilotNames.get(e.getKey()),
+                        e.getValue(),
+                        List.copyOf(scratchEs.get(e.getKey()))
+                ))
+                .toList();
+
+        Long leaderId = boucleTotals.entrySet().stream()
+                .min(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+        String leaderName = leaderId != null ? pilotNames.get(leaderId) : null;
+        String leaderTime = leaderId != null
+                ? RallyeTimeFormat.format(boucleTotals.get(leaderId))
+                : null;
+
+        List<String> headlines = new ArrayList<>();
+        if (leaderName != null) {
+            if (finished) {
+                headlines.add(leaderName + " remporte la boucle " + boucle + " en " + leaderTime + ".");
+            } else {
+                headlines.add(leaderName + " mène la boucle " + boucle + " en " + leaderTime
+                        + " (" + stagesWithTimes + "/" + stages + " ES).");
+            }
+        }
+        if (!scratchLeaders.isEmpty()) {
+            RallyeScratchTally top = scratchLeaders.get(0);
+            String stagesLabel = top.stageNumbers().stream()
+                    .map(n -> "ES " + n)
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("");
+            if (top.count() == 1) {
+                headlines.add(top.pilotName() + " : 1 scratch (" + stagesLabel + ").");
+            } else {
+                headlines.add(top.pilotName() + " domine les scratchs : "
+                        + top.count() + " (" + stagesLabel + ").");
+            }
+            if (scratchLeaders.size() > 1) {
+                RallyeScratchTally second = scratchLeaders.get(1);
+                headlines.add("Aussi en forme : " + second.pilotName()
+                        + " (" + second.count() + " scratch"
+                        + (second.count() > 1 ? "s" : "") + ").");
+            }
+        }
+        if (hardestName != null && hardestGap != null) {
+            headlines.add("Coup dur pour " + hardestName + " sur " + hardestEs
+                    + " (" + hardestGap + " face au scratch).");
+        }
+
+        // Pénalités
+        List<String> penos = new ArrayList<>();
+        for (RallyePilot p : rallye.getPilots()) {
+            Double peno = p.getPenaltySeconds(boucle);
+            if (peno != null && peno > 0) {
+                penos.add(p.getName() + " +" + RallyeTimeFormat.format(peno));
+            }
+        }
+        if (!penos.isEmpty()) {
+            headlines.add("Pénalités : " + String.join(", ", penos) + ".");
+        }
+
+        return new RallyeBoucleRecap(
+                boucle,
+                true,
+                finished,
+                stagesWithTimes,
+                leaderName,
+                leaderTime,
+                scratchLeaders,
+                highlights,
+                headlines
+        );
+    }
+
+    private RallyeFinalRecap buildFinalRecap(
+            Rallye rallye,
+            Map<Long, Integer> totalScratches,
+            Map<Long, String> names,
+            Map<Long, List<Integer>> scratchStagesGlobal,
+            List<RallyeBoucleRecap> boucleRecaps
+    ) {
+        List<RallyeStandingRow> overall = standings(rallye.getId(), rallye.totalStages(), null);
+        boolean hasData = overall.stream().anyMatch(r -> r.totalSeconds() != null);
+        if (!hasData) {
+            return new RallyeFinalRecap(
+                    false, null, null, List.of(), List.of(),
+                    List.of("Le résumé final apparaîtra dès que des temps seront enregistrés.")
+            );
+        }
+
+        List<RallyeStandingRow> ranked = overall.stream()
+                .filter(r -> r.totalSeconds() != null)
+                .toList();
+
+        String championName = ranked.isEmpty() ? null : ranked.get(0).name();
+        String championTime = ranked.isEmpty() ? null : ranked.get(0).totalFormatted();
+
+        List<String> podium = new ArrayList<>();
+        for (int i = 0; i < Math.min(3, ranked.size()); i++) {
+            RallyeStandingRow r = ranked.get(i);
+            podium.add((i + 1) + ". " + r.name() + " — " + r.totalFormatted()
+                    + (r.gapFormatted() != null && !"—".equals(r.gapFormatted())
+                    ? " (" + r.gapFormatted() + ")" : ""));
+        }
+
+        List<RallyeScratchTally> scratchLeaders = totalScratches.entrySet().stream()
+                .filter(e -> e.getValue() > 0)
+                .sorted((a, b) -> {
+                    int c = Integer.compare(b.getValue(), a.getValue());
+                    if (c != 0) {
+                        return c;
+                    }
+                    return names.getOrDefault(a.getKey(), "").compareToIgnoreCase(
+                            names.getOrDefault(b.getKey(), ""));
+                })
+                .map(e -> new RallyeScratchTally(
+                        names.get(e.getKey()),
+                        e.getValue(),
+                        List.copyOf(scratchStagesGlobal.getOrDefault(e.getKey(), List.of()))
+                ))
+                .toList();
+
+        List<String> headlines = new ArrayList<>();
+        if (championName != null) {
+            headlines.add("Vainqueur : " + championName + " en " + championTime + ".");
+        }
+        if (podium.size() >= 2) {
+            headlines.add("Podium : " + String.join(" · ", podium) + ".");
+        }
+        if (!scratchLeaders.isEmpty()) {
+            RallyeScratchTally top = scratchLeaders.get(0);
+            headlines.add("Roi des scratchs : " + top.pilotName()
+                    + " avec " + top.count() + " ES gagnée"
+                    + (top.count() > 1 ? "s" : "") + ".");
+        }
+
+        // Plus de boucles menées
+        Map<String, Integer> boucleWins = new HashMap<>();
+        for (RallyeBoucleRecap b : boucleRecaps) {
+            if (b.hasData() && b.leaderName() != null) {
+                boucleWins.merge(b.leaderName(), 1, Integer::sum);
+            }
+        }
+        boucleWins.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .ifPresent(e -> {
+                    if (e.getValue() >= 2) {
+                        headlines.add(e.getKey() + " a remporté " + e.getValue()
+                                + " boucles au chronomètre cumulé.");
+                    } else if (e.getValue() == 1 && boucleRecaps.stream().filter(RallyeBoucleRecap::hasData).count() == 1) {
+                        // single boucle with data — skip redundant
+                    } else if (e.getValue() == 1) {
+                        headlines.add("Meilleure boucle chronométrée : " + e.getKey() + ".");
+                    }
+                });
+
+        // Plus gros écart final (dernier classé)
+        if (ranked.size() >= 2) {
+            RallyeStandingRow last = ranked.get(ranked.size() - 1);
+            if (last.gapFormatted() != null && !"—".equals(last.gapFormatted())) {
+                headlines.add("Plus gros retard final : " + last.name()
+                        + " (" + last.gapFormatted() + ").");
+            }
+        }
+
+        // Coup dur le plus marquant parmi les boucles
+        String worstBlow = null;
+        for (RallyeBoucleRecap b : boucleRecaps) {
+            for (String h : b.headlines()) {
+                if (h.startsWith("Coup dur")) {
+                    worstBlow = h.replace("Coup dur", "Coup dur du rallye");
+                }
+            }
+        }
+        if (worstBlow != null) {
+            headlines.add(worstBlow);
+        }
+
+        return new RallyeFinalRecap(
+                true,
+                championName,
+                championTime,
+                podium,
+                scratchLeaders,
+                headlines
+        );
+    }
+
+    private static Long findPilotIdByName(Rallye rallye, String name) {
+        if (name == null) {
+            return null;
+        }
+        for (RallyePilot p : rallye.getPilots()) {
+            if (name.equals(p.getName())) {
+                return p.getId();
+            }
+        }
+        return null;
     }
 
     @Override

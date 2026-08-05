@@ -2117,6 +2117,104 @@ a.feature-item:hover h3 {
   border-top: 1px solid var(--color-border);
 }
 
+.rallye-recap-list {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.rallye-recap {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-asphalt) 3%, white);
+}
+
+.rallye-recap--final {
+  background: color-mix(in srgb, var(--color-amber) 10%, white);
+  border-color: color-mix(in srgb, var(--color-amber) 35%, var(--color-border));
+}
+
+.rallye-recap.is-empty {
+  opacity: 0.72;
+}
+
+.rallye-recap.is-live {
+  border-color: color-mix(in srgb, var(--color-asphalt) 25%, var(--color-border));
+}
+
+.rallye-recap.is-finished {
+  border-color: color-mix(in srgb, var(--color-amber) 40%, var(--color-border));
+}
+
+.rallye-recap__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.rallye-recap__head h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.rallye-recap__badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.rallye-recap__headlines {
+  margin: 0 0 var(--space-4);
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.rallye-recap__headlines li {
+  line-height: 1.45;
+}
+
+.rallye-recap__grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .rallye-recap__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.rallye-recap__grid h4 {
+  margin: 0 0 var(--space-2);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.rallye-recap__podium,
+.rallye-recap__scratches,
+.rallye-recap__stages {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.rallye-recap__worst {
+  color: var(--color-muted);
+}
+
+.rallye-recap__es-list {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+}
+
 .page-hero-eyebrow {
   margin: 0 0 var(--space-2);
 }

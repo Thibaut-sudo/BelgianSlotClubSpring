@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(title='Rallye — Belgian Slot Club')}"></head>
-<body>
+<link rel="stylesheet" href="/css/rallye-mobile.css">
+<body class="rallye-app">
 <header th:replace="~{fragments/layout :: nav(active='rallye', club=${club})}"></header>
 
 <section class="page-hero page-hero--club"

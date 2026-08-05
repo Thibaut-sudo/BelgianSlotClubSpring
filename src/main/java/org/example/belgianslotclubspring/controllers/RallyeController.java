@@ -123,6 +123,7 @@ public class RallyeController {
         model.addAttribute("checkpoints", checkpoints);
         model.addAttribute("standings", standings);
         model.addAttribute("timeDisplay", timeDisplay);
+        model.addAttribute("recaps", rallyeService.buildRecaps(id));
         return "pages/rallyeDetail";
     }
 

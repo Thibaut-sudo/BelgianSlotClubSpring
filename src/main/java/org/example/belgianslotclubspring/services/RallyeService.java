@@ -3,6 +3,7 @@ package org.example.belgianslotclubspring.services;
 import org.example.belgianslotclubspring.entities.Rallye;
 import org.example.belgianslotclubspring.entities.RallyePilot;
 import org.example.belgianslotclubspring.models.RallyeBoucleGrid;
+import org.example.belgianslotclubspring.models.RallyeRecaps;
 import org.example.belgianslotclubspring.models.RallyeStandingRow;
 
 import java.time.LocalDate;
@@ -36,6 +37,9 @@ public interface RallyeService {
      * Si null, utilise toutes les ES déjà courues pour le max atteint.
      */
     List<RallyeStandingRow> standings(Long rallyeId, Integer afterStages, String categoryFilter);
+
+    /** Compte-rendus par boucle + résumé final (scratchs, coups durs, podium). */
+    RallyeRecaps buildRecaps(Long rallyeId);
 
     /** Importe nom + voiture (+ catégorie) depuis la feuille « Pilotes » d'un Excel rallye SRCS. */
     int importPilotsFromExcel(Long rallyeId, String filePath);

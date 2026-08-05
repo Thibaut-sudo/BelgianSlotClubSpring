@@ -298,9 +298,10 @@
 }
 
 .print-es-passages {
+  /* Grille adaptée au nb d'ES (ex. 4→2×2, 5→3+2) pour des cases temps plus larges */
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: repeat(var(--es-cols, 2), minmax(0, 1fr));
+  gap: 0.55rem;
   align-items: start;
 }
 
@@ -363,28 +364,6 @@
   min-height: 1.6rem;
 }
 
-.time-input {
-  width: 100%;
-  margin: 0;
-  padding: 0.15rem 0.25rem;
-  border: 1.5px solid #555;
-  border-radius: 2px;
-  background: #fff;
-  box-sizing: border-box;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.78rem;
-  height: 1.7rem;
-  min-height: 1.7rem;
-}
-
-.time-input:focus {
-  outline: 2px solid var(--color-accent, #c8102e);
-  outline-offset: 1px;
-  border-color: var(--color-accent, #c8102e);
-}
-
 .print-sheet--boucle {
   scroll-margin-top: 5rem;
 }
@@ -411,21 +390,20 @@
 }
 
 .ocr-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.15rem;
+  display: block;
+  position: relative;
 }
 
 .ocr-anchor {
-  display: block;
+  display: none; /* visible uniquement à l'impression */
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.55rem;
+  font-size: 0.45rem;
   line-height: 1;
-  letter-spacing: 0.04em;
-  color: #222;
-  text-align: center;
+  letter-spacing: 0.02em;
+  color: #666;
+  text-align: right;
   user-select: none;
+  margin-top: 0.05rem;
 }
 
 .print-only-footer {
@@ -444,7 +422,7 @@
   flex-direction: column;
   min-width: 0;
   background: #fff;
-  height: fit-content;
+  height: auto;
   align-self: start;
 }
 
@@ -453,11 +431,11 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.35rem 0.4rem;
+  padding: 0.2rem 0.35rem;
   background: var(--color-asphalt, #2b2b2e);
   color: #fff;
   font-family: var(--font-display), 'Oswald', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   flex-shrink: 0;
@@ -476,29 +454,29 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
 }
 
 .print-empty-msg {
   text-align: center;
   color: #888;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-style: italic;
-  padding: 0.75rem 0.35rem !important;
+  padding: 0.4rem 0.25rem !important;
 }
 
 .print-group-table col.col-num {
-  width: 1.6rem;
+  width: 1.35rem;
 }
 
 .print-group-table col.col-time {
-  width: 7rem;
+  width: 8rem;
 }
 
 .print-group-table th,
 .print-group-table td {
   border-bottom: 1px solid #d8d3c9;
-  padding: 0.5rem 0.4rem;
+  padding: 0.35rem 0.4rem;
   vertical-align: middle;
 }
 
@@ -543,23 +521,36 @@
 .print-pilot-car {
   display: block;
   color: #666;
-  font-size: 0.68rem;
-  line-height: 1.1;
-  min-height: 1.1em;
+  font-size: 0.62rem;
+  line-height: 1.05;
+  min-height: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.time-box {
+.time-box,
+.time-input {
   display: block;
   width: 100%;
-  height: 3rem;
-  min-height: 3rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.25rem 0.4rem;
   border: 1.5px solid #555;
   border-radius: 2px;
   background: #fff;
   box-sizing: border-box;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.95rem;
+}
+
+.time-input:focus {
+  outline: 2px solid var(--color-accent, #c8102e);
+  outline-offset: 1px;
+  border-color: var(--color-accent, #c8102e);
 }
 
 .print-sheet-footer {
@@ -598,17 +589,18 @@
   }
 
   @media (max-width: 560px) {
-    .print-groups {
+    .print-groups,
+    .print-es-passages {
       grid-template-columns: 1fr;
     }
   }
 }
 
-/* Impression A4 paysage */
+/* Impression A4 paysage — 1 groupe = 1 page (jamais de coupure) */
 @media print {
   @page {
     size: A4 landscape;
-    margin: 7mm;
+    margin: 6mm;
   }
 
   body.grille-page {
@@ -629,11 +621,15 @@
   .print-sheet {
     break-after: always;
     page-break-after: always;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
     display: flex;
     flex-direction: column;
-    height: auto;
-    max-height: none;
-    min-height: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 198mm;
+    max-height: 198mm;
+    overflow: hidden;
     margin: 0;
     padding: 0;
     border: 0;
@@ -648,19 +644,68 @@
   }
 
   .print-es-passages {
-    display: grid;
-    grid-template-columns: repeat(var(--group-count, 4), minmax(0, 1fr));
-    gap: 2mm;
+    display: grid !important;
+    grid-template-columns: repeat(var(--es-cols, 2), minmax(0, 1fr)) !important;
+    grid-auto-rows: minmax(0, auto);
+    gap: 2.5mm;
     align-items: start;
-    flex: 1;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
+  .print-group {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    height: auto !important;
+    max-height: 100%;
+    overflow: hidden;
+    align-self: start;
+  }
+
+  .print-pilot-car {
+    display: block;
+    font-size: 6.5pt;
+  }
+
+  .print-group-table th,
+  .print-group-table td {
+    padding: 1mm 1.4mm;
+  }
+
+  .print-group-table {
+    font-size: 8.5pt;
+  }
+
+  .print-group-table col.col-num {
+    width: 7mm;
+  }
+
+  .print-group-table col.col-time {
+    width: 36mm;
+  }
+
+  .print-group-header {
+    padding: 1.2mm 1.6mm;
+    font-size: 9pt;
+  }
+
+  .print-pilot-name {
+    font-size: 9pt;
+  }
+
+  /* Hauteur adaptée au nb de pilotes pour rester sur 1 page */
   .print-group .time-box,
   .print-group .time-input {
-    height: 8mm;
-    min-height: 8mm;
-    font-size: 9pt;
-    border: 0.3mm solid #444;
+    height: var(--time-h, 11mm) !important;
+    min-height: var(--time-h, 11mm) !important;
+    max-height: var(--time-h, 11mm) !important;
+    font-size: 10pt;
+    padding: 1mm 1.5mm;
+    border: 0.4mm solid #333;
     box-shadow: none;
     outline: none;
     -webkit-appearance: none;
@@ -669,21 +714,26 @@
     color: #111;
   }
 
+  .print-group .time-input::placeholder {
+    color: transparent;
+  }
+
   .print-qr {
     display: inline-block;
-    width: 12mm;
-    height: 12mm;
+    width: 9mm;
+    height: 9mm;
     border: 0;
     vertical-align: middle;
   }
 
   .print-sheet-header {
     padding-bottom: 1mm;
-    margin-bottom: 1.5mm;
+    margin-bottom: 2mm;
+    flex-shrink: 0;
   }
 
   .print-sheet-header h1 {
-    font-size: 11pt;
+    font-size: 12pt;
   }
 
   .print-kicker {
@@ -694,9 +744,23 @@
     font-size: 8pt;
   }
 
+  .print-seed-note {
+    display: none;
+  }
+
   .ocr-anchor {
-    font-size: 6pt;
-    color: #111;
+    display: block;
+    font-size: 4.5pt;
+    color: #bbb;
+    line-height: 1;
+    margin-top: 0.4mm;
+  }
+
+  .print-sheet-footer {
+    margin-top: auto;
+    padding-top: 1.5mm;
+    font-size: 7.5pt;
+    flex-shrink: 0;
   }
 
   .print-sheet-meta--with-qr {

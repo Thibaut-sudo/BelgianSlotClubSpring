@@ -167,8 +167,9 @@
     <div class="grille-print-root">
         <section class="print-sheet"
                  th:each="sheet : ${grid.groupSheets}"
+                 th:with="stageCount=${#lists.size(sheet.stages)}, pilotCount=${#lists.size(sheet.pilots)}, esRows=${stageCount <= 3 ? 1 : (pilotCount >= 5 ? 1 : 2)}, esCols=${(stageCount + esRows - 1) / esRows}, timeH=${pilotCount >= 6 ? '7mm' : (pilotCount >= 4 ? '9mm' : (pilotCount >= 3 ? '12mm' : '14mm'))}"
                  th:id="'print-groupe-' + ${sheet.groupNumber}"
-                 th:style="'--group-count:' + ${grid.groupCount}">
+                 th:style="|--group-count: ${grid.groupCount}; --stage-count: ${stageCount}; --pilot-count: ${pilotCount}; --es-rows: ${esRows}; --es-cols: ${esCols}; --time-h: ${timeH};|">
             <header class="print-sheet-header">
                 <div>
                     <p class="print-kicker" th:text="${clubDisplayName}">SRCS</p>
@@ -220,7 +221,7 @@
                                            type="text"
                                            inputmode="decimal"
                                            autocomplete="off"
-                                           placeholder="—"
+                                           placeholder=""
                                            th:name="'time_' + ${p.id} + '_' + ${st.esNumber}"
                                            th:value="${timeDisplay[p.id + '_' + st.esNumber]}"
                                            th:aria-label="'Temps ' + ${p.name} + ' ES ' + ${st.esNumber}">

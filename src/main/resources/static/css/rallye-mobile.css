@@ -570,7 +570,8 @@
   }
 
   .print-es-passages {
-    grid-template-columns: 1fr !important;
+    /* Mobile saisie : une ES sous l'autre ; l'impression force les colonnes */
+    grid-template-columns: 1fr;
   }
 
   .print-sheet {
@@ -579,8 +580,8 @@
   }
 
   .time-input {
-    min-height: 2.75rem !important;
-    font-size: 1.05rem !important;
+    min-height: 2.4rem !important;
+    font-size: 1rem !important;
   }
 
   .grille-manche-list {

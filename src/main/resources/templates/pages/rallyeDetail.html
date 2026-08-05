@@ -165,6 +165,20 @@
                        th:classappend="${b == activeBoucle} ? ' is-active'"
                        th:text="'Boucle ' + ${b}">Boucle 1</a>
                 </div>
+                <div class="rallye-add-forms">
+                    <form th:action="@{/rallye/{id}/add-boucle(id=${rallye.id})}" method="post" class="rallye-add-form">
+                        <button type="submit" class="btn btn-outline btn-sm"
+                                th:disabled="${rallye.boucleCount >= 12}"
+                                title="Ajouter une boucle">+ Boucle</button>
+                    </form>
+                    <form th:action="@{/rallye/{id}/remove-boucle(id=${rallye.id})}" method="post" class="rallye-add-form"
+                          th:onsubmit="'return confirm(\'Supprimer la boucle ' + ${rallye.boucleCount} + ' et tous ses temps ?\');'">
+                        <input type="hidden" name="boucle" th:value="${activeBoucle}">
+                        <button type="submit" class="btn btn-outline btn-sm"
+                                th:disabled="${rallye.boucleCount <= 1}"
+                                title="Supprimer la dernière boucle">− Boucle</button>
+                    </form>
+                </div>
             </div>
 
             <p class="rallye-axis-label">
@@ -182,7 +196,7 @@
                     <form th:action="@{/rallye/{id}/remove-stage(id=${rallye.id})}" method="post" class="rallye-add-form"
                           th:onsubmit="'return confirm(\'Supprimer l\\\'ES ' + ${rallye.stagesPerBoucle} + ' et tous ses temps ?\');'">
                         <input type="hidden" name="boucle" th:value="${activeBoucle}">
-                        <button type="submit" class="btn btn-ghost btn-sm"
+                        <button type="submit" class="btn btn-outline btn-sm"
                                 th:disabled="${rallye.stagesPerBoucle <= 1}"
                                 title="Supprimer la dernière ES">− ES</button>
                     </form>

@@ -1,47 +1,44 @@
 #!/bin/bash
 
-# Script pour arrêter l'application Belgian Slot Club Spring Boot
+# Arrêt Belgian Slot Club (+ tunnel éventuel)
 # Usage: ./stop.sh
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT_DIR"
 
-echo "🛑 Arrêt de l'application Belgian Slot Club..."
+PORT="${PORT:-8080}"
 
-# Arrêter le tunnel Cloudflare s'il tourne
+echo "Arrêt Belgian Slot Club…"
+
 if [ -x "./tunnel.sh" ]; then
-    ./tunnel.sh stop
+    ./tunnel.sh stop >/dev/null 2>&1 || true
 fi
 
-# Trouver le processus sur le port 8080
-PID=$(lsof -ti:8080)
+PIDS="$(lsof -tiTCP:"$PORT" -sTCP:LISTEN 2>/dev/null || true)"
 
-if [ -z "$PID" ]; then
-    echo "ℹ️  Aucune application n'est en cours d'exécution sur le port 8080"
+if [ -z "$PIDS" ]; then
+    # Tuer aussi d'éventuels mvn spring-boot:run orphelins
+    pkill -f "spring-boot:run" 2>/dev/null || true
+    echo "Rien n'écoute sur le port $PORT."
     exit 0
 fi
 
-echo "📋 Processus trouvé (PID: $PID)"
-echo "🔄 Arrêt en cours..."
-
-# Arrêter le processus
-kill $PID 2>/dev/null
-
-# Attendre un peu
+echo "PID: $PIDS"
+kill $PIDS 2>/dev/null || true
 sleep 2
 
-# Vérifier si le processus est toujours actif
-if lsof -ti:8080 >/dev/null 2>&1; then
-    echo "⚠️  Le processus n'a pas répondu, arrêt forcé..."
-    kill -9 $PID 2>/dev/null
+if lsof -tiTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+    echo "Arrêt forcé…"
+    kill -9 $PIDS 2>/dev/null || true
     sleep 1
 fi
 
-# Vérification finale
-if lsof -ti:8080 >/dev/null 2>&1; then
-    echo "❌ Impossible d'arrêter l'application"
+pkill -f "spring-boot:run" 2>/dev/null || true
+
+if lsof -tiTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+    echo "Impossible d'arrêter l'application."
     exit 1
-else
-    echo "✅ Application arrêtée avec succès"
-    exit 0
 fi
+
+echo "Application arrêtée."
+exit 0

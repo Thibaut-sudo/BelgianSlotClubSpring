@@ -1,62 +1,37 @@
-# 🚀 Guide de démarrage rapide
+# Démarrage rapide — Belgian Slot Club
 
-## Lancer l'application (méthode la plus simple)
+## Le plus simple (macOS)
 
-### Option 1 : Script simple (recommandé)
-```bash
-./start.sh
-```
+1. Double-clic sur **`Démarrer.command`**
+2. Attendre l’ouverture du navigateur → http://localhost:8080
+3. Pour arrêter : double-clic sur **`Arrêter.command`**
 
-### Option 2 : En arrière-plan
-```bash
-./start.sh dev --background
-# ou
-./start.sh -b
-```
+Au premier lancement, macOS peut demander d’autoriser le script : clic droit → Ouvrir.
 
-### Option 3 : Mode production
-```bash
-./start.sh prod
-```
-
-## Arrêter l'application
+## Depuis le terminal
 
 ```bash
-./stop.sh
+./start.sh          # démarre + ouvre le navigateur
+./start.sh status   # déjà lancé ?
+./stop.sh           # arrête
 ```
 
-## Autres méthodes
-
-### Avec Maven directement
-```bash
-./mvnw spring-boot:run
-```
-
-### Avec le JAR compilé
-```bash
-./mvnw package -DskipTests
-java -jar target/BelgianSlotClubSpring-0.0.1-SNAPSHOT.jar
-```
-
-## Accès à l'application
-
-Une fois lancée, l'application est accessible sur :
-- **URL principale** : http://localhost:8080
-- **Page d'accueil** : http://localhost:8080/
-- **Contact** : http://localhost:8080/contact
-
-## Vérifier que l'application tourne
+### Options
 
 ```bash
-curl http://localhost:8080
-# ou
-lsof -i :8080
+./start.sh --fg         # logs dans le terminal
+./start.sh --restart    # force un redémarrage
+./start.sh --tunnel     # + URL publique (Cloudflare)
+./start.sh prod         # profil production
 ```
 
-## Voir les logs (si lancé en arrière-plan)
+## Logs
 
 ```bash
 tail -f app.log
 ```
 
+## Prérequis
 
+- **JDK 21** (détecté automatiquement via `/usr/libexec/java_home`)
+- Le script utilise `./mvnw` (rien d’autre à installer pour Maven)

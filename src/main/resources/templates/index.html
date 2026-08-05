@@ -104,14 +104,16 @@
                 courses: (club) => '/selectRace/' + club,
                 results: (club) => '/selectRace/' + club,
                 championnat: (club) => '/championnat?club=' + encodeURIComponent(club),
-                calendrier: (club) => '/prochain-evenement?club=' + encodeURIComponent(club)
+                calendrier: (club) => '/prochain-evenement?club=' + encodeURIComponent(club),
+                rallye: (club) => '/rallye?club=' + encodeURIComponent(club)
             };
 
             const labels = {
                 courses: 'Choisissez un club pour voir les courses et résultats.',
                 results: 'Choisissez un club pour voir les courses et résultats.',
                 championnat: 'Choisissez un club pour accéder au championnat.',
-                calendrier: 'Choisissez un club pour accéder au calendrier.'
+                calendrier: 'Choisissez un club pour accéder au calendrier.',
+                rallye: 'Choisissez un club pour gérer les classements rallye.'
             };
 
             const resolve = destinations[goto] || destinations.courses;

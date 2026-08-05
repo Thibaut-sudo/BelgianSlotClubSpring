@@ -1,0 +1,632 @@
+/* Grilles de groupes rallye — écran + impression */
+
+.grille-page {
+  background: var(--color-paper);
+}
+
+.grille-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-4) 0;
+}
+
+.grille-toolbar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.grille-toolbar-title {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1.15;
+}
+
+.grille-toolbar-sub {
+  margin: 0.2rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.92rem;
+}
+
+.grille-screen {
+  padding: var(--space-8) var(--space-4) var(--space-8);
+}
+
+.grille-preview-block {
+  margin-bottom: var(--space-8);
+}
+
+.grille-base-groups {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(var(--group-count, 4), minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .grille-base-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .grille-base-groups {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grille-base-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  min-height: 100%;
+}
+
+.grille-base-card h3 {
+  margin: 0 0 var(--space-3);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.grille-base-count {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-muted);
+}
+
+.grille-base-card ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.grille-base-card li {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  gap: 0.2rem 0.4rem;
+  align-items: start;
+  font-size: 0.88rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--color-paper-2);
+}
+
+.grille-base-card li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.grille-pilot-meta {
+  display: grid;
+  grid-template-rows: auto 1.1em;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.grille-pilot-meta strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grille-car {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  line-height: 1.1em;
+  min-height: 1.1em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grille-num {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  padding-top: 0.1rem;
+}
+
+.grille-manche-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.grille-manche-link {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-white);
+  text-decoration: none;
+  color: inherit;
+  font-weight: 600;
+}
+
+.grille-manche-link:hover {
+  border-color: var(--color-asphalt);
+}
+
+.grille-manche-es {
+  font-weight: 400;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.grille-es-path {
+  margin: calc(var(--space-2) * -1) 0 var(--space-3);
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+.grille-manche-of {
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+.grille-rotation-note {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-border);
+  font-size: 0.9rem;
+  color: var(--color-ink);
+}
+
+/* --------------------------------------------------------------------------
+   Feuilles (écran + print) — styles partagés
+   -------------------------------------------------------------------------- */
+.print-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  border-bottom: 2px solid var(--color-ink, #111);
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+
+.print-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted, #555);
+}
+
+.print-sheet-header h1 {
+  margin: 0.1rem 0 0;
+  font-family: var(--font-display), 'Oswald', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.print-sheet-meta {
+  text-align: right;
+  font-size: 0.85rem;
+}
+
+.print-sheet-meta p {
+  margin: 0;
+}
+
+.print-seed-note {
+  font-size: 0.72rem !important;
+  color: var(--color-muted, #555);
+  margin-top: 0.12rem !important;
+}
+
+.print-groups {
+  display: grid;
+  grid-template-columns: repeat(var(--group-count, 4), minmax(0, 1fr));
+  gap: 0.4rem;
+  align-items: start;
+}
+
+.print-es-passages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.print-boucle-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--group-count, 4), minmax(0, 1fr));
+  gap: 0.45rem;
+  align-items: start;
+}
+
+.print-es-column {
+  min-width: 0;
+  border: 1.5px solid var(--color-ink, #111);
+  border-radius: 3px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.print-es-column-header {
+  background: var(--color-accent, #c8102e);
+  color: #fff;
+  text-align: center;
+  font-family: var(--font-display), 'Oswald', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.4rem;
+}
+
+.print-es-column-body {
+  display: grid;
+  gap: 0;
+}
+
+.print-es-column .print-group {
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid #ccc;
+}
+
+.print-es-column .print-group:first-child {
+  border-top: 0;
+}
+
+.print-group--compact .print-group-header {
+  padding: 0.25rem 0.35rem;
+  font-size: 0.7rem;
+}
+
+.print-group--compact .print-group-table {
+  font-size: 0.72rem;
+}
+
+.print-group--compact .print-pilot-car {
+  display: none;
+}
+
+.print-group--compact .time-box {
+  height: 1.6rem;
+  min-height: 1.6rem;
+}
+
+.time-input {
+  width: 100%;
+  margin: 0;
+  padding: 0.15rem 0.25rem;
+  border: 1.5px solid #555;
+  border-radius: 2px;
+  background: #fff;
+  box-sizing: border-box;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  height: 1.7rem;
+  min-height: 1.7rem;
+}
+
+.time-input:focus {
+  outline: 2px solid var(--color-accent, #c8102e);
+  outline-offset: 1px;
+  border-color: var(--color-accent, #c8102e);
+}
+
+.print-sheet--boucle {
+  scroll-margin-top: 5rem;
+}
+
+.print-sheet-meta--with-qr {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  text-align: right;
+}
+
+.print-qr {
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
+.ocr-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.15rem;
+}
+
+.ocr-anchor {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.55rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: #222;
+  text-align: center;
+  user-select: none;
+}
+
+.print-only-footer {
+  display: none;
+}
+
+.print-es-title {
+  color: var(--color-accent, #c8102e);
+}
+
+.print-group {
+  border: 1.5px solid var(--color-ink, #111);
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #fff;
+  height: fit-content;
+  align-self: start;
+}
+
+.print-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.4rem;
+  background: var(--color-asphalt, #2b2b2e);
+  color: #fff;
+  font-family: var(--font-display), 'Oswald', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.print-es {
+  background: var(--color-accent, #c8102e);
+  color: #fff;
+  padding: 0.12rem 0.4rem;
+  border-radius: 2px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.print-group-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.78rem;
+}
+
+.print-empty-msg {
+  text-align: center;
+  color: #888;
+  font-size: 0.75rem;
+  font-style: italic;
+  padding: 0.75rem 0.35rem !important;
+}
+
+.print-group-table col.col-num {
+  width: 1.6rem;
+}
+
+.print-group-table col.col-time {
+  width: 7rem;
+}
+
+.print-group-table th,
+.print-group-table td {
+  border-bottom: 1px solid #d8d3c9;
+  padding: 0.5rem 0.4rem;
+  vertical-align: middle;
+}
+
+.print-group-table tbody tr:last-child th,
+.print-group-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.print-group-table th {
+  text-align: left;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #f3f3f1;
+  font-weight: 700;
+}
+
+.print-group-table th:nth-child(1),
+.print-group-table td.col-num {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.print-group-table th:nth-child(3),
+.print-group-table td.col-time {
+  text-align: center;
+}
+
+.col-pilot {
+  min-width: 0;
+}
+
+.print-pilot-name {
+  display: block;
+  font-weight: 700;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.print-pilot-car {
+  display: block;
+  color: #666;
+  font-size: 0.68rem;
+  line-height: 1.1;
+  min-height: 1.1em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time-box {
+  display: block;
+  width: 100%;
+  height: 3rem;
+  min-height: 3rem;
+  border: 1.5px solid #555;
+  border-radius: 2px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.print-sheet-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.55rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid #bbb;
+  font-size: 0.72rem;
+  color: #555;
+}
+
+/* Écran */
+@media screen {
+  .grille-print-root {
+    display: block;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 var(--space-4) var(--space-12);
+  }
+
+  .print-sheet {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    margin-bottom: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+
+  @media (max-width: 900px) {
+    .print-groups {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .print-groups {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+/* Impression A4 paysage */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 7mm;
+  }
+
+  body.grille-page {
+    background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .grille-print-root {
+    display: block !important;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .print-sheet {
+    break-after: always;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    color: #111;
+  }
+
+  .print-sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .print-es-passages {
+    display: grid;
+    grid-template-columns: repeat(var(--group-count, 4), minmax(0, 1fr));
+    gap: 2mm;
+    align-items: start;
+    flex: 1;
+  }
+
+  .print-group .time-box,
+  .print-group .time-input {
+    height: 8mm;
+    min-height: 8mm;
+    font-size: 9pt;
+    border: 0.3mm solid #444;
+    box-shadow: none;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #fff;
+    color: #111;
+  }
+
+  .print-qr {
+    width: 22mm;
+    height: 22mm;
+    border: 0.2mm solid #999;
+  }
+
+  .ocr-anchor {
+    font-size: 6pt;
+    color: #111;
+  }
+
+  .print-sheet-meta--with-qr {
+    gap: 2mm;
+  }
+
+  .print-only-footer {
+    display: inline;
+  }
+}

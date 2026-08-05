@@ -1,0 +1,186 @@
+/* Scan photo feuilles rallye */
+
+.scan-page {
+  min-height: 100vh;
+  background: var(--color-bg, #f6f4ef);
+}
+
+.scan-layout {
+  display: grid;
+  gap: 1.5rem;
+  padding-bottom: 3rem;
+}
+
+.scan-card {
+  background: #fff;
+  border: 1px solid var(--color-border, #e2ddd3);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.25rem 1.35rem;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,.04));
+}
+
+.scan-capture {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  max-height: 28rem;
+  background: #1a1a1c;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0.75rem 0 1rem;
+}
+
+.scan-video,
+.scan-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.scan-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #bbb;
+  font-size: 0.95rem;
+}
+
+.scan-actions {
+  flex-wrap: wrap;
+}
+
+.scan-file-btn {
+  cursor: pointer;
+  margin: 0;
+}
+
+.scan-status {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  color: var(--color-muted, #555);
+  min-height: 1.35em;
+}
+
+.scan-status.is-error {
+  color: var(--color-accent, #c8102e);
+}
+
+.scan-status.is-ok {
+  color: #1f7a3f;
+}
+
+.scan-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.scan-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: #eee;
+  color: #333;
+}
+
+.scan-badge--ok {
+  background: #e5f6ea;
+  color: #1f7a3f;
+}
+
+.scan-badge--warn {
+  background: #fff3d6;
+  color: #8a5a00;
+}
+
+.scan-badge--empty {
+  background: #f0eeea;
+  color: #666;
+}
+
+.scan-review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.75rem;
+}
+
+.scan-stage {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.scan-stage-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  background: #2b2b2e;
+  color: #fff;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.scan-stage table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.scan-stage td {
+  padding: 0.4rem 0.5rem;
+  border-top: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.scan-stage .pilot-name {
+  font-weight: 700;
+  display: block;
+}
+
+.scan-stage .pilot-meta {
+  font-size: 0.7rem;
+  color: #777;
+}
+
+.scan-time-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 6.5rem;
+}
+
+.scan-time-wrap input {
+  width: 100%;
+  padding: 0.35rem 0.4rem;
+  border: 1.5px solid #888;
+  border-radius: 3px;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: right;
+}
+
+.scan-time-wrap input.is-filled {
+  border-color: #1f7a3f;
+  background: #f3fbf5;
+}
+
+.scan-time-wrap input.is-uncertain {
+  border-color: #c48a00;
+  background: #fffaf0;
+}
+
+.scan-conf {
+  font-size: 0.65rem;
+  color: #777;
+}
+
+@media (max-width: 640px) {
+  .scan-capture {
+    max-height: 18rem;
+  }
+}

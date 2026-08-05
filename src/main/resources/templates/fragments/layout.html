@@ -53,6 +53,12 @@
                 </li>
                 <li>
                     <a class="nav-link"
+                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/rallye(club=${club})} : '/?goto=rallye#clubs'"
+                       th:classappend="${active == 'rallye'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'rallye'} ? 'page' : null">Rallye</a>
+                </li>
+                <li>
+                    <a class="nav-link"
                        th:href="${club != null and !#strings.isEmpty(club)} ? @{/prochain-evenement(club=${club})} : '/?goto=calendrier#clubs'"
                        th:classappend="${active == 'calendrier'} ? ' active' : ''"
                        th:attr="aria-current=${active == 'calendrier'} ? 'page' : null">Calendrier</a>

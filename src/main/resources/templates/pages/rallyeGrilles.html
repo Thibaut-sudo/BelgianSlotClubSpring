@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Grilles — ' + ${rallye.name}">Grilles Rallye</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/rallye-print.css">
+</head>
+<body class="grille-page">
+
+<header class="grille-toolbar no-print">
+    <div class="container grille-toolbar-inner">
+        <div>
+            <a th:href="@{/rallye/{id}(id=${rallye.id})}" class="page-hero-back">← Retour au rallye</a>
+            <h1 class="grille-toolbar-title" th:text="${rallye.name}">Rallye</h1>
+            <p class="grille-toolbar-sub">
+                Une feuille par groupe —
+                <th:block th:if="${activeBoucle == 1}">Boucle 1 : groupes par n° d’inscription</th:block>
+                <th:block th:if="${activeBoucle > 1 and grid.seededFromResults}">
+                    Boucle <span th:text="${activeBoucle}">2</span> : groupes selon classement
+                    boucle <span th:text="${grid.sourceBoucle}">1</span>
+                </th:block>
+                <th:block th:if="${activeBoucle > 1 and !grid.seededFromResults}">
+                    saisissez d’abord les temps de la boucle
+                    <span th:text="${grid.sourceBoucle}">1</span>
+                </th:block>
+            </p>
+        </div>
+        <div class="cluster">
+            <div class="rallye-tabs rallye-tabs--compact">
+                <a th:each="b : ${#numbers.sequence(1, rallye.boucleCount)}"
+                   th:href="@{/rallye/{id}/grilles(id=${rallye.id}, boucle=${b})}"
+                   class="rallye-tab"
+                   th:classappend="${b == activeBoucle} ? ' is-active'"
+                   th:text="'Boucle ' + ${b}">Boucle 1</a>
+            </div>
+            <button type="submit" form="grilleTimesForm" name="returnTo" value="grilles" class="btn btn-primary">Enregistrer les temps</button>
+            <a class="btn btn-outline"
+               th:href="@{/rallye/{id}/scan(id=${rallye.id}, boucle=${activeBoucle})}">Scanner une feuille</a>
+            <button type="button" class="btn btn-secondary" onclick="window.print()">Imprimer</button>
+        </div>
+    </div>
+    <div class="container" th:if="${success}" style="padding-top:0.5rem">
+        <div class="flash flash--success" th:text="${success}"></div>
+    </div>
+    <div class="container" th:if="${error}" style="padding-top:0.5rem">
+        <div class="flash flash--error" th:text="${error}"></div>
+    </div>
+</header>
+
+<main class="container grille-screen no-print" th:if="${#lists.isEmpty(rallye.pilots)}">
+    <p class="empty-state">Ajoutez des pilotes avant de générer les grilles.</p>
+</main>
+
+<main class="container grille-screen no-print" th:unless="${#lists.isEmpty(rallye.pilots)}">
+    <section class="grille-preview-block">
+        <h2 class="section-title">Composition des groupes — Boucle <span th:text="${activeBoucle}">1</span></h2>
+        <p class="section-lead" th:if="${activeBoucle == 1}">
+            Répartition à tour de rôle (1→G1, 2→G2… puis on recommence).
+            Chaque groupe enchaîne ensuite toutes les ES : ES de départ → suivante → … jusqu’à toutes les avoir faites.
+        </p>
+        <p class="section-lead" th:if="${activeBoucle > 1 and grid.seededFromResults}">
+            Groupes recalculés selon le classement après la boucle
+            <span th:text="${grid.sourceBoucle}">1</span>, puis redistribués à tour de rôle.
+        </p>
+        <p class="section-lead flash flash--error" th:if="${activeBoucle > 1 and !grid.seededFromResults}">
+            Aucun temps saisi pour la boucle <span th:text="${grid.sourceBoucle}">1</span>.
+            Enregistrez-les pour recalculer les groupes.
+        </p>
+        <div class="grille-base-groups" th:style="'--group-count:' + ${grid.groupCount}">
+            <article class="grille-base-card" th:each="group, gStat : ${grid.baseGroups}">
+                <h3>
+                    <span th:text="'Groupe ' + ${gStat.count}">Groupe 1</span>
+                    <span class="grille-base-count" th:text="${#lists.size(group)} + ' pil.'">0 pil.</span>
+                </h3>
+                <p class="grille-es-path">
+                    Départ ES <span th:text="${gStat.count}">1</span>
+                    <th:block th:each="step : ${#numbers.sequence(1, grid.groupCount - 1)}">
+                        → ES <span th:text="${((gStat.count - 1 + step) % grid.groupCount) + 1}">2</span>
+                    </th:block>
+                </p>
+                <ol>
+                    <li th:each="p : ${group}">
+                        <span class="grille-num" th:if="${p.previousRank != null}" th:text="'R.' + ${p.previousRank}">R.1</span>
+                        <span class="grille-num" th:if="${p.previousRank == null and p.startNumber != null}" th:text="${p.startNumber}">1</span>
+                        <span class="grille-num" th:if="${p.previousRank == null and p.startNumber == null}">·</span>
+                        <div class="grille-pilot-meta">
+                            <strong th:text="${p.name}">Pilote</strong>
+                            <span class="grille-car" th:text="${p.car != null and !#strings.isEmpty(p.car)} ? ${p.car} : ' '"> </span>
+                        </div>
+                    </li>
+                </ol>
+            </article>
+        </div>
+        <p class="grille-rotation-note">
+            <strong>ES</strong> = spéciale chronométrée.
+            Chaque groupe a sa propre feuille avec toutes les ES de la boucle.
+            L’ordre des pilotes dans le groupe vient du classement ; à chaque ES,
+            le départ tourne pour que chacun mène une spéciale si possible.
+        </p>
+    </section>
+
+    <section class="grille-preview-block">
+        <h2 class="section-title">Feuilles par groupe</h2>
+        <p class="section-lead">
+            Une page = <strong>un groupe</strong>, avec toutes les ES de la boucle pour noter les temps.
+            Synchronisé avec la
+            <a th:href="@{/rallye/{id}(id=${rallye.id}, boucle=${activeBoucle})} + '#saisie'">Saisie</a>.
+        </p>
+        <div class="grille-manche-list">
+            <a th:each="sheet : ${grid.groupSheets}"
+               class="grille-manche-link"
+               th:href="'#print-groupe-' + ${sheet.groupNumber}">
+                <span>Groupe <span th:text="${sheet.groupNumber}">1</span></span>
+                <span class="grille-manche-es">
+                    <th:block th:each="st, i : ${sheet.stages}">
+                        <span th:text="'ES ' + ${st.esNumber}">ES 1</span><th:block th:unless="${i.last}"> → </th:block>
+                    </th:block>
+                    · <span th:text="${#lists.size(sheet.pilots)} + ' pil.'">2 pil.</span>
+                </span>
+            </a>
+        </div>
+    </section>
+</main>
+
+<!-- Une feuille = un groupe (toutes les ES de la boucle) -->
+<form id="grilleTimesForm"
+      th:action="@{/rallye/{id}/times(id=${rallye.id})}"
+      method="post"
+      th:unless="${#lists.isEmpty(rallye.pilots)}">
+    <input type="hidden" name="boucle" th:value="${activeBoucle}">
+
+    <div class="grille-print-root">
+        <section class="print-sheet"
+                 th:each="sheet : ${grid.groupSheets}"
+                 th:id="'print-groupe-' + ${sheet.groupNumber}"
+                 th:style="'--group-count:' + ${grid.groupCount}">
+            <header class="print-sheet-header">
+                <div>
+                    <p class="print-kicker" th:text="${clubDisplayName}">SRCS</p>
+                    <h1 th:text="${rallye.name}">Rallye</h1>
+                </div>
+                <div class="print-sheet-meta print-sheet-meta--with-qr">
+                    <canvas class="print-qr"
+                            width="96" height="96"
+                            th:attr="data-qr=${sheet.qrPayload}"
+                            aria-hidden="true"></canvas>
+                    <div>
+                        <p th:text="${#temporals.format(rallye.date, 'dd/MM/yyyy')}">01/01/2026</p>
+                        <p>
+                            <strong th:text="'Boucle ' + ${activeBoucle}">Boucle 1</strong>
+                            ·
+                            <strong class="print-es-title" th:text="'Groupe ' + ${sheet.groupNumber}">Groupe 1</strong>
+                        </p>
+                        <p class="print-seed-note">
+                            Écrire clairement : 12.345 ou 1:23.45 — chiffres uniquement
+                        </p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="print-es-passages">
+                <article class="print-group" th:each="st : ${sheet.stages}">
+                    <header class="print-group-header">
+                        <span th:text="'ES ' + ${st.esNumber}">ES 1</span>
+                        <span class="print-es" th:text="${st.passageOrder} + 'ᵉ passage'">1ᵉ passage</span>
+                    </header>
+                    <table class="print-group-table">
+                        <colgroup>
+                            <col class="col-num">
+                            <col class="col-pilot">
+                            <col class="col-time">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th th:text="${grid.seededFromResults} ? 'R.' : '#'">#</th>
+                            <th>Pilote</th>
+                            <th>Temps</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="p : ${st.pilots}">
+                            <td class="col-num"
+                                th:text="${p.previousRank != null ? p.previousRank : (p.startNumber != null ? p.startNumber : '')}">1</td>
+                            <td class="col-pilot">
+                                <span class="print-pilot-name" th:text="${p.name}">Nom</span>
+                                <span class="print-pilot-car"
+                                      th:text="${p.car != null and !#strings.isEmpty(p.car)} ? ${p.car} : ' '"> </span>
+                            </td>
+                            <td class="col-time">
+                                <div class="ocr-cell">
+                                    <input class="time-box time-input"
+                                           type="text"
+                                           inputmode="decimal"
+                                           autocomplete="off"
+                                           placeholder="—"
+                                           th:name="'time_' + ${p.id} + '_' + ${st.esNumber}"
+                                           th:value="${timeDisplay[p.id + '_' + st.esNumber]}"
+                                           th:aria-label="'Temps ' + ${p.name} + ' ES ' + ${st.esNumber}">
+                                    <span class="ocr-anchor"
+                                          th:text="'p' + ${p.id} + 'e' + ${st.esNumber}">p1e1</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(st.pilots)}" class="print-empty-group">
+                            <td colspan="3" class="print-empty-msg">Aucun pilote</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </article>
+            </div>
+
+            <footer class="print-sheet-footer">
+                <span class="no-print">
+                    <button type="submit" name="returnTo" value="grilles" class="btn btn-primary btn-sm">Enregistrer</button>
+                    <button type="submit" name="returnTo" value="saisie" class="btn btn-outline btn-sm">Enregistrer et voir saisie</button>
+                </span>
+                <span>Feuille Groupe <span th:text="${sheet.groupNumber}">1</span>
+                    · Boucle <span th:text="${activeBoucle}">1</span></span>
+                <span th:text="'Groupe ' + ${sheet.groupNumber} + ' / ' + ${grid.groupCount}">Groupe 1 / 4</span>
+            </footer>
+        </section>
+    </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js" class="no-print"></script>
+<script class="no-print">
+(function () {
+  if (typeof QRCode === 'undefined') return;
+  document.querySelectorAll('canvas.print-qr[data-qr]').forEach(function (canvas) {
+    var payload = canvas.getAttribute('data-qr');
+    if (!payload) return;
+    QRCode.toCanvas(canvas, payload, {
+      width: 96,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#111111', light: '#ffffff' }
+    });
+  });
+})();
+</script>
+<script src="/js/navigation.js" class="no-print"></script>
+</body>
+</html>

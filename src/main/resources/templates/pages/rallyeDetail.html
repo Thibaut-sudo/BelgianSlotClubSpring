@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title=${rallye.name} + ' — Rallye')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(active='rallye', club=${club})}"></header>
+
+<section class="page-hero page-hero--club"
+         th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+    <div class="page-hero-content container">
+        <p class="page-hero-eyebrow">
+            <a th:href="@{/rallye(club=${club})}" class="page-hero-back">← Rallyes</a>
+        </p>
+        <h1 class="page-hero-title" th:text="${rallye.name}">Rallye</h1>
+        <p class="page-hero-sub">Saisie simplifiée des temps · classements recalculés automatiquement</p>
+        <div class="page-hero-meta">
+            <span th:text="${#temporals.format(rallye.date, 'dd/MM/yyyy')}">01/01/2026</span>
+            <span th:text="${clubDisplayName}">SRCS</span>
+            <span th:text="${rallye.boucleCount} + ' boucles'">4 boucles</span>
+            <span th:text="${rallye.stagesPerBoucle} + ' ES'">5 ES</span>
+            <span th:text="${#lists.size(rallye.pilots)} + ' pilotes'">0 pilotes</span>
+        </div>
+        <div class="page-hero-actions cluster">
+            <a href="#saisie" class="btn btn-primary">Saisir les temps</a>
+            <a th:href="@{/rallye/{id}/grilles(id=${rallye.id})}" class="btn btn-secondary">Grilles à imprimer</a>
+            <a href="#classement" class="btn btn-outline">Classement</a>
+            <a href="#pilotes" class="btn btn-outline">Pilotes</a>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+
+        <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
+        <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
+
+        <!-- Pilotes -->
+        <div id="pilotes" class="rallye-block">
+            <div class="rallye-block-header">
+                <div>
+                    <h2 class="section-title">Pilotes</h2>
+                    <p class="section-lead">Ajoutez à la main ou importez la feuille « Pilotes » de votre Excel.</p>
+                </div>
+                <a th:if="${!#lists.isEmpty(rallye.pilots)}"
+                   th:href="@{/rallye/{id}/grilles(id=${rallye.id})}"
+                   class="btn btn-secondary btn-sm">Grilles groupes</a>
+            </div>
+
+            <div class="rallye-tools">
+                <form th:action="@{/rallye/{id}/pilots(id=${rallye.id})}" method="post" class="rallye-inline-form">
+                    <input class="form-input" type="text" name="name" placeholder="Pilote" required>
+                    <input class="form-input" type="text" name="car" placeholder="Voiture">
+                    <input class="form-input" type="text" name="category" placeholder="Catégorie">
+                    <button type="submit" class="btn btn-primary btn-sm">Ajouter</button>
+                </form>
+                <form th:action="@{/rallye/{id}/import-pilots(id=${rallye.id})}" method="post"
+                      enctype="multipart/form-data" class="rallye-inline-form">
+                    <input class="form-input" type="file" name="file" accept=".xls,.xlsx" required>
+                    <button type="submit" class="btn btn-secondary btn-sm">Importer Excel</button>
+                </form>
+            </div>
+
+            <div class="table-wrap" th:if="${!#lists.isEmpty(rallye.pilots)}">
+                <table class="data-table rallye-table">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Pilote</th>
+                        <th>Voiture</th>
+                        <th>Catégorie</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${rallye.pilots}">
+                        <td th:text="${p.startNumber}">1</td>
+                        <td th:text="${p.name}">Nom</td>
+                        <td th:text="${p.car}">Voiture</td>
+                        <td th:text="${p.category}">Cat</td>
+                        <td class="rallye-actions">
+                            <form th:action="@{/rallye/{id}/pilots/{pid}/delete(id=${rallye.id}, pid=${p.id})}"
+                                  method="post" onsubmit="return confirm('Supprimer ce pilote ?');">
+                                <button type="submit" class="btn btn-ghost btn-sm">Suppr.</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p th:if="${#lists.isEmpty(rallye.pilots)}" class="empty-state">Aucun pilote pour l’instant.</p>
+        </div>
+
+        <!-- Saisie temps -->
+        <div id="saisie" class="rallye-block">
+            <div class="rallye-block-header">
+                <div>
+                    <h2 class="section-title">Saisie des temps</h2>
+                    <p class="section-lead">
+                        Choisissez d’abord la <strong>boucle</strong> (passage), puis saisissez le temps de chaque <strong>ES</strong> (spéciale).
+                        Formats : <code>12.345</code> ou <code>1:23.45</code>.
+                    </p>
+                </div>
+            </div>
+
+            <p class="rallye-axis-label">Boucle</p>
+            <div class="rallye-tabs-row">
+                <div class="rallye-tabs" role="tablist" aria-label="Boucles">
+                    <a th:each="b : ${#numbers.sequence(1, rallye.boucleCount)}"
+                       th:href="@{/rallye/{id}(id=${rallye.id}, boucle=${b}, after=${afterStages}, category=${selectedCategory})} + '#saisie'"
+                       class="rallye-tab"
+                       th:classappend="${b == activeBoucle} ? ' is-active'"
+                       th:text="'Boucle ' + ${b}">Boucle 1</a>
+                </div>
+            </div>
+
+            <p class="rallye-axis-label">
+                ES de la boucle <span th:text="${activeBoucle}">1</span>
+            </p>
+            <div class="rallye-tabs-row rallye-tabs-row--es">
+                <p class="rallye-es-count" th:text="${rallye.stagesPerBoucle} + ' spéciale(s)'">5 spéciales</p>
+                <div class="rallye-add-forms">
+                    <form th:action="@{/rallye/{id}/add-stage(id=${rallye.id})}" method="post" class="rallye-add-form">
+                        <input type="hidden" name="boucle" th:value="${activeBoucle}">
+                        <button type="submit" class="btn btn-outline btn-sm"
+                                th:disabled="${rallye.stagesPerBoucle >= 12}"
+                                title="Ajouter une épreuve spéciale">+ ES</button>
+                    </form>
+                    <form th:action="@{/rallye/{id}/remove-stage(id=${rallye.id})}" method="post" class="rallye-add-form"
+                          th:onsubmit="'return confirm(\'Supprimer l\\\'ES ' + ${rallye.stagesPerBoucle} + ' et tous ses temps ?\');'">
+                        <input type="hidden" name="boucle" th:value="${activeBoucle}">
+                        <button type="submit" class="btn btn-ghost btn-sm"
+                                th:disabled="${rallye.stagesPerBoucle <= 1}"
+                                title="Supprimer la dernière ES">− ES</button>
+                    </form>
+                </div>
+            </div>
+
+            <form th:if="${!#lists.isEmpty(rallye.pilots)}"
+                  th:action="@{/rallye/{id}/times(id=${rallye.id})}" method="post">
+                <input type="hidden" name="boucle" th:value="${activeBoucle}">
+                <div class="table-wrap table-wrap--wide">
+                    <table class="data-table rallye-table rallye-entry-table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Pilote</th>
+                            <th th:each="s : ${#numbers.sequence(1, rallye.stagesPerBoucle)}"
+                                th:text="'ES ' + ${s}">ES 1</th>
+                            <th>PENO</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="p : ${rallye.pilots}">
+                            <td th:text="${p.startNumber}">1</td>
+                            <td class="rallye-pilot-cell">
+                                <strong th:text="${p.name}">Nom</strong>
+                                <span class="rallye-pilot-car" th:text="${p.car != null and !#strings.isEmpty(p.car)} ? ${p.car} : ' '"> </span>
+                            </td>
+                            <td th:each="s : ${#numbers.sequence(1, rallye.stagesPerBoucle)}">
+                                <input class="form-input form-input--time"
+                                       type="text"
+                                       inputmode="decimal"
+                                       th:name="'time_' + ${p.id} + '_' + ${s}"
+                                       th:value="${timeDisplay[p.id + '_' + s]}"
+                                       placeholder="—"
+                                       autocomplete="off">
+                            </td>
+                            <td>
+                                <input class="form-input form-input--time form-input--peno"
+                                       type="text"
+                                       inputmode="decimal"
+                                       th:name="'time_' + ${p.id} + '_0'"
+                                       th:value="${timeDisplay[p.id + '_0']}"
+                                       placeholder="—"
+                                       autocomplete="off">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="rallye-save-bar">
+                    <button type="submit" class="btn btn-primary">Enregistrer boucle <span th:text="${activeBoucle}">1</span></button>
+                    <span class="rallye-hint">Les classements ci-dessous se mettent à jour après enregistrement.</span>
+                </div>
+            </form>
+            <p th:if="${#lists.isEmpty(rallye.pilots)}" class="empty-state">Ajoutez des pilotes avant de saisir les temps.</p>
+        </div>
+
+        <!-- Classement -->
+        <div id="classement" class="rallye-block">
+            <div class="rallye-block-header">
+                <div>
+                    <h2 class="section-title">Classement</h2>
+                    <p class="section-lead">Classement cumulé après un nombre d’ES courues (toutes boucles confondues).</p>
+                </div>
+            </div>
+
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <label class="filter-label">Après</label>
+                    <div class="rallye-tabs rallye-tabs--compact">
+                        <a th:each="cp : ${checkpoints}"
+                           th:href="@{/rallye/{id}(id=${rallye.id}, boucle=${activeBoucle}, after=${cp}, category=${selectedCategory})} + '#classement'"
+                           class="rallye-tab"
+                           th:classappend="${cp == afterStages} ? ' is-active'"
+                           th:text="${cp} + ' ES'">5 ES</a>
+                    </div>
+                </div>
+                <div class="filter-group" th:if="${!#lists.isEmpty(categories)}">
+                    <label class="filter-label" for="catFilter">Catégorie</label>
+                    <select id="catFilter" class="form-select filter-select"
+                            onchange="filterCategory(this.value)">
+                        <option value="">Toutes</option>
+                        <option th:each="c : ${categories}"
+                                th:value="${c}"
+                                th:text="${c}"
+                                th:selected="${selectedCategory == c}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-wrap" th:if="${!#lists.isEmpty(standings)}">
+                <table class="data-table rallye-table">
+                    <thead>
+                    <tr>
+                        <th>Pos.</th>
+                        <th>Pilote</th>
+                        <th>Voiture</th>
+                        <th>Cat.</th>
+                        <th>Temps</th>
+                        <th>Écart</th>
+                        <th>ES</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${standings}"
+                        th:classappend="${row.position == 1} ? ' is-leader' : (${row.totalSeconds == null} ? ' is-dnf' : '')">
+                        <td th:text="${row.totalSeconds == null} ? '—' : ${row.position}">1</td>
+                        <td th:text="${row.name}">Nom</td>
+                        <td th:text="${row.car}">Voiture</td>
+                        <td th:text="${row.category}">Cat</td>
+                        <td class="mono" th:text="${row.totalFormatted}">0.000</td>
+                        <td class="mono" th:text="${row.gapFormatted}">—</td>
+                        <td th:text="${row.stagesCompleted} + '/' + ${row.stagesExpected}">0/5</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p th:if="${#lists.isEmpty(standings)}" class="empty-state">Pas encore de classement.</p>
+        </div>
+
+        <div class="rallye-danger">
+            <form th:action="@{/rallye/{id}/delete(id=${rallye.id})}" method="post"
+                  onsubmit="return confirm('Supprimer définitivement ce rallye ?');">
+                <button type="submit" class="btn btn-ghost btn-sm">Supprimer le rallye</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:inline="javascript">
+    function filterCategory(value) {
+        const id = /*[[${rallye.id}]]*/ 0;
+        const boucle = /*[[${activeBoucle}]]*/ 1;
+        const after = /*[[${afterStages}]]*/ 20;
+        let url = '/rallye/' + id + '?boucle=' + boucle + '&after=' + after;
+        if (value) url += '&category=' + encodeURIComponent(value);
+        window.location.href = url + '#classement';
+    }
+</script>
+</body>
+</html>

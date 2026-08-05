@@ -1827,7 +1827,7 @@ a.feature-item:hover h3 {
 @import url('/css/tables.css');
 
 /* --------------------------------------------------------------------------
-   Shared UI helpers
+   Rallye
    -------------------------------------------------------------------------- */
 .flash {
   padding: var(--space-3) var(--space-4);
@@ -1846,6 +1846,275 @@ a.feature-item:hover h3 {
   background: color-mix(in srgb, var(--color-accent) 10%, white);
   color: var(--color-accent);
   border: 1px solid color-mix(in srgb, var(--color-accent) 28%, white);
+}
+
+.rallye-layout {
+  display: grid;
+  gap: var(--space-8);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .rallye-layout {
+    grid-template-columns: 1.4fr 0.8fr;
+    align-items: start;
+  }
+}
+
+.rallye-card-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.rallye-card {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-white);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.rallye-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.rallye-card-date {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+}
+
+.rallye-card-name {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.rallye-card-meta {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+}
+
+.stack-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.form-hint {
+  margin: var(--space-1) 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+
+.form-hint--summary {
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-border);
+}
+
+.rallye-axis-label {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.rallye-block {
+  margin-bottom: var(--space-12);
+  scroll-margin-top: calc(var(--nav-height) + var(--space-4));
+}
+
+.rallye-block-header {
+  margin-bottom: var(--space-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.rallye-tools {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.rallye-inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.rallye-inline-form .form-input {
+  min-width: 8rem;
+  flex: 1;
+}
+
+.rallye-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.rallye-tabs-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.rallye-tabs-row .rallye-tabs {
+  margin-bottom: 0;
+}
+
+.rallye-tabs-row--es {
+  margin-top: calc(var(--space-2) * -1);
+  margin-bottom: var(--space-4);
+}
+
+.rallye-es-count {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.rallye-add-form {
+  display: inline-flex;
+}
+
+.rallye-add-forms {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.rallye-tabs--compact {
+  margin-bottom: 0;
+}
+
+.rallye-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-white);
+  color: var(--color-ink);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.rallye-tab:hover {
+  border-color: var(--color-asphalt);
+}
+
+.rallye-tab.is-active {
+  background: var(--color-asphalt);
+  border-color: var(--color-asphalt);
+  color: var(--color-white);
+}
+
+.table-wrap--wide {
+  overflow-x: auto;
+}
+
+.rallye-table .mono {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92rem;
+}
+
+.rallye-entry-table .form-input--time {
+  width: 5.5rem;
+  min-width: 5.5rem;
+  padding: 0.4rem 0.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.form-input--peno {
+  background: color-mix(in srgb, var(--color-amber) 10%, white);
+}
+
+.rallye-pilot-cell {
+  display: grid;
+  grid-template-rows: auto 1.15em;
+  gap: 0.1rem;
+  align-content: center;
+  min-height: 2.6em;
+}
+
+.rallye-pilot-cell .rallye-pilot-car {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  line-height: 1.15em;
+  min-height: 1.15em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.rallye-entry-table td {
+  vertical-align: middle;
+}
+
+.rallye-save-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-top: var(--space-4);
+}
+
+.rallye-hint {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.rallye-table tr.is-leader td {
+  background: color-mix(in srgb, var(--color-amber) 12%, white);
+  font-weight: 600;
+}
+
+.rallye-table tr.is-dnf td {
+  color: var(--color-muted);
+}
+
+.rallye-actions {
+  text-align: right;
+}
+
+.rallye-danger {
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
 }
 
 .page-hero-eyebrow {

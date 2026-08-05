@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Scan feuille — ' + ${rallye.name}">Scan feuille</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/rallye-scan.css">
+</head>
+<body class="scan-page"
+      th:attr="data-rallye-id=${rallye.id}, data-boucle=${activeBoucle}">
+
+<header class="grille-toolbar">
+    <div class="container grille-toolbar-inner">
+        <div>
+            <a th:href="@{/rallye/{id}/grilles(id=${rallye.id}, boucle=${activeBoucle})}" class="page-hero-back">← Retour aux grilles</a>
+            <h1 class="grille-toolbar-title">Scanner une feuille</h1>
+            <p class="grille-toolbar-sub">
+                Photo de la feuille groupe → lecture QR + OCR prudent → tu valides avant enregistrement.
+                En cas de doute, la case reste vide (moins d’erreurs).
+            </p>
+        </div>
+        <div class="cluster">
+            <a class="btn btn-outline"
+               th:href="@{/rallye/{id}/grilles(id=${rallye.id}, boucle=${activeBoucle})}">Grilles</a>
+        </div>
+    </div>
+</header>
+
+<main class="container scan-layout">
+    <section class="scan-card">
+        <h2 class="section-title">1. Photo</h2>
+        <p class="section-lead">Cadre toute la feuille, QR bien visible, éclairage uniforme.</p>
+        <div class="scan-capture">
+            <video id="scanVideo" class="scan-video" playsinline muted hidden></video>
+            <canvas id="scanPreview" class="scan-preview" hidden></canvas>
+            <div id="scanPlaceholder" class="scan-placeholder">Aucune photo</div>
+        </div>
+        <div class="cluster scan-actions">
+            <button type="button" id="btnCamera" class="btn btn-secondary">Caméra</button>
+            <label class="btn btn-outline scan-file-btn">
+                Choisir une photo
+                <input type="file" id="scanFile" accept="image/*" capture="environment" hidden>
+            </label>
+            <button type="button" id="btnSnap" class="btn btn-primary" hidden>Prendre la photo</button>
+            <button type="button" id="btnAnalyze" class="btn btn-primary" disabled>Analyser</button>
+        </div>
+        <p id="scanStatus" class="scan-status" aria-live="polite"></p>
+    </section>
+
+    <section class="scan-card" id="scanReviewSection" hidden>
+        <h2 class="section-title">2. Vérification</h2>
+        <p class="section-lead" id="scanReviewLead">Corrige si besoin, puis enregistre.</p>
+        <div id="scanBadges" class="scan-badges"></div>
+        <form id="scanTimesForm" method="post" th:action="@{/rallye/{id}/times(id=${rallye.id})}">
+            <input type="hidden" name="boucle" id="scanBoucle" th:value="${activeBoucle}">
+            <input type="hidden" name="returnTo" value="grilles">
+            <div id="scanReviewGrid" class="scan-review-grid"></div>
+            <div class="rallye-save-bar">
+                <button type="submit" class="btn btn-primary" id="btnSaveScan">Enregistrer les temps validés</button>
+                <span class="rallye-hint">Les cases vides ou douteuses ne sont pas forcées.</span>
+            </div>
+        </form>
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script src="/js/rallye-scan.js"></script>
+<script src="/js/navigation.js"></script>
+</body>
+</html>

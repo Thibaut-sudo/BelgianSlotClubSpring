@@ -1,327 +1,154 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classement du Championnat - Belgian Slot Club</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="icon" type="image/png" href="/images/favicon.png">
-</head>
+<head th:replace="~{fragments/layout :: head(title='Championnat — Belgian Slot Club')}"></head>
 <body>
-    <!-- Navigation -->
-    <nav class="nav-container">
-        <div class="nav-content">
-            <a href="/" class="logo">
-                <div class="logo-icon">🏁</div>
-                <span>Belgian Slot Club</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="/">Accueil</a></li>
-                <li><a th:href="@{/championnat(club=${club})}" class="active">Championnat</a></li>
-                <li><a href="/calendar/upload">📅 Calendrier</a></li>
-                <li><a href="/reglement">Règlement</a></li>
-                <li><a href="/contact">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
+    <header th:replace="~{fragments/layout :: nav(active='championnat', club=${club})}"></header>
 
-    <!-- Nouvelle en-tête moderne -->
-    <section class="hero-header">
-        <div class="hero-background">
-            <div class="hero-pattern"></div>
-            <div class="hero-overlay"></div>
-        </div>
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-main">
-                    <div class="hero-badge">
-                        <span class="badge-icon">🏆</span>
-                        <span class="badge-text">Championnat</span>
-                    </div>
-                    <h1 class="hero-title">
-                        <span class="title-line">Classement</span>
-                        <span class="title-accent">Championnat</span>
-                    </h1>
-                    <p class="hero-description">
-                        Découvrez les performances exceptionnelles de nos pilotes et suivez l'évolution 
-                        du classement en temps réel. Chaque course compte dans cette compétition intense !
-                    </p>
-                    <div class="hero-stats">
-                        <div class="stat-item">
-                            <div class="stat-number" id="heroTotalPilotes">0</div>
-                            <div class="stat-label">Pilotes</div>
-                        </div>
-                        <div class="stat-divider"></div>
-                        <div class="stat-item">
-                            <div class="stat-number" id="heroTotalCourses">0</div>
-                            <div class="stat-label">Courses</div>
-                        </div>
-                        <div class="stat-divider"></div>
-                        <div class="stat-item">
-                            <div class="stat-number" id="heroLeaderPoints">0</div>
-                            <div class="stat-label">Points Leader</div>
-                        </div>
-                    </div>
+    <section class="page-hero page-hero--club"
+             th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+        <div class="page-hero-content container">
+            <h1 class="page-hero-title">Classement Championnat</h1>
+            <p class="page-hero-sub">Suivez le classement général et la catégorie bis pour la saison en cours.</p>
+            <div class="page-hero-meta">
+                <span>Club : <strong th:text="${clubDisplayName != null ? clubDisplayName : club}">Club</strong></span>
+                <span>Saison : <strong th:text="${selectedYear}">2025</strong></span>
+                <span>Catégorie : <strong th:text="${selectedCategory}">Catégorie</strong></span>
+            </div>
+            <div class="page-hero-stats">
+                <div class="page-hero-stat">
+                    <span class="page-hero-stat-value" id="heroTotalPilotes">0</span>
+                    <span class="page-hero-stat-label">Pilotes</span>
                 </div>
-                <div class="hero-sidebar">
-                    <div class="championship-card">
-                        <div class="card-header">
-                            <h3>🏁 Informations Championnat</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="info-row">
-                                <div class="info-icon">🏢</div>
-                                <div class="info-details">
-                                    <div class="info-label">Club</div>
-                                    <div class="info-value" th:text="${club}">Club</div>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-icon">📅</div>
-                                <div class="info-details">
-                                    <div class="info-label">Saison</div>
-                                    <div class="info-value" th:text="${selectedYear}">2025</div>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-icon">🏅</div>
-                                <div class="info-details">
-                                    <div class="info-label">Catégorie</div>
-                                    <div class="info-value" th:text="${selectedCategory}">Catégorie</div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+                <div class="page-hero-stat">
+                    <span class="page-hero-stat-value" id="heroTotalCourses">0</span>
+                    <span class="page-hero-stat-label">Courses</span>
+                </div>
+                <div class="page-hero-stat">
+                    <span class="page-hero-stat-value" id="heroLeaderPoints">0</span>
+                    <span class="page-hero-stat-label">Points leader</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Contenu principal -->
-    <section class="page-content">
+    <section class="section">
         <div class="container">
+
             <!-- Filtres -->
-            <div class="filters-section">
-                <div class="filters-container">
-                    <div class="filter-group">
-                        <label for="year" class="filter-label">Année</label>
-                        <select id="year" name="year" class="filter-select" onchange="updateURL()">
-                            <option th:each="year : ${years}" th:value="${year}" th:text="${year}" th:selected="${selectedYear == year}"></option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="categorie" class="filter-label">Catégorie</label>
-                        <select id="categorie" name="categorie" class="filter-select" onchange="updateURL()">
-                            <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${selectedCategory == cat}"></option>
-                        </select>
-                    </div>
-                    <div class="filter-actions">
-                        <button class="btn btn-primary" onclick="refreshData()">
-                            🔄 Actualiser
-                        </button>
-                    </div>
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <label for="year" class="filter-label">Année</label>
+                    <select id="year" name="year" class="filter-select form-select" onchange="updateURL()">
+                        <option th:each="year : ${years}" th:value="${year}" th:text="${year}" th:selected="${selectedYear == year}"></option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="categorie" class="filter-label">Catégorie</label>
+                    <select id="categorie" name="categorie" class="filter-select form-select" onchange="updateURL()">
+                        <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${selectedCategory == cat}"></option>
+                    </select>
+                </div>
+                <div class="filter-group" style="flex: 0;">
+                    <label class="filter-label sr-only" for="refreshBtn">Actualiser</label>
+                    <button type="button" id="refreshBtn" class="btn btn-primary" onclick="refreshData()">Actualiser</button>
                 </div>
             </div>
 
-            <!-- Statistiques du championnat -->
-            <div class="championship-stats">
-                <div class="stat-card">
-                    <div class="stat-icon">🏆</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalPilotes">0</div>
-                        <div class="stat-label">Pilotes</div>
-                    </div>
+            <!-- Statistiques -->
+            <div class="stats-row">
+                <div class="stat-block">
+                    <span class="stat-block-value" id="totalPilotes">0</span>
+                    <span class="stat-block-label">Pilotes</span>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🏁</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalCourses">0</div>
-                        <div class="stat-label">Courses</div>
-                    </div>
+                <div class="stat-block">
+                    <span class="stat-block-value" id="totalCourses">0</span>
+                    <span class="stat-block-label">Courses</span>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">👑</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="leaderPoints">0</div>
-                        <div class="stat-label">Points Leader</div>
-                    </div>
+                <div class="stat-block">
+                    <span class="stat-block-value" id="leaderPoints">0</span>
+                    <span class="stat-block-label">Points leader</span>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📊</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalPoints">0</div>
-                        <div class="stat-label">Points Total</div>
-                    </div>
+                <div class="stat-block">
+                    <span class="stat-block-value" id="totalPoints">0</span>
+                    <span class="stat-block-label">Moyenne points</span>
                 </div>
             </div>
 
-
-
-            <!-- Système de points du championnat -->
-            <div class="points-system-section">
-                <div class="points-system-card">
-                    <div class="points-system-header" onclick="togglePointsSystem()">
-                        <div class="header-content">
-                            <h3>📋 Système de Points du Championnat</h3>
-                            <p>Calcul des points selon le règlement officiel Slot 4000</p>
-                        </div>
-                        <div class="toggle-button">
-                            <span class="toggle-icon">▼</span>
-                        </div>
+            <!-- Système de points -->
+            <div class="points-system-card">
+                <div class="points-system-header" onclick="togglePointsSystem()" role="button" tabindex="0" aria-expanded="false" aria-controls="pointsSystemContent">
+                    <div class="header-content">
+                        <h2>Système de points du championnat</h2>
+                        <p>Calcul des points selon le règlement officiel Slot 4000</p>
                     </div>
-                    
-                    <div class="points-system-content" id="pointsSystemContent" style="display: none;">
-                        <div class="points-explanation">
-                            <h4>🏆 Comment sont calculés les points ?</h4>
-                            <ul class="points-rules">
-                                <li><strong>1er place :</strong> 50 points</li>
-                                <li><strong>2ème place :</strong> 40 points</li>
-                                <li><strong>3ème place :</strong> 35 points</li>
-                                <li><strong>4ème place :</strong> 32 points</li>
-                                <li><strong>5ème place :</strong> 30 points</li>
-                                <li><strong>6ème à 10ème :</strong> 28, 26, 24, 22, 20 points</li>
-                                <li><strong>11ème à 15ème :</strong> 19, 18, 17, 16, 15 points</li>
-                                <li><strong>16ème à 20ème :</strong> 14, 13, 12, 11, 10 points</li>
-                                <li><strong>21ème à 28ème :</strong> 9, 8, 7, 6, 5, 4, 3, 2 points</li>
-                                <li><strong>29ème et plus :</strong> 1 point</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="points-table-mini">
-                            <h4>📊 Tableau de Points Rapide</h4>
-                            <div class="points-grid-two-columns">
-                                <div class="points-column">
-                                    <div class="points-row">
-                                        <span class="position">1</span>
-                                        <span class="points">50</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">2</span>
-                                        <span class="points">40</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">3</span>
-                                        <span class="points">35</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">4</span>
-                                        <span class="points">32</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">5</span>
-                                        <span class="points">30</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">6</span>
-                                        <span class="points">28</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">7</span>
-                                        <span class="points">26</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">8</span>
-                                        <span class="points">24</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">9</span>
-                                        <span class="points">22</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">10</span>
-                                        <span class="points">20</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">11</span>
-                                        <span class="points">19</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">12</span>
-                                        <span class="points">18</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">13</span>
-                                        <span class="points">17</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">14</span>
-                                        <span class="points">16</span>
-                                    </div>
-                                </div>
-                                <div class="points-column">
-                                    <div class="points-row">
-                                        <span class="position">15</span>
-                                        <span class="points">15</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">16</span>
-                                        <span class="points">14</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">17</span>
-                                        <span class="points">13</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">18</span>
-                                        <span class="points">12</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">19</span>
-                                        <span class="points">11</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">20</span>
-                                        <span class="points">10</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">21</span>
-                                        <span class="points">9</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">22</span>
-                                        <span class="points">8</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">23</span>
-                                        <span class="points">7</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">24</span>
-                                        <span class="points">6</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">25</span>
-                                        <span class="points">5</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">26</span>
-                                        <span class="points">4</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">27</span>
-                                        <span class="points">3</span>
-                                    </div>
-                                    <div class="points-row">
-                                        <span class="position">28+</span>
-                                        <span class="points">2</span>
-                                    </div>
-                                </div>
+                    <div class="toggle-button" aria-hidden="true">
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                </div>
+
+                <div class="points-system-content" id="pointsSystemContent" style="display: none;">
+                    <div class="points-explanation">
+                        <h3>Comment sont calculés les points ?</h3>
+                        <ul class="points-rules">
+                            <li><strong>1<sup>re</sup> place :</strong> 50 points</li>
+                            <li><strong>2<sup>e</sup> place :</strong> 40 points</li>
+                            <li><strong>3<sup>e</sup> place :</strong> 35 points</li>
+                            <li><strong>4<sup>e</sup> place :</strong> 32 points</li>
+                            <li><strong>5<sup>e</sup> place :</strong> 30 points</li>
+                            <li><strong>6<sup>e</sup> à 10<sup>e</sup> :</strong> 28, 26, 24, 22, 20 points</li>
+                            <li><strong>11<sup>e</sup> à 15<sup>e</sup> :</strong> 19, 18, 17, 16, 15 points</li>
+                            <li><strong>16<sup>e</sup> à 20<sup>e</sup> :</strong> 14, 13, 12, 11, 10 points</li>
+                            <li><strong>21<sup>e</sup> à 28<sup>e</sup> :</strong> 9, 8, 7, 6, 5, 4, 3, 2 points</li>
+                            <li><strong>29<sup>e</sup> et plus :</strong> 1 point</li>
+                        </ul>
+                    </div>
+
+                    <div class="points-table-mini">
+                        <h3>Tableau de points rapide</h3>
+                        <div class="points-grid-two-columns">
+                            <div class="points-column">
+                                <div class="points-row"><span class="position">1</span><span class="points">50</span></div>
+                                <div class="points-row"><span class="position">2</span><span class="points">40</span></div>
+                                <div class="points-row"><span class="position">3</span><span class="points">35</span></div>
+                                <div class="points-row"><span class="position">4</span><span class="points">32</span></div>
+                                <div class="points-row"><span class="position">5</span><span class="points">30</span></div>
+                                <div class="points-row"><span class="position">6</span><span class="points">28</span></div>
+                                <div class="points-row"><span class="position">7</span><span class="points">26</span></div>
+                                <div class="points-row"><span class="position">8</span><span class="points">24</span></div>
+                                <div class="points-row"><span class="position">9</span><span class="points">22</span></div>
+                                <div class="points-row"><span class="position">10</span><span class="points">20</span></div>
+                                <div class="points-row"><span class="position">11</span><span class="points">19</span></div>
+                                <div class="points-row"><span class="position">12</span><span class="points">18</span></div>
+                                <div class="points-row"><span class="position">13</span><span class="points">17</span></div>
+                                <div class="points-row"><span class="position">14</span><span class="points">16</span></div>
+                            </div>
+                            <div class="points-column">
+                                <div class="points-row"><span class="position">15</span><span class="points">15</span></div>
+                                <div class="points-row"><span class="position">16</span><span class="points">14</span></div>
+                                <div class="points-row"><span class="position">17</span><span class="points">13</span></div>
+                                <div class="points-row"><span class="position">18</span><span class="points">12</span></div>
+                                <div class="points-row"><span class="position">19</span><span class="points">11</span></div>
+                                <div class="points-row"><span class="position">20</span><span class="points">10</span></div>
+                                <div class="points-row"><span class="position">21</span><span class="points">9</span></div>
+                                <div class="points-row"><span class="position">22</span><span class="points">8</span></div>
+                                <div class="points-row"><span class="position">23</span><span class="points">7</span></div>
+                                <div class="points-row"><span class="position">24</span><span class="points">6</span></div>
+                                <div class="points-row"><span class="position">25</span><span class="points">5</span></div>
+                                <div class="points-row"><span class="position">26</span><span class="points">4</span></div>
+                                <div class="points-row"><span class="position">27</span><span class="points">3</span></div>
+                                <div class="points-row"><span class="position">28+</span><span class="points">2</span></div>
                             </div>
                         </div>
-                        
-                        <div class="points-notes">
-                            <h4>📝 Notes importantes</h4>
-                            <ul class="notes-list">
-                                <li>Les points sont attribués selon la position finale de chaque course</li>
-                                <li>En cas d'égalité, le meilleur résultat en course départage</li>
-                                <li>Les pénalités peuvent réduire le nombre de points obtenus</li>
-                                <li>Le classement final est basé sur le total des points de toutes les courses</li>
-                            </ul>
-                        </div>
+                    </div>
+
+                    <div class="points-notes">
+                        <h3>Notes importantes</h3>
+                        <ul class="notes-list">
+                            <li>Les points sont attribués selon la position finale de chaque course</li>
+                            <li>En cas d'égalité, le meilleur résultat en course départage</li>
+                            <li>Les pénalités peuvent réduire le nombre de points obtenus</li>
+                            <li>Le classement final est basé sur le total des points de toutes les courses</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -329,17 +156,17 @@
             <!-- Classement Général -->
             <div class="table-container championship-table-container">
                 <div class="table-header">
-                    <h2>Classement Général</h2>
+                    <h2>Classement général</h2>
                     <p>Classement principal du championnat</p>
                 </div>
-                <div class="table-wrapper">
+                <div class="table-scroll">
                     <table class="championship-table" id="raceTable">
                         <thead>
                             <tr id="headerRow">
                                 <th class="position">Pos</th>
                                 <th>Pilote</th>
                                 <th>Total</th>
-                                <th id="sortTotal1" class="sortable">Total - 1 🔽</th>
+                                <th id="sortTotal1" class="sortable">Total − 1</th>
                             </tr>
                         </thead>
                         <tbody id="raceBody"></tbody>
@@ -350,17 +177,17 @@
             <!-- Classement Catégorie Bis -->
             <div class="table-container excluded-table-container">
                 <div class="table-header">
-                    <h2>Classement Catégorie Bis</h2>
+                    <h2>Classement catégorie bis</h2>
                     <p>Classement des pilotes en catégorie bis</p>
                 </div>
-                <div class="table-wrapper">
+                <div class="table-scroll">
                     <table class="championship-table" id="excludedTable">
                         <thead>
                             <tr id="excludedHeaderRow">
                                 <th class="position">Pos</th>
                                 <th>Pilote</th>
                                 <th>Total</th>
-                                <th>Total - 1</th>
+                                <th>Total − 1</th>
                             </tr>
                         </thead>
                         <tbody id="excludedBody"></tbody>
@@ -370,979 +197,120 @@
 
             <!-- Actions -->
             <div class="actions-section">
-                <div class="export-actions">
-                    <button class="btn-export excel" onclick="exportToExcel()">
-                        📊 Exporter Excel
-                    </button>
-                    <button class="btn-export pdf" onclick="exportToPDF()">
-                        📄 Exporter PDF
-                    </button>
-                    <button class="btn-export share" onclick="shareChampionship()">
-                        🔗 Partager
-                    </button>
+                <div class="export-actions cluster">
+                    <button type="button" class="btn-export excel" onclick="exportToExcel()">Exporter Excel</button>
+                    <button type="button" class="btn-export pdf" onclick="exportToPDF()">Exporter PDF</button>
+                    <button type="button" class="btn-export share" onclick="shareChampionship()">Partager</button>
                 </div>
-                <div class="navigation-actions">
-                    <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-primary">
-                        🏁 Voir Courses
-                    </a>
-                    <a href="/" class="btn btn-secondary">
-                        🏠 Retour Accueil
-                    </a>
+                <div class="navigation-actions cluster">
+                    <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-primary">Voir les courses</a>
+                    <a href="/" class="btn btn-outline">Retour à l'accueil</a>
                 </div>
             </div>
+
         </div>
     </section>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 
     <script th:inline="javascript">
         const raceResults = /*[[${raceResults}]]*/ {};
     </script>
 
     <style>
-        /* Nouvelle en-tête moderne */
-        .hero-header {
-            position: relative;
-            background: linear-gradient(135deg, #1e293b, #334155, #475569, #64748b);
-            background-size: 400% 400%;
-            color: var(--white);
-            padding: var(--spacing-20) 0 var(--spacing-16) 0;
-            overflow: hidden;
-            animation: gradientShift 10s ease-in-out infinite;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .hero-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1;
-        }
-
-        .hero-pattern {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-                linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.03) 50%, transparent 60%);
-            animation: patternFloat 15s ease-in-out infinite;
-        }
-
-        @keyframes patternFloat {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(1deg); }
-        }
-
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.15));
-            backdrop-filter: blur(1px);
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: var(--spacing-12);
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .hero-main {
+        /* Hero stats */
+        .page-hero-stats {
             display: flex;
-            flex-direction: column;
-            gap: var(--spacing-8);
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-2);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-            padding: var(--spacing-2) var(--spacing-4);
-            border-radius: var(--border-radius-full);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            width: fit-content;
-            animation: badgeGlow 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes badgeGlow {
-            0% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
-            100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
-        }
-
-        .badge-icon {
-            font-size: var(--font-size-lg);
-        }
-
-        .badge-text {
-            font-size: var(--font-size-sm);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .hero-title {
-            font-size: var(--font-size-8xl);
-            font-weight: 900;
-            line-height: 0.9;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-2);
-        }
-
-        .title-line {
-            background: linear-gradient(135deg, #ffffff, #f0f9ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .title-accent {
-            background: linear-gradient(135deg, #10b981, #059669, #047857);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            animation: accentPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes accentPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-
-        .hero-description {
-            font-size: var(--font-size-xl);
-            line-height: 1.6;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0;
-        }
-
-        .hero-stats {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-6);
-            margin-top: var(--spacing-4);
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: var(--spacing-4);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: var(--border-radius-lg);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .stat-item:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .stat-number {
-            font-size: var(--font-size-3xl);
-            font-weight: 800;
-            color: #10b981;
-            margin-bottom: var(--spacing-1);
-        }
-
-        .stat-label {
-            font-size: var(--font-size-sm);
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 500;
-        }
-
-        .stat-divider {
-            width: 1px;
-            height: 40px;
-            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3), transparent);
-        }
-
-        .hero-sidebar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .championship-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-            border-radius: var(--border-radius-xl);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(15px);
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-            transition: all 0.4s ease;
-            width: 100%;
-            max-width: 350px;
-        }
-
-        .championship-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 
-                0 30px 80px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.12));
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, #10b981, #059669);
-            padding: var(--spacing-6);
-            text-align: center;
-        }
-
-        .card-header h3 {
-            margin: 0;
-            font-size: var(--font-size-lg);
-            font-weight: 700;
-            color: var(--white);
-        }
-
-        .card-content {
-            padding: var(--spacing-6);
-        }
-
-        .info-row {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-4);
-            padding: var(--spacing-3) 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-icon {
-            font-size: var(--font-size-xl);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .info-details {
-            flex: 1;
-        }
-
-        .info-label {
-            font-size: var(--font-size-xs);
-            opacity: 0.7;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 600;
-            margin-bottom: var(--spacing-1);
-        }
-
-        .info-value {
-            font-size: var(--font-size-lg);
-            font-weight: 700;
-            color: var(--white);
-        }
-
-
-
-        .page-content {
-            padding: var(--spacing-16) 0;
-        }
-
-        /* Filtres améliorés */
-        .filters-section {
-            margin-bottom: var(--spacing-12);
-        }
-
-        .filters-container {
-            display: flex;
-            gap: var(--spacing-8);
-            align-items: end;
-            background: linear-gradient(135deg, var(--white), var(--gray-50));
-            padding: var(--spacing-8);
-            border-radius: var(--border-radius-xl);
-            box-shadow: var(--shadow-xl);
-            border: 1px solid var(--gray-200);
             flex-wrap: wrap;
-            position: relative;
-            overflow: hidden;
+            gap: var(--space-4);
+            margin-top: var(--space-5);
         }
 
-        .filters-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-color), #059669, #047857);
-        }
-
-        .filter-group {
+        .page-hero-stat {
             display: flex;
             flex-direction: column;
-            gap: var(--spacing-3);
-            min-width: 180px;
-            position: relative;
+            align-items: center;
+            min-width: 5rem;
+            padding: var(--space-3) var(--space-5);
+            background: rgb(255 255 255 / 0.08);
+            border: 1px solid rgb(255 255 255 / 0.15);
+            border-radius: var(--radius);
         }
 
-        .filter-label {
-            font-size: var(--font-size-sm);
-            font-weight: 700;
-            color: var(--gray-800);
+        .page-hero-stat-value {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-white);
+            line-height: 1;
+        }
+
+        .page-hero-stat-label {
+            margin-top: var(--space-1);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: var(--spacing-1);
+            color: rgb(255 255 255 / 0.65);
         }
 
-        .filter-select {
-            padding: var(--spacing-4) var(--spacing-6);
-            border: 2px solid var(--gray-200);
-            border-radius: var(--border-radius-lg);
-            font-size: var(--font-size-base);
-            font-weight: 500;
-            background: var(--white);
-            transition: all 0.3s ease;
-            cursor: pointer;
+        /* Points system collapsible */
+        .points-system-card {
+            margin-bottom: var(--space-6);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
             box-shadow: var(--shadow-sm);
         }
 
-        .filter-select:hover {
-            border-color: var(--accent-color);
-            box-shadow: var(--shadow-md);
-            transform: translateY(-1px);
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: var(--spacing-4);
-        }
-
-        .filter-actions .btn {
-            padding: var(--spacing-4) var(--spacing-8);
-            font-weight: 600;
-            border-radius: var(--border-radius-lg);
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .filter-actions .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        /* Statistiques du championnat optimisées */
-        .championship-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-8);
-            margin-bottom: var(--spacing-16);
-        }
-
-        .championship-stats .stat-card {
-            background: var(--white);
-            border-radius: var(--border-radius-xl);
-            padding: var(--spacing-8);
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--gray-200);
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .championship-stats .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-color), #059669);
-        }
-
-        .championship-stats .stat-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.02));
-            opacity: 0;
-            transition: var(--transition-normal);
-        }
-
-        .championship-stats .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .championship-stats .stat-card:hover::after {
-            opacity: 1;
-        }
-
-        .championship-stats .stat-icon {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-4);
-            display: block;
-            transition: transform 0.3s ease;
-        }
-
-        .championship-stats .stat-card:hover .stat-icon {
-            transform: scale(1.1);
-        }
-
-        .championship-stats .stat-number {
-            font-size: var(--font-size-3xl);
-            font-weight: 800;
-            color: var(--accent-color);
-            margin-bottom: var(--spacing-2);
-        }
-
-        .championship-stats .stat-label {
-            font-size: var(--font-size-base);
-            color: var(--gray-700);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 600;
-        }
-
-
-
-        /* Tables de championnat optimisées */
-        .table-container {
-            margin-bottom: var(--spacing-12);
-            background: var(--white);
-            border-radius: var(--border-radius-xl);
-            box-shadow: var(--shadow-xl);
-            border: 1px solid var(--gray-200);
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .table-container:hover {
-            box-shadow: var(--shadow-2xl);
-            transform: translateY(-4px);
-        }
-
-        .table-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: var(--white);
-            padding: var(--spacing-8);
-            text-align: center;
-        }
-
-        .table-header h2 {
-            margin: 0 0 var(--spacing-2) 0;
-            font-size: var(--font-size-3xl);
-            font-weight: 800;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .table-header p {
-            margin: 0;
-            font-size: var(--font-size-lg);
-            opacity: 0.9;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            background: var(--white);
-        }
-
-        .championship-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: var(--font-size-base);
-        }
-
-        .championship-table th {
-            background: linear-gradient(135deg, var(--accent-color), #059669);
-            color: var(--white);
-            font-weight: 700;
-            padding: var(--spacing-4) var(--spacing-6);
-            text-align: left;
-            border-bottom: 3px solid var(--accent-color);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: var(--font-size-sm);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .championship-table th.position {
-            text-align: center;
-            width: 80px;
-        }
-
-        .championship-table th:first-child {
-            border-top-left-radius: var(--border-radius);
-        }
-
-        .championship-table th:last-child {
-            border-top-right-radius: var(--border-radius);
-        }
-
-        .championship-table .sortable {
-            cursor: pointer;
-            transition: var(--transition-normal);
-            position: relative;
-        }
-
-        .championship-table .sortable:hover {
-            background: linear-gradient(135deg, #059669, var(--accent-color));
-            transform: scale(1.02);
-        }
-
-        .championship-table .sortable::after {
-            content: '▼';
-            position: absolute;
-            right: var(--spacing-2);
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: var(--font-size-xs);
-            opacity: 0.7;
-        }
-
-        .championship-table td {
-            padding: var(--spacing-4) var(--spacing-6);
-            border-bottom: 1px solid var(--gray-100);
-            transition: var(--transition-normal);
-        }
-
-        .championship-table tbody tr {
-            transition: background-color 0.3s ease;
-        }
-
-        .championship-table tbody tr:hover {
-            background: var(--gray-50);
-        }
-
-        .championship-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Positions spéciales optimisées */
-        .position-1 {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: var(--white);
-            font-weight: 800;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
-        }
-
-        .position-2 {
-            background: linear-gradient(135deg, #9ca3af, #6b7280);
-            color: var(--white);
-            font-weight: 700;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        .position-3 {
-            background: linear-gradient(135deg, #f87171, #dc2626);
-            color: var(--white);
-            font-weight: 700;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Colonnes spécifiques */
-        .championship-table td.position {
-            text-align: center;
-            font-weight: 800;
-            font-size: var(--font-size-lg);
-            min-width: 60px;
-        }
-
-        .championship-table td.pilot-name {
-            font-weight: 600;
-            color: var(--gray-900);
-            font-size: var(--font-size-lg);
-        }
-
-        .championship-table td.total-points,
-        .championship-table td.total-points-1 {
-            font-weight: 700;
-            color: var(--accent-color);
-            text-align: center;
-            font-size: var(--font-size-lg);
-        }
-
-        .championship-table td.race-score {
-            text-align: center;
-            font-weight: 600;
-            min-width: 50px;
-            transition: background-color 0.3s ease;
-        }
-
-        .championship-table td.race-score:hover {
-            background: var(--accent-color);
-            color: var(--white);
-        }
-
-        /* Ligne exclue */
-        .excluded-row {
-            background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
-            opacity: 0.8;
-        }
-
-        .excluded-row:hover {
-            opacity: 1;
-            background: linear-gradient(135deg, var(--gray-200), var(--gray-300));
-        }
-
-        .excluded-row td {
-            color: var(--gray-600);
-            font-style: italic;
-        }
-
-        /* Actions améliorées */
-        .actions-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: var(--spacing-6);
-            margin-top: var(--spacing-12);
-            padding: var(--spacing-8);
-            background: linear-gradient(135deg, var(--white), var(--gray-50));
-            border-radius: var(--border-radius-xl);
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .export-actions {
-            display: flex;
-            gap: var(--spacing-4);
-            flex-wrap: wrap;
-        }
-
-        .btn-export {
-            padding: var(--spacing-3) var(--spacing-6);
-            border: none;
-            border-radius: var(--border-radius-lg);
-            font-weight: 600;
-            font-size: var(--font-size-sm);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-2);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .btn-export.excel {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: var(--white);
-        }
-
-        .btn-export.excel:hover {
-            background: linear-gradient(135deg, #059669, #047857);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-export.pdf {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: var(--white);
-        }
-
-        .btn-export.pdf:hover {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-export.share {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: var(--white);
-        }
-
-        .btn-export.share:hover {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .navigation-actions {
-            display: flex;
-            gap: var(--spacing-4);
-            flex-wrap: wrap;
-        }
-
-        /* Responsive amélioré */
-        @media (max-width: 1024px) {
-            .championship-table th,
-            .championship-table td {
-                padding: var(--spacing-3) var(--spacing-4);
-                font-size: var(--font-size-sm);
-            }
-
-            .championship-table th.position,
-            .championship-table td.position {
-                width: 50px;
-                min-width: 50px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hero-content {
-                grid-template-columns: 1fr;
-                gap: var(--spacing-8);
-                text-align: center;
-            }
-
-            .hero-title {
-                font-size: var(--font-size-5xl);
-                text-align: center;
-            }
-
-            .hero-description {
-                font-size: var(--font-size-lg);
-                text-align: center;
-                max-width: 100%;
-            }
-
-            .hero-stats {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .stat-divider {
-                display: none;
-            }
-
-            .championship-card {
-                max-width: 100%;
-            }
-
-            .filters-container {
-                flex-direction: column;
-                align-items: stretch;
-                gap: var(--spacing-6);
-            }
-
-            .filter-group {
-                min-width: auto;
-            }
-
-            .championship-stats {
-                grid-template-columns: repeat(2, 1fr);
-                gap: var(--spacing-6);
-            }
-
-            .championship-stats .stat-card {
-                padding: var(--spacing-6);
-            }
-
-            .championship-stats .stat-icon {
-                font-size: 2.5rem;
-            }
-
-            .championship-stats .stat-number {
-                font-size: var(--font-size-3xl);
-            }
-
-            .actions-section {
-                flex-direction: column;
-                align-items: stretch;
-                gap: var(--spacing-6);
-            }
-
-            .export-actions,
-            .navigation-actions {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .table-header {
-                padding: var(--spacing-6);
-            }
-
-            .table-header h2 {
-                font-size: var(--font-size-2xl);
-            }
-
-            .championship-table th,
-            .championship-table td {
-                padding: var(--spacing-3);
-                font-size: var(--font-size-sm);
-            }
-
-            .championship-table td.pilot-name {
-                font-size: var(--font-size-base);
-            }
-
-            .championship-table td.total-points,
-            .championship-table td.total-points-1 {
-                font-size: var(--font-size-base);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .championship-stats {
-                grid-template-columns: 1fr;
-            }
-
-            .championship-stats .stat-card {
-                padding: var(--spacing-5);
-            }
-
-            .championship-stats .stat-icon {
-                font-size: 2rem;
-            }
-
-            .championship-stats .stat-number {
-                font-size: var(--font-size-2xl);
-            }
-
-            .table-header {
-                padding: var(--spacing-4);
-            }
-
-            .table-header h2 {
-                font-size: var(--font-size-xl);
-            }
-
-            .championship-table th,
-            .championship-table td {
-                padding: var(--spacing-2) var(--spacing-3);
-                font-size: var(--font-size-xs);
-            }
-
-            .championship-table th.position,
-            .championship-table td.position {
-                width: 40px;
-                min-width: 40px;
-            }
-
-            .btn-export {
-                padding: var(--spacing-2) var(--spacing-4);
-                font-size: var(--font-size-xs);
-            }
-        }
-
-        /* Styles pour le tableau de points en deux colonnes */
-        .points-grid-two-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-6);
-            margin-top: var(--spacing-4);
-        }
-
-        .points-column {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-2);
-        }
-
-        .points-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: var(--spacing-3) var(--spacing-4);
-            background: var(--white);
-            border-radius: var(--border-radius);
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition-normal);
-        }
-
-        .points-row:hover {
-            background: var(--gray-50);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        .points-row .position {
-            font-weight: 700;
-            color: var(--accent-color);
-            font-size: var(--font-size-base);
-            min-width: 30px;
-        }
-
-        .points-row .points {
-            font-weight: 800;
-            color: var(--gray-900);
-            font-size: var(--font-size-lg);
-        }
-
-        /* Styles pour le système de points pliable */
         .points-system-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: var(--space-4);
+            padding: var(--space-5) var(--space-6);
+            background: var(--color-asphalt);
+            color: var(--color-white);
             cursor: pointer;
-            padding: var(--spacing-6);
-            background: linear-gradient(135deg, var(--accent-color), #059669);
-            color: var(--white);
-            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-            transition: var(--transition-normal);
+            user-select: none;
+            transition: background-color var(--transition);
         }
 
         .points-system-header:hover {
-            background: linear-gradient(135deg, #059669, var(--accent-color));
+            background: var(--color-track);
         }
 
-        .header-content {
-            flex: 1;
+        .points-system-header h2 {
+            margin: 0 0 var(--space-1);
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--color-white);
+        }
+
+        .points-system-header p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: rgb(255 255 255 / 0.75);
         }
 
         .toggle-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transition: var(--transition-normal);
-        }
-
-        .toggle-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            width: 2rem;
+            height: 2rem;
+            background: rgb(255 255 255 / 0.12);
+            border-radius: var(--radius-sm);
         }
 
         .toggle-icon {
-            font-size: var(--font-size-lg);
-            font-weight: bold;
-            transition: var(--transition-normal);
+            font-size: 0.625rem;
+            transition: transform var(--transition);
         }
 
         .toggle-icon.rotated {
@@ -1350,33 +318,119 @@
         }
 
         .points-system-content {
-            background: var(--white);
-            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-            border: 1px solid var(--gray-200);
-            border-top: none;
-            overflow: hidden;
-            transition: var(--transition-normal);
+            padding: var(--space-6);
+            border-top: 1px solid var(--color-border);
         }
 
-        /* Responsive pour les deux colonnes */
+        .points-explanation h3,
+        .points-table-mini h3,
+        .points-notes h3 {
+            margin: 0 0 var(--space-4);
+            font-size: 0.9375rem;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--color-ink);
+        }
+
+        .points-rules,
+        .notes-list {
+            margin: 0 0 var(--space-6);
+            padding-left: var(--space-5);
+            font-size: 0.9375rem;
+            color: var(--color-muted);
+            line-height: 1.65;
+        }
+
+        .points-rules li,
+        .notes-list li {
+            margin-bottom: var(--space-2);
+        }
+
+        .points-grid-two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        .points-column {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
+
+        .points-column .points-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-2) var(--space-3);
+            background: var(--color-paper);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+        }
+
+        .points-column .points-row .position {
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .points-column .points-row .points {
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--color-ink);
+        }
+
+        /* Excluded rows */
+        .excluded-row {
+            background: var(--color-paper);
+            opacity: 0.85;
+        }
+
+        .excluded-row td {
+            color: var(--color-muted);
+            font-style: italic;
+        }
+
+        /* Actions bar */
+        .actions-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-4);
+            margin-top: var(--space-6);
+            padding: var(--space-5);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+        }
+
+        .btn-export.share {
+            border-color: var(--color-track);
+            color: var(--color-track);
+        }
+
+        .btn-export.share:hover {
+            background: var(--color-asphalt);
+            border-color: var(--color-asphalt);
+            color: var(--color-white);
+        }
+
         @media (max-width: 768px) {
             .points-grid-two-columns {
                 grid-template-columns: 1fr;
-                gap: var(--spacing-4);
             }
-            
-            .points-system-header {
+
+            .actions-section {
                 flex-direction: column;
-                gap: var(--spacing-3);
-                text-align: center;
+                align-items: stretch;
             }
-            
-            .toggle-button {
-                align-self: center;
+
+            .export-actions,
+            .navigation-actions {
+                justify-content: center;
             }
         }
-
-
     </style>
 
     <script>
@@ -1440,7 +494,11 @@
             let excludedPilotes = pilotes.filter(p => p.name.includes("*"));
             let validPilotes = pilotes.filter(p => !p.name.includes("*"));
 
+            // Trier les pilotes valides par total1 (décroissant)
             validPilotes.sort((a, b) => b.total1 - a.total1);
+
+            // Trier les pilotes avec * (catégorie bis) par total1 (décroissant)
+            excludedPilotes.sort((a, b) => b.total1 - a.total1);
 
             function appendToTable(body, pilote, isExcluded = false) {
                 let tr = document.createElement("tr");
@@ -1509,8 +567,8 @@
             document.getElementById("totalPilotes").textContent = allNames.size;
             document.getElementById("totalCourses").textContent = dates.length;
             document.getElementById("leaderPoints").textContent = pilotes.length > 0 ? pilotes[0].total : 0;
-            
-            let avgPoints = pilotes.length > 0 ? 
+
+            let avgPoints = pilotes.length > 0 ?
                 Math.round(pilotes.reduce((sum, p) => sum + p.total, 0) / pilotes.length) : 0;
             document.getElementById("totalPoints").textContent = avgPoints;
 
@@ -1523,9 +581,9 @@
         // Formatage de date
         function formatDate(dateStr) {
             const date = new Date(dateStr);
-            return date.toLocaleDateString('fr-FR', { 
-                day: '2-digit', 
-                month: '2-digit' 
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit'
             });
         }
 
@@ -1575,8 +633,6 @@
             }
         }
 
-        // Animations au scroll supprimées pour éviter les animations au chargement
-
         // Initialisation au chargement
         document.addEventListener('DOMContentLoaded', function() {
             initializeTable();
@@ -1589,17 +645,18 @@
         function togglePointsSystem() {
             const content = document.getElementById('pointsSystemContent');
             const icon = document.querySelector('.toggle-icon');
-            
+            const header = document.querySelector('.points-system-header');
+
             if (content.style.display === 'none' || content.style.display === '') {
                 content.style.display = 'block';
                 icon.classList.add('rotated');
+                if (header) header.setAttribute('aria-expanded', 'true');
             } else {
                 content.style.display = 'none';
                 icon.classList.remove('rotated');
+                if (header) header.setAttribute('aria-expanded', 'false');
             }
         }
-
-
     </script>
 </body>
 </html>

@@ -1,6 +1,8 @@
 package org.example.belgianslotclubspring.controllers;
 
+import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.services.SaveExcelFilleService;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,10 +10,10 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Contrôleur REST permettant l'upload de fichiers Excel et leur traitement.
+ * Contrôleur permettant l'upload de fichiers Excel et leur traitement.
  * Les fichiers sont stockés localement et analysés pour enregistrer les données.
  */
-@RestController
+@Controller
 public class FileUploadController {
 
     private final SaveExcelFilleService saveExcelFilleService;
@@ -34,13 +36,11 @@ public class FileUploadController {
      */
     @PostMapping("/upload")
     public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("club") String club) {
-        // Vérification si le fichier est vide
-        if (file.isEmpty()) {
-            return "Fichier vide.";
-        }
+        String clubCode = Club.requireCode(club);
 
-        // Extraction du nom du club (prend uniquement le premier élément si une liste est passée)
-        club = club.split(",")[0];
+        if (file == null || file.isEmpty()) {
+            return "redirect:/selectRace/" + clubCode + "?error=Fichier vide.";
+        }
 
         try {
             // Définition du répertoire d'upload
@@ -59,16 +59,30 @@ public class FileUploadController {
             // Transfert du fichier uploadé vers le répertoire défini
             file.transferTo(destinationFile);
 
-            // Enregistrement et traitement du fichier Excel via le service
-            saveExcelFilleService.saveExcelFile(destinationFile.getAbsolutePath(), club);
+            try {
+                // Enregistrement et traitement du fichier Excel via le service
+                saveExcelFilleService.saveExcelFile(destinationFile.getAbsolutePath(), clubCode);
 
-            // Redirection vers la page du club après un upload réussi
-            return "redirect:/selectClub/" + club;
+                if (destinationFile.exists()) {
+                    boolean deleted = destinationFile.delete();
+                    if (deleted) {
+                        System.out.println("Fichier Excel supprimé avec succès : " + destinationFile.getName());
+                    } else {
+                        System.out.println("Impossible de supprimer le fichier Excel : " + destinationFile.getName());
+                    }
+                }
+
+                return "redirect:/selectRace/" + clubCode;
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Erreur lors du traitement du fichier Excel. Le fichier est conservé pour analyse.");
+                return "redirect:/selectRace/" + clubCode + "?error=Erreur lors du traitement du fichier Excel.";
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Erreur lors de l'upload du fichier.");
-            return "redirect:/selectClub/Erreur lors de l'upload du fichier.";
+            return "redirect:/selectRace/" + clubCode + "?error=Erreur lors de l'upload du fichier.";
         }
     }
 }

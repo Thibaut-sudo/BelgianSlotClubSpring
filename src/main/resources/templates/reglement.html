@@ -1,65 +1,24 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Règlement 2025 - Slot 4000 - Belgian Slot Club</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="icon" type="image/png" href="/images/favicon.png">
-</head>
+<head th:replace="~{fragments/layout :: head(title='Règlement 2025 — Slot 4000 — Belgian Slot Club')}"></head>
 <body>
-    <!-- Navigation -->
-    <nav class="nav-container">
-        <div class="nav-content">
-            <a href="/" class="logo">
-                <div class="logo-icon">🏁</div>
-                <span>Belgian Slot Club</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="/">Accueil</a></li>
-                <li><a href="/selectRace">Championnat</a></li>
-                <li><a href="/calendar/upload">📅 Calendrier</a></li>
-                <li><a href="/reglement" class="active">Règlement</a></li>
-                <li><a href="/contact">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
+    <header th:replace="~{fragments/layout :: nav(active='reglement', club=${club})}"></header>
 
-    <!-- En-tête de la page -->
-    <section class="page-header">
-        <div class="container">
-            <div class="page-header-content">
-                <div class="reglement-info">
-                    <h1 class="page-title">📋 Règlement 2025 - Slot 4000</h1>
-                    <p class="page-subtitle">Catégories 1/32 & 1/24 - Version du 22 novembre 2024</p>
-                    <div class="reglement-meta">
-                        <div class="meta-item">
-                            <span class="meta-icon">🏁</span>
-                            <span class="meta-label">Club</span>
-                            <span class="meta-value">Slot 4000</span>
-                        </div>
-                        <div class="meta-item">
-                            <span class="meta-icon">📅</span>
-                            <span class="meta-label">Saison</span>
-                            <span class="meta-value">2025</span>
-                        </div>
-                        <div class="meta-item">
-                            <span class="meta-icon">📏</span>
-                            <span class="meta-label">Échelles</span>
-                            <span class="meta-value">1/32 & 1/24</span>
-                        </div>
+    <section class="page-hero">
+        <div class="page-hero-content container">
+            <div class="reglement-hero-layout">
+                <div>
+                    <h1 class="page-hero-title">Règlement 2025 — Slot 4000</h1>
+                    <p class="page-hero-sub">Catégories 1/32 &amp; 1/24 — Version du 22 novembre 2024</p>
+                    <div class="page-hero-meta">
+                        <span>Club : Slot 4000</span>
+                        <span>Saison 2025</span>
+                        <span>Échelles 1/32 &amp; 1/24</span>
                     </div>
                 </div>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="printReglement()">
-                        🖨️ Imprimer
-                    </button>
-                    <button class="btn btn-primary" onclick="downloadPDF()">
-                        📄 Télécharger PDF
-                    </button>
+                <div class="cluster reglement-hero-actions">
+                    <button type="button" class="btn btn-secondary" onclick="printReglement()">Imprimer</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadPDF()">Télécharger PDF</button>
                 </div>
             </div>
         </div>
@@ -69,10 +28,10 @@
     <section class="toc-section">
         <div class="container">
             <div class="toc-card">
-                <h2>📑 Table des matières</h2>
+                <h2>Table des matières</h2>
                 <div class="toc-grid">
                     <div class="toc-category">
-                        <h3>🏆 Règlements Sportif</h3>
+                        <h3>Règlements sportif</h3>
                         <ul class="toc-list">
                             <li><a href="#parc-ferme">1. Parc Fermé et Contrôle Technique</a></li>
                             <li><a href="#intersegment">2. Intersegment</a></li>
@@ -84,7 +43,7 @@
                         </ul>
                     </div>
                     <div class="toc-category">
-                        <h3>🔧 Règlements Technique</h3>
+                        <h3>Règlements technique</h3>
                         <ul class="toc-list">
                             <li><a href="#general">1. Général</a></li>
                             <li><a href="#proto32">2. PROTO 32</a></li>
@@ -97,7 +56,7 @@
                         </ul>
                     </div>
                     <div class="toc-category">
-                        <h3>📋 Annexes</h3>
+                        <h3>Annexes</h3>
                         <ul class="toc-list">
                             <li><a href="#annexe-gt3">Annexe 1 : Voitures GT3 acceptées</a></li>
                             <li><a href="#annexe-contact">Annexe 2 : Contacts et informations</a></li>
@@ -114,7 +73,7 @@
         <div class="container">
             <!-- Règlements Sportif -->
             <div class="reglement-section" id="sportif">
-                <h2 class="section-title">🏆 Règlements Sportif</h2>
+                <h2 class="section-title">Règlements sportif</h2>
                 
                 <div class="reglement-article" id="parc-ferme">
                     <h3>1. Parc Fermé et Contrôle Technique</h3>
@@ -217,7 +176,7 @@
 
             <!-- Règlements Technique -->
             <div class="reglement-section" id="technique">
-                <h2 class="section-title">🔧 Règlements Technique</h2>
+                <h2 class="section-title">Règlements technique</h2>
                 
                 <div class="reglement-article" id="general">
                     <h3>1. Général</h3>
@@ -1093,7 +1052,7 @@
 
             <!-- Annexes -->
             <div class="reglement-section" id="annexes">
-                <h2 class="section-title">📋 Annexes</h2>
+                <h2 class="section-title">Annexes</h2>
                 
                 <div class="reglement-article" id="annexe-gt3">
                     <h3>Annexe 1 : Liste des voitures GT3 acceptées</h3>
@@ -1183,21 +1142,187 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="container">
-                <div class="footer-bottom">
-                    <div class="footer-copyright">
-                        <p>&copy; 2025 Belgian Slot Club. Tous droits réservés.</p>
-                    </div>
-                    <div class="footer-version">
-                        <span>Règlement Slot 4000 - Version 2025</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer> 
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+    <style>
+        .reglement-hero-layout {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-6);
+        }
+
+        .reglement-hero-actions {
+            flex-shrink: 0;
+        }
+
+        .toc-section {
+            padding-block: var(--space-8);
+            background: var(--color-paper-2);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .toc-card {
+            padding: var(--space-6);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .toc-card > h2 {
+            margin-bottom: var(--space-6);
+            font-size: clamp(1.25rem, 3vw, 1.5rem);
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-6);
+        }
+
+        .toc-category h3 {
+            margin-bottom: var(--space-3);
+            font-size: 0.9375rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--color-muted);
+        }
+
+        .toc-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .toc-list a {
+            display: block;
+            padding: var(--space-2) var(--space-3);
+            font-size: 0.9375rem;
+            color: var(--color-ink);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            transition: background var(--transition), color var(--transition);
+        }
+
+        .toc-list a:hover,
+        .toc-list a.active {
+            background: var(--color-paper-2);
+            color: var(--color-accent);
+        }
+
+        .toc-list a.active {
+            font-weight: 600;
+        }
+
+        .reglement-content {
+            padding-block: var(--space-10);
+        }
+
+        .reglement-section {
+            margin-bottom: var(--space-12);
+        }
+
+        .reglement-section > .section-title {
+            margin-bottom: var(--space-8);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        .reglement-article {
+            margin-bottom: var(--space-8);
+            padding: var(--space-6);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+        }
+
+        .reglement-article h3 {
+            margin-bottom: var(--space-4);
+            font-size: 1.125rem;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--color-ink);
+        }
+
+        .reglement-article h4,
+        .reglement-article h5 {
+            margin-top: var(--space-5);
+            margin-bottom: var(--space-3);
+            font-size: 1rem;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--color-ink);
+        }
+
+        .reglement-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+            padding-left: var(--space-5);
+            list-style: disc;
+        }
+
+        .reglement-list li {
+            font-size: 0.9375rem;
+            line-height: 1.65;
+            color: var(--color-ink);
+        }
+
+        .category-details {
+            margin-top: var(--space-4);
+        }
+
+        .planning-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 5rem 1fr;
+            gap: var(--space-4);
+            align-items: center;
+            padding: var(--space-4);
+            background: var(--color-paper);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+        }
+
+        .timeline-time {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+
+        .timeline-content {
+            font-size: 0.9375rem;
+            color: var(--color-ink);
+        }
+
+        @media (min-width: 768px) {
+            .toc-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media print {
+            .site-nav,
+            .reglement-hero-actions,
+            .toc-section {
+                display: none !important;
+            }
+
+            .reglement-article {
+                break-inside: avoid;
+                box-shadow: none;
+            }
+        }
+    </style>
 
     <script>
         // Fonction pour imprimer le règlement
@@ -1272,16 +1397,6 @@
             });
         });
 
-        // Ajouter des styles pour le lien actif
-        const style = document.createElement('style');
-        style.textContent = `
-            .toc-list a.active {
-                background: var(--primary-color) !important;
-                color: var(--white) !important;
-                font-weight: 600;
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html> 

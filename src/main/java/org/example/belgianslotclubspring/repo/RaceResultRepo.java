@@ -12,24 +12,50 @@ import java.util.List;
 @Repository
 public interface RaceResultRepo extends JpaRepository<RaceResult, Integer> {
 
-    @Query("SELECT DISTINCT r.date, r.categoryName FROM RaceResult r WHERE r.ClubName = :club")
+    @Query("""
+            SELECT DISTINCT r.date, r.categoryName
+            FROM RaceResult r
+            WHERE lower(r.ClubName) = lower(:club)
+            ORDER BY r.date DESC
+            """)
     List<Object[]> getRaceResultDateByClubName(@Param("club") String club);
 
-    @Query("SELECT DISTINCT concat(upper(substring(lower(r.categoryName), 1, 1)), substring(lower(r.categoryName), 2)) FROM RaceResult r WHERE  lower(r.ClubName) = lower(:club)")
-    List<String> getAllCategoriesClub(String club);
+    @Query("""
+            SELECT DISTINCT concat(
+                upper(substring(lower(r.categoryName), 1, 1)),
+                substring(lower(r.categoryName), 2)
+            )
+            FROM RaceResult r
+            WHERE lower(r.ClubName) = lower(:club)
+            """)
+    List<String> getAllCategoriesClub(@Param("club") String club);
 
+    @Query("""
+            SELECT r FROM RaceResult r
+            WHERE r.date = :date AND lower(r.ClubName) = lower(:club)
+            ORDER BY r.totalTours DESC
+            """)
+    List<RaceResult> getRaceResultByDateAndClub(@Param("date") LocalDate date, @Param("club") String club);
 
+    @Query("""
+            SELECT r.date, r.nom, r.totalTours
+            FROM RaceResult r
+            WHERE lower(r.categoryName) = lower(:category)
+              AND lower(r.ClubName) = lower(:club)
+              AND (:year IS NULL OR year(r.date) = :year)
+            ORDER BY r.date ASC
+            """)
+    List<Object[]> getChampionshipResultsRaw(
+            @Param("category") String category,
+            @Param("club") String club,
+            @Param("year") Integer year
+    );
 
-    List<RaceResult> getRaceResultByDate(LocalDate date);
-
-    @Query("SELECT r.date, r.nom, r.totalTours FROM RaceResult r WHERE lower(r.categoryName) = lower( :category) and  lower(r.ClubName) = lower(:club) ORDER BY r.date ASC")
-    List<Object[]> getChampionshipResultsRaw(@Param("category") String category, String club);
-
-
-    @Query("SELECT DISTINCT year(r.date) FROM RaceResult r WHERE lower(r.ClubName) = lower(:club)")
-    List<String> getAllYearsClub(String club);
-
-    @Query("SELECT DISTINCT year(r.date) FROM RaceResult r WHERE lower(r.ClubName) = lower(:club) ORDER BY year(r.date)")
-    List<Integer> getAvailableYears(String club);
-
+    @Query("""
+            SELECT DISTINCT year(r.date)
+            FROM RaceResult r
+            WHERE lower(r.ClubName) = lower(:club)
+            ORDER BY year(r.date) ASC
+            """)
+    List<Integer> getAvailableYears(@Param("club") String club);
 }

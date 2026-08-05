@@ -1,352 +1,110 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact - Belgian Slot Club</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- CSS principal -->
-    <link rel="stylesheet" href="/css/main.css">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/images/favicon.png">
-</head>
+<head th:replace="~{fragments/layout :: head(title='Contact — Belgian Slot Club')}"></head>
 <body>
-    <!-- Navigation -->
-    <nav class="nav-container">
-        <div class="nav-content">
-            <a href="/" class="logo">
-                <div class="logo-icon">🏁</div>
-                <span>Belgian Slot Club</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="/">Accueil</a></li>
-                <li><a href="/selectRace">Championnat</a></li>
-                <li><a href="/calendar/upload">📅 Calendrier</a></li>
-                <li><a href="/reglement">Règlement</a></li>
-                <li><a href="/contact" class="active">Contact</a></li>
-            </ul>
+    <header th:replace="~{fragments/layout :: nav(active='contact', club=${null})}"></header>
+
+    <section class="page-hero">
+        <div class="page-hero-content container">
+            <h1 class="page-hero-title">Contact</h1>
+            <p class="page-hero-sub">Une question sur le site, une course ou un club ? Écrivez-nous.</p>
         </div>
-    </nav>
+    </section>
 
-    <!-- Contenu principal -->
-    <main>
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="container text-center">
-                <h1>Contactez-nous</h1>
-                <p class="mb-6">Nous sommes là pour vous aider. N'hésitez pas à nous contacter pour toute question.</p>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section class="contact-section slide-in">
-            <div class="container">
-                <div class="contact-layout">
-                    <!-- Informations de contact -->
-                    <div class="contact-info">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>Informations de contact</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="contact-item">
-                                    <div class="contact-icon">📧</div>
-                                    <div class="contact-details">
-                                        <h4>Email</h4>
-                                        <p>contact@belgianslotclub.be</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="contact-item">
-                                    <div class="contact-icon">📱</div>
-                                    <div class="contact-details">
-                                        <h4>Téléphone</h4>
-                                        <p>+32 123 456 789</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="contact-item">
-                                    <div class="contact-icon">📍</div>
-                                    <div class="contact-details">
-                                        <h4>Adresse</h4>
-                                        <p>Rue de la Course, 1000<br>Bruxelles, Belgique</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="contact-item">
-                                    <div class="contact-icon">⏰</div>
-                                    <div class="contact-details">
-                                        <h4>Horaires</h4>
-                                        <p>Lun-Ven: 9h-18h<br>Sam: 10h-16h</p>
-                                    </div>
-                                </div>
-                            </div>
+    <main class="section">
+        <div class="container">
+            <div class="contact-layout">
+                <aside class="info-panel">
+                    <h2>Coordonnées</h2>
+                    <dl class="contact-dl">
+                        <div>
+                            <dt>Email</dt>
+                            <dd>contact@belgianslotclub.be</dd>
                         </div>
-                    </div>
-
-                    <!-- Formulaire de contact -->
-                    <div class="contact-form">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>Envoyez-nous un message</h3>
-                            </div>
-                            <div class="card-body">
-                                <form action="/contact/send" method="post" class="contact-form-fields">
-                                    <div class="form-group">
-                                        <label for="name" class="form-label">Nom complet</label>
-                                        <input type="text" id="name" name="name" class="form-input" required>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="email" class="form-label">Adresse email</label>
-                                        <input type="email" id="email" name="email" class="form-input" required>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="subject" class="form-label">Sujet</label>
-                                        <select id="subject" name="subject" class="form-select">
-                                            <option value="">Sélectionnez un sujet</option>
-                                            <option value="general">Question générale</option>
-                                            <option value="technical">Problème technique</option>
-                                            <option value="suggestion">Suggestion d'amélioration</option>
-                                            <option value="partnership">Partenariat</option>
-                                            <option value="other">Autre</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="message" class="form-label">Message</label>
-                                        <textarea id="message" name="message" class="form-textarea" rows="6" required 
-                                                  placeholder="Décrivez votre demande en détail..."></textarea>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-primary w-full">
-                                        <span>Envoyer le message</span>
-                                        <span class="btn-icon">→</span>
-                                    </button>
-                                </form>
-                            </div>
+                        <div>
+                            <dt>Téléphone</dt>
+                            <dd>+32 123 456 789</dd>
                         </div>
-                    </div>
+                        <div>
+                            <dt>Adresse</dt>
+                            <dd>Rue de la Course, 1000<br>Bruxelles, Belgique</dd>
+                        </div>
+                        <div>
+                            <dt>Horaires</dt>
+                            <dd>Lun–Ven : 9h–18h<br>Sam : 10h–16h</dd>
+                        </div>
+                    </dl>
+                </aside>
+
+                <div class="info-panel">
+                    <h2>Envoyer un message</h2>
+                    <form action="/contact/send" method="post" class="contact-form-fields">
+                        <div class="form-group">
+                            <label for="name" class="form-label">Nom complet</label>
+                            <input type="text" id="name" name="name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label">Adresse email</label>
+                            <input type="email" id="email" name="email" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject" class="form-label">Sujet</label>
+                            <select id="subject" name="subject" class="form-select">
+                                <option value="">Sélectionnez un sujet</option>
+                                <option value="general">Question générale</option>
+                                <option value="technical">Problème technique</option>
+                                <option value="suggestion">Suggestion d’amélioration</option>
+                                <option value="partnership">Partenariat</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea id="message" name="message" class="form-textarea" rows="6" required
+                                      placeholder="Décrivez votre demande…"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Envoyer le message</button>
+                    </form>
                 </div>
             </div>
-        </section>
-
-        <!-- FAQ Section -->
-        <section class="faq-section">
-            <div class="container">
-                <h2 class="text-center mb-8">Questions fréquentes</h2>
-                
-                <div class="faq-grid">
-                    <div class="faq-item card">
-                        <h4>Comment ajouter une nouvelle course ?</h4>
-                        <p>Utilisez le bouton "Ajouter une course" sur la page de sélection des courses. Vous devrez fournir un fichier Excel avec les résultats.</p>
-                    </div>
-                    
-                    <div class="faq-item card">
-                        <h4>Quels formats de fichiers sont acceptés ?</h4>
-                        <p>Nous acceptons les fichiers Excel (.xls et .xlsx) contenant les résultats des courses.</p>
-                    </div>
-                    
-                    <div class="faq-item card">
-                        <h4>Comment consulter les championnats ?</h4>
-                        <p>Accédez à la page "Championnat" depuis le menu de navigation pour voir les classements.</p>
-                    </div>
-                    
-                    <div class="faq-item card">
-                        <h4>Le site est-il compatible mobile ?</h4>
-                        <p>Oui, le site est entièrement responsive et s'adapte à tous les appareils : ordinateur, tablette et mobile.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-container">
-            <p>&copy; 2025 Belgian Slot Club. Tous droits réservés.</p>
-            <ul class="footer-links">
-                <li><a href="#">Mentions légales</a></li>
-                <li><a href="#">Politique de confidentialité</a></li>
-                <li><a href="/contact">Contact</a></li>
-            </ul>
+    <section class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Questions fréquentes</h2>
+            <div class="faq-grid">
+                <article class="faq-item">
+                    <h3>Comment ajouter une course ?</h3>
+                    <p>Sur la page d’un club, utilisez « Ajouter une course » et importez un fichier Excel.</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Quels formats sont acceptés ?</h3>
+                    <p>Fichiers Excel .xls et .xlsx contenant les résultats de course.</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Où voir les championnats ?</h3>
+                    <p>Choisissez d’abord un club, puis ouvrez Championnat dans le menu.</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Le site est-il mobile ?</h3>
+                    <p>Oui, l’interface s’adapte à l’ordinateur, à la tablette et au téléphone.</p>
+                </article>
+            </div>
         </div>
-    </footer>
+    </section>
 
-    <!-- Styles spécifiques -->
-    <style>
-        .hero {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            color: var(--white);
-            padding: var(--spacing-20) 0;
-            margin-bottom: var(--spacing-16);
-        }
-        
-        .hero h1 {
-            color: var(--white);
-            font-size: var(--font-size-4xl);
-            margin-bottom: var(--spacing-6);
-        }
-        
-        .hero p {
-            color: var(--gray-100);
-            font-size: var(--font-size-xl);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .contact-section {
-            margin-bottom: var(--spacing-16);
-        }
-        
-        .contact-layout {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: var(--spacing-8);
-            align-items: start;
-        }
-        
-        .contact-item {
-            display: flex;
-            align-items: flex-start;
-            gap: var(--spacing-4);
-            margin-bottom: var(--spacing-6);
-            padding-bottom: var(--spacing-4);
-            border-bottom: 1px solid var(--gray-200);
-        }
-        
-        .contact-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        
-        .contact-icon {
-            font-size: 1.5rem;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--primary-color);
-            color: var(--white);
-            border-radius: var(--border-radius);
-            flex-shrink: 0;
-        }
-        
-        .contact-details h4 {
-            margin-bottom: var(--spacing-1);
-            color: var(--gray-900);
-        }
-        
-        .contact-details p {
-            margin: 0;
-            color: var(--gray-600);
-            line-height: 1.5;
-        }
-        
-        .contact-form-fields {
-            margin: 0;
-        }
-        
-        .btn-icon {
-            margin-left: var(--spacing-2);
-            transition: var(--transition-normal);
-        }
-        
-        .btn:hover .btn-icon {
-            transform: translateX(4px);
-        }
-        
-        .faq-section {
-            margin-bottom: var(--spacing-16);
-        }
-        
-        .faq-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-6);
-        }
-        
-        .faq-item {
-            padding: var(--spacing-6);
-        }
-        
-        .faq-item h4 {
-            color: var(--primary-color);
-            margin-bottom: var(--spacing-3);
-            font-weight: 600;
-        }
-        
-        .faq-item p {
-            color: var(--gray-600);
-            margin: 0;
-            line-height: 1.6;
-        }
-        
-        .w-full {
-            width: 100%;
-        }
-        
-        @media (max-width: 1024px) {
-            .contact-layout {
-                grid-template-columns: 1fr;
-                gap: var(--spacing-6);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .hero {
-                padding: var(--spacing-12) 0;
-            }
-            
-            .hero h1 {
-                font-size: var(--font-size-3xl);
-            }
-            
-            .hero p {
-                font-size: var(--font-size-lg);
-            }
-            
-            .contact-item {
-                flex-direction: column;
-                text-align: center;
-                gap: var(--spacing-3);
-            }
-            
-            .faq-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-
-    <!-- Script pour améliorer l'expérience utilisateur -->
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animations supprimées pour éviter les animations au chargement
-            
-            // Validation du formulaire
+        document.addEventListener('DOMContentLoaded', function () {
             const form = document.querySelector('.contact-form-fields');
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    submitBtn.classList.add('loading');
-                    submitBtn.disabled = true;
-                    
-                    // Simuler un délai d'envoi
-                    setTimeout(() => {
-                        submitBtn.classList.remove('loading');
-                        submitBtn.disabled = false;
-                    }, 2000);
-                });
-            }
+            if (!form) return;
+            form.addEventListener('submit', function () {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Envoi…';
+            });
         });
     </script>
 </body>

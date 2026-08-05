@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Head fragment -->
+<head th:fragment="head (title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Belgian Slot Club'">Belgian Slot Club</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+</head>
+
+<!-- Navigation fragment -->
+<header th:fragment="nav (active, club)" class="site-nav" id="navbar">
+    <div class="nav-inner container">
+        <div class="nav-brand-wrap">
+            <button type="button" class="nav-back" id="navBackBtn" aria-label="Retour" title="Retour"
+                    th:if="${active != 'home'}">
+                <span aria-hidden="true">‹</span>
+            </button>
+            <a href="/" class="nav-brand">
+                <span class="nav-brand-mark">BSC</span>
+                <span class="nav-brand-text">Belgian Slot Club</span>
+            </a>
+        </div>
+        <button type="button" class="nav-toggle" id="hamburger" aria-label="Menu" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav>
+            <ul class="nav-links" id="navLinks">
+                <li>
+                    <a href="/" class="nav-link"
+                       th:classappend="${active == 'home'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'home'} ? 'page' : null">Accueil</a>
+                </li>
+                <li>
+                    <a class="nav-link"
+                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/selectRace/{club}(club=${club})} : '/?goto=courses#clubs'"
+                       th:classappend="${active == 'courses'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'courses'} ? 'page' : null">Courses</a>
+                </li>
+                <li>
+                    <a class="nav-link"
+                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/championnat(club=${club})} : '/?goto=championnat#clubs'"
+                       th:classappend="${active == 'championnat'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'championnat'} ? 'page' : null">Championnat</a>
+                </li>
+                <li>
+                    <a class="nav-link"
+                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/prochain-evenement(club=${club})} : '/?goto=calendrier#clubs'"
+                       th:classappend="${active == 'calendrier'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'calendrier'} ? 'page' : null">Calendrier</a>
+                </li>
+                <li>
+                    <a href="/reglement" class="nav-link"
+                       th:classappend="${active == 'reglement'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'reglement'} ? 'page' : null">Règlement</a>
+                </li>
+                <li>
+                    <a href="/contact" class="nav-link"
+                       th:classappend="${active == 'contact'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'contact'} ? 'page' : null">Contact</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="nav-overlay" id="navOverlay"></div>
+</header>
+
+<!-- Footer fragment -->
+<footer th:fragment="footer" class="site-footer">
+    <div class="footer-inner container">
+        <div class="footer-brand">
+            <span class="footer-brand-mark">BSC</span>
+            <span class="footer-brand-text">Belgian Slot Club</span>
+        </div>
+        <nav class="footer-nav" aria-label="Liens du pied de page">
+            <ul class="footer-links">
+                <li><a href="/">Accueil</a></li>
+                <li><a href="/contact">Contact</a></li>
+                <li><a href="/reglement">Règlement</a></li>
+                <li><a href="/selectRace/slot4000">Slot4000</a></li>
+                <li><a href="/selectRace/srcs">SRCS</a></li>
+            </ul>
+        </nav>
+        <p class="footer-copyright">&copy; 2026 Belgian Slot Club. Tous droits réservés.</p>
+    </div>
+</footer>
+
+<!-- Scripts fragment -->
+<th:block th:fragment="scripts">
+    <script src="/js/navigation.js"></script>
+</th:block>
+
+</body>
+</html>

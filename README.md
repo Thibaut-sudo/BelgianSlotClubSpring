@@ -109,14 +109,29 @@ sudo systemctl start postgresql
 
 ## 🚀 Lancement de l'application
 
-### Méthode 1 : Script de lancement (recommandé)
+### Méthode 1 : Script de lancement (recommandé - le plus simple !)
 ```bash
-# Mode développement
+# Mode développement (par défaut)
+./start.sh
+
+# Mode développement explicite
 ./start.sh dev
 
 # Mode production
 ./start.sh prod
+
+# Lancer en arrière-plan
+./start.sh dev --background
+# ou simplement
+./start.sh -b
 ```
+
+### Arrêter l'application
+```bash
+./stop.sh
+```
+
+> 💡 **Astuce** : Consultez `QUICK_START.md` pour un guide de démarrage rapide !
 
 ### Méthode 2 : Maven directement
 ```bash

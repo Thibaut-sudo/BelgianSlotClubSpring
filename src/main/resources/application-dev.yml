@@ -1,7 +1,7 @@
 spring:
   # Configuration de la base de données H2 pour le développement
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:file:./data/belgianslotclub
     username: sa
     password: 
     driver-class-name: org.h2.Driver
@@ -15,7 +15,7 @@ spring:
   # Configuration JPA
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:

@@ -1,86 +1,41 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Résultats des Courses - Belgian Slot Club</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="icon" type="image/png" href="/images/favicon.png">
-</head>
+<head th:replace="~{fragments/layout :: head(title='Résultats — Belgian Slot Club')}"></head>
 <body>
-    <!-- Navigation -->
-    <nav class="nav-container">
-        <div class="nav-content">
-            <a href="/" class="logo">
-                <div class="logo-icon">🏁</div>
-                <span>Belgian Slot Club</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="/">Accueil</a></li>
-                <li><a th:href="@{/championnat(club=${club})}" class="active">Championnat</a></li>
-                <li><a href="/calendar/upload">📅 Calendrier</a></li>
-                <li><a href="/reglement">Règlement</a></li>
-                <li><a href="/contact">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
+    <header th:replace="~{fragments/layout :: nav(active='courses', club=${club})}"></header>
 
-    <!-- En-tête de la page -->
-    <section class="page-header">
-        <div class="container">
-            <div class="page-header-content">
-                <h1 class="page-title">Résultats des Courses</h1>
-                <p class="page-subtitle">Consultez les résultats détaillés des qualifications et de la course</p>
-                <div class="race-info">
-                    <div class="info-item">
-                        <span class="info-label">Club:</span>
-                        <span class="info-value" th:text="${club}">Club</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Date:</span>
-                        <span class="info-value" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}">Date</span>
-                    </div>
-                </div>
+    <section class="page-hero page-hero--club"
+             th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+        <div class="page-hero-content container">
+            <h1 class="page-hero-title">Résultats de course</h1>
+            <p class="page-hero-sub">Qualifications et classement final détaillés</p>
+            <div class="page-hero-meta">
+                <span>Club : <strong th:text="${club}">Club</strong></span>
             </div>
         </div>
     </section>
 
-    <!-- Contenu principal -->
-    <section class="page-content">
+    <section class="section">
         <div class="container">
-            <!-- Statistiques rapides -->
-            <div class="stats-overview">
-                <div class="stat-item">
-                    <div class="stat-icon">🏁</div>
-                    <div class="stat-content">
-                        <div class="stat-number" th:text="${#lists.size(qualiResult)}">0</div>
-                        <div class="stat-label">Pilotes</div>
-                    </div>
+            <div class="stats-row">
+                <div class="stat-block">
+                    <span class="stat-block-value" th:text="${#lists.size(qualiResult)}">0</span>
+                    <span class="stat-block-label">Pilotes</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-icon">⏱️</div>
-                    <div class="stat-content">
-                        <div class="stat-number">6</div>
-                        <div class="stat-label">Pistes</div>
-                    </div>
+                <div class="stat-block">
+                    <span class="stat-block-value">6</span>
+                    <span class="stat-block-label">Pistes</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-icon">🏆</div>
-                    <div class="stat-content">
-                        <div class="stat-number">1er</div>
-                        <div class="stat-label">Gagnant</div>
-                    </div>
+                <div class="stat-block">
+                    <span class="stat-block-value">1er</span>
+                    <span class="stat-block-label">Vainqueur</span>
                 </div>
             </div>
 
-            <!-- Tableau des Qualifications -->
             <div class="table-container qualif-table-container">
                 <div class="table-header">
                     <h2>Qualifications</h2>
-                    <p>Classement des pilotes selon leur meilleur temps</p>
+                    <p>Classement selon le meilleur temps</p>
                 </div>
                 <div class="table-wrapper">
                     <table class="qualif-table">
@@ -88,19 +43,19 @@
                             <tr>
                                 <th class="position">Pos</th>
                                 <th>Pilote</th>
-                                <th>Meilleur Temps</th>
+                                <th>Meilleur temps</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="quali, stat : ${qualiResult}" th:class="${stat.count <= 3 ? 'top-' + stat.count : ''}">
-                                <td class="position" th:class="${'position-' + stat.count}">
+                                <td class="position" th:classappend="${' position-' + stat.count}">
                                     <span th:text="${stat.count}"></span>
                                 </td>
                                 <td class="pilot-name" th:text="${quali.getPilotName()}"></td>
                                 <td class="best-time" th:text="${quali.getBestTime()}"></td>
                                 <td class="actions">
-                                    <button class="btn-detail" title="Voir détails">👁️</button>
+                                    <button type="button" class="btn btn-sm btn-ghost btn-detail" title="Voir détails">Détails</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -108,10 +63,9 @@
                 </div>
             </div>
 
-            <!-- Tableau des Résultats de Course -->
             <div class="table-container race-table-container">
                 <div class="table-header">
-                    <h2>Résultats de la Course</h2>
+                    <h2>Résultats de la course</h2>
                     <p>Classement final avec détails par piste</p>
                 </div>
                 <div class="table-wrapper">
@@ -120,7 +74,7 @@
                             <tr>
                                 <th class="position">Pos</th>
                                 <th>Pilote</th>
-                                <th>Total Tours</th>
+                                <th>Total tours</th>
                                 <th colspan="2" class="track-header track-1">Piste 1</th>
                                 <th colspan="2" class="track-header track-2">Piste 2</th>
                                 <th colspan="2" class="track-header track-3">Piste 3</th>
@@ -129,32 +83,22 @@
                                 <th colspan="2" class="track-header track-6">Piste 6</th>
                             </tr>
                             <tr class="sub-header">
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th class="track-1">Tours</th>
-                                <th class="track-1">Temps</th>
-                                <th class="track-2">Tours</th>
-                                <th class="track-2">Temps</th>
-                                <th class="track-3">Tours</th>
-                                <th class="track-3">Temps</th>
-                                <th class="track-4">Tours</th>
-                                <th class="track-4">Temps</th>
-                                <th class="track-5">Tours</th>
-                                <th class="track-5">Temps</th>
-                                <th class="track-6">Tours</th>
-                                <th class="track-6">Temps</th>
+                                <th></th><th></th><th></th>
+                                <th class="track-1">Tours</th><th class="track-1">Temps</th>
+                                <th class="track-2">Tours</th><th class="track-2">Temps</th>
+                                <th class="track-3">Tours</th><th class="track-3">Temps</th>
+                                <th class="track-4">Tours</th><th class="track-4">Temps</th>
+                                <th class="track-5">Tours</th><th class="track-5">Temps</th>
+                                <th class="track-6">Tours</th><th class="track-6">Temps</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="raceResult, stat : ${raceResultDate}" th:class="${stat.count <= 3 ? 'top-' + stat.count : ''}">
-                                <td class="position" th:class="${'position-' + stat.count}">
+                                <td class="position" th:classappend="${' position-' + stat.count}">
                                     <span th:text="${stat.count}"></span>
                                 </td>
                                 <td class="pilot-name" th:text="${raceResult.getNom()}"></td>
                                 <td class="total-laps" th:text="${raceResult.getTotalTours()}"></td>
-                                
-                                <!-- Boucle sur les temps par piste -->
                                 <th:block th:each="lap, iterStat : ${raceResult.lapsPerTrack}">
                                     <td th:class="'track-' + ${iterStat.index + 1} + ' laps'" th:text="${lap.laps}"></td>
                                     <td th:class="'track-' + ${iterStat.index + 1} + ' time'" th:text="${raceResult.bestTime[iterStat.index].bestLapTime}"></td>
@@ -165,272 +109,33 @@
                 </div>
             </div>
 
-            <!-- Actions -->
             <div class="actions-section">
-                <div class="export-actions">
-                    <button class="btn-export excel">
-                        📊 Exporter Excel
-                    </button>
-                    <button class="btn-export pdf">
-                        📄 Exporter PDF
-                    </button>
-                    <button class="btn-export share">
-                        🔗 Partager
-                    </button>
+                <div class="export-actions cluster">
+                    <button type="button" class="btn btn-secondary btn-export">Exporter Excel</button>
+                    <button type="button" class="btn btn-secondary btn-export">Exporter PDF</button>
+                    <button type="button" class="btn btn-outline btn-export">Partager</button>
                 </div>
-                <div class="navigation-actions">
-                    <a th:href="@{/championnat(club=${club})}" class="btn btn-primary">
-                        🏆 Voir Championnat
-                    </a>
-                    <a href="/" class="btn btn-secondary">
-                        🏠 Retour Accueil
-                    </a>
+                <div class="navigation-actions cluster">
+                    <a th:href="@{/championnat(club=${club})}" class="btn btn-primary">Voir championnat</a>
+                    <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-outline">Retour aux courses</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <style>
-        /* Styles spécifiques à la page des résultats */
-        .page-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: var(--white);
-            padding: var(--spacing-16) 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .page-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            opacity: 0.3;
-        }
-
-        .page-header-content {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-        }
-
-        .page-title {
-            font-size: var(--font-size-4xl);
-            font-weight: 800;
-            margin-bottom: var(--spacing-4);
-            background: linear-gradient(135deg, var(--white), var(--gray-100));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .page-subtitle {
-            font-size: var(--font-size-lg);
-            margin-bottom: var(--spacing-6);
-            opacity: 0.9;
-        }
-
-        .race-info {
-            display: flex;
-            justify-content: center;
-            gap: var(--spacing-8);
-            flex-wrap: wrap;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: var(--spacing-1);
-        }
-
-        .info-label {
-            font-size: var(--font-size-sm);
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .info-value {
-            font-size: var(--font-size-lg);
-            font-weight: 600;
-        }
-
-        .page-content {
-            padding: var(--spacing-16) 0;
-        }
-
-        /* Statistiques rapides */
-        .stats-overview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--spacing-6);
-            margin-bottom: var(--spacing-12);
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-4);
-            background: var(--white);
-            padding: var(--spacing-6);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--gray-200);
-            transition: var(--transition-normal);
-        }
-
-        .stat-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .stat-icon {
-            font-size: 2rem;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: var(--white);
-            border-radius: var(--border-radius);
-        }
-
-        .stat-content {
-            flex: 1;
-        }
-
-        .stat-number {
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-            color: var(--gray-800);
-            margin-bottom: var(--spacing-1);
-        }
-
-        .stat-label {
-            font-size: var(--font-size-sm);
-            color: var(--gray-600);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 500;
-        }
-
-        /* Tables améliorées */
-        .qualif-table-container,
-        .race-table-container {
-            margin-bottom: var(--spacing-8);
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-        }
-
-        /* En-têtes de pistes */
-        .track-header {
-            text-align: center;
-            font-weight: 600;
-            color: var(--white);
-        }
-
-        .track-1 { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .track-2 { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .track-3 { background: linear-gradient(135deg, #10b981, #059669); }
-        .track-4 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        .track-5 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-        .track-6 { background: linear-gradient(135deg, #ec4899, #db2777); }
-
-        .sub-header th {
-            background: var(--gray-100);
-            color: var(--gray-700);
-            font-size: var(--font-size-xs);
-            padding: var(--spacing-2) var(--spacing-3);
-        }
-
-        /* Cellules de pistes */
-        .track-1.laps, .track-1.time { background: rgba(239, 68, 68, 0.1); }
-        .track-2.laps, .track-2.time { background: rgba(245, 158, 11, 0.1); }
-        .track-3.laps, .track-3.time { background: rgba(16, 185, 129, 0.1); }
-        .track-4.laps, .track-4.time { background: rgba(59, 130, 246, 0.1); }
-        .track-5.laps, .track-5.time { background: rgba(139, 92, 246, 0.1); }
-        .track-6.laps, .track-6.time { background: rgba(236, 72, 153, 0.1); }
-
-        /* Actions */
-        .actions-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: var(--spacing-4);
-            margin-top: var(--spacing-8);
-            padding: var(--spacing-6);
-            background: var(--gray-50);
-            border-radius: var(--border-radius-lg);
-            border: 1px solid var(--gray-200);
-        }
-
-        .navigation-actions {
-            display: flex;
-            gap: var(--spacing-3);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .page-title {
-                font-size: var(--font-size-3xl);
-            }
-
-            .race-info {
-                flex-direction: column;
-                gap: var(--spacing-4);
-            }
-
-            .stats-overview {
-                grid-template-columns: 1fr;
-            }
-
-            .actions-section {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .navigation-actions {
-                justify-content: center;
-            }
-
-            .table-wrapper {
-                font-size: var(--font-size-xs);
-            }
-        }
-
-        /* Animations supprimées pour éviter les animations au chargement */
-    </style>
-
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
     <script>
-        // Animations au scroll supprimées pour éviter les animations au chargement
-
-        // Actions des boutons
         document.querySelectorAll('.btn-export').forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Simulation d'export
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                    alert('Fonctionnalité d\'export en cours de développement');
-                }, 150);
+            btn.addEventListener('click', () => {
+                alert('Fonctionnalité d\'export en cours de développement');
             });
         });
-
-        // Bouton de détail
         document.querySelectorAll('.btn-detail').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const row = this.closest('tr');
                 const pilotName = row.querySelector('.pilot-name').textContent;
-                alert(`Détails pour ${pilotName} - Fonctionnalité en cours de développement`);
+                alert(`Détails pour ${pilotName} — en cours de développement`);
             });
         });
     </script>

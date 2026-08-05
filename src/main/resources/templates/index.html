@@ -1,911 +1,133 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Belgian Slot Club - Accueil</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="icon" type="image/png" href="/images/favicon.png">
-</head>
+<head th:replace="~{fragments/layout :: head(title='Belgian Slot Club — Accueil')}"></head>
 <body>
-    <!-- Navigation -->
-    <nav class="nav-container">
-        <div class="nav-content">
-            <a href="/" class="logo">
-                <div class="logo-icon">🏁</div>
-                <span>Belgian Slot Club</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="/">Accueil</a></li>
-                <li><a th:href="@{/championnat(club=${club})}">Championnat</a></li>
-                <li><a href="/calendar/upload">📅 Calendrier</a></li>
-                <li><a href="/reglement">Règlement</a></li>
-                <li><a href="/contact">Contact</a></li>
-                <li><a href="#" id="uploadButton" class="btn btn-orange">📁 Ajouter une course</a></li>
-            </ul>
-        </div>
-    </nav>
+    <header th:replace="~{fragments/layout :: nav(active='home', club=${null})}"></header>
 
-    <!-- Section Hero -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Bienvenue au Belgian Slot Club</h1>
-            <p>Découvrez les résultats des courses et suivez les championnats de vos clubs préférés</p>
-            <div>
-                <a href="#clubs" class="btn btn-orange">Découvrir les clubs</a>
-                <a href="/contact" class="btn btn-secondary">Nous contacter</a>
+    <section class="hero-home" style="--hero-bg: url('/images/hero-home.jpg')">
+        <div class="hero-home-content">
+            <span class="hero-brand-mark">BSC</span>
+            <p class="hero-brand">Belgian Slot Club</p>
+            <h1>Les courses. Les clubs. Les classements.</h1>
+            <p class="hero-lead">Suivez les résultats et les championnats des clubs de slot racing belges.</p>
+            <div class="cluster">
+                <a href="#clubs" class="btn btn-primary btn-lg">Choisir un club</a>
+                <a href="/contact" class="btn btn-outline btn-lg">Nous contacter</a>
             </div>
         </div>
     </section>
 
-    <!-- Section Clubs -->
     <section id="clubs" class="section">
         <div class="container">
             <h2 class="section-title">Sélectionnez votre club</h2>
-            <div class="grid grid-3">
-                <div class="card club-card" onclick="window.location.href='/selectRace/slot4000'">
-                    <img src="/images/images.jfif" alt="Slot 4000" class="club-image">
-                    <div class="club-info">
-                        <h3 class="club-name">Slot 4000</h3>
-                        <p class="club-description">Club de slot racing installé au-dessus du magasin Hobby 2000, Quai de la Boverie 78-87 à Liège. Club reconnu de slot-racing en Belgique depuis 2008, partageant les locaux avec le club Ferro-Liège.</p>
-                        <div class="club-stats">
-                            <span class="stat">📍 Quai de la Boverie 78-87, 4020 Liège</span>
-                            <span class="stat">🏪 Au-dessus de Hobby 2000</span>
-                            <span class="stat">🏁 Club reconnu depuis 2008</span>
-                        </div>
+            <p class="section-lead" id="clubSelectLead">Accédez aux courses, au classement et au calendrier de votre club.</p>
+            <div class="club-grid">
+                <a href="/selectRace/slot4000" class="club-tile" data-club="slot4000">
+                    <img src="/images/images.jfif" alt="Slot 4000" class="club-tile-image">
+                    <div class="club-tile-body">
+                        <h3>Slot 4000</h3>
+                        <p>Club de slot racing à Liège, au-dessus de Hobby 2000. Actif depuis 2008.</p>
+                        <ul class="club-tile-meta">
+                            <li>Quai de la Boverie 78-87, 4020 Liège</li>
+                            <li>Vendredi dès 18h</li>
+                        </ul>
                     </div>
-                </div>
+                </a>
 
-                <div class="card club-card" onclick="window.location.href='/selectRace/srcs'">
-                    <img src="/images/SRCS.png" alt="SRCS" class="club-image">
-                    <div class="club-info">
-                        <h3 class="club-name">SRCS</h3>
-                        <p class="club-description">Slot Racing Club Seraing (SRCS), fondé en 2009. Club belge de slot racing situé à Jemeppe-sur-Meuse, ouvert aux débutants comme aux pilotes expérimentés. Président : Dédé Mercator.</p>
-                        <div class="club-stats">
-                            <span class="stat">📍 Jemeppe-sur-Meuse (Seraing)</span>
-                            <span class="stat">👤 Président : Dédé Mercator</span>
-                            <span class="stat">📅 Mardi à partir de 17h</span>
-                        </div>
+                <a href="/selectRace/srcs" class="club-tile" data-club="srcs">
+                    <img src="/images/SRCS.png" alt="SRCS" class="club-tile-image">
+                    <div class="club-tile-body">
+                        <h3>SRCS</h3>
+                        <p>Slot Racing Club Seraing, fondé en 2009. Ouvert aux débutants et aux expérimentés.</p>
+                        <ul class="club-tile-meta">
+                            <li>Jemeppe-sur-Meuse (Seraing)</li>
+                            <li>Mardi dès 18h</li>
+                        </ul>
                     </div>
-                </div>
+                </a>
 
-                <div class="card club-card" onclick="window.location.href='/selectRace/autres'">
-                    <img src="/images/images.jfif" alt="Autres Clubs" class="club-image">
-                    <div class="club-info">
-                        <h3 class="club-name">Autres Clubs</h3>
-                        <p class="club-description">Découvrez les autres clubs de slot racing en Belgique. De nombreux clubs locaux organisent des compétitions et accueillent les passionnés dans toute la Belgique.</p>
-                        <div class="club-stats">
-                            <span class="stat">🇧🇪 Clubs en Belgique</span>
-                            <span class="stat">🏆 Compétitions locales</span>
-                            <span class="stat">🤝 Accueil débutants</span>
-                        </div>
+                <div class="club-tile club-tile-muted">
+                    <img src="/images/autres-clubs.jpg" alt="Autres clubs" class="club-tile-image">
+                    <div class="club-tile-body">
+                        <h3>Autres clubs</h3>
+                        <p>D’autres clubs belges seront bientôt disponibles sur la plateforme.</p>
+                        <ul class="club-tile-meta">
+                            <li>Compétitions locales</li>
+                            <li>À venir</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Section Fonctionnalités -->
-    <section class="section" style="background: var(--gray-50);">
-        <div class="container">
-            <h2 class="section-title">Fonctionnalités</h2>
-            <div class="grid grid-4">
-                <div class="card feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Résultats en temps réel</h3>
-                    <p>Suivez les performances de vos pilotes préférés avec des statistiques détaillées et des temps de passage précis au centième de seconde.</p>
-                </div>
-                <div class="card feature-card">
-                    <div class="feature-icon">🏆</div>
-                    <h3>Championnats officiels</h3>
-                    <p>Consultez les classements des championnats belges officiels et les archives des saisons précédentes avec historique complet.</p>
-                </div>
-                <div class="card feature-card">
-                    <div class="feature-icon">📅</div>
-                    <h3>Calendrier intelligent</h3>
-                    <p>Téléchargez une image de calendrier et laissez notre OCR extraire automatiquement les dates et événements pour votre club.</p>
-                </div>
-                <div class="card feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Interface moderne</h3>
-                    <p>Profitez d'une interface utilisateur intuitive et responsive, optimisée pour tous les appareils : ordinateur, tablette et mobile.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section Statistiques -->
     <section class="section">
         <div class="container">
-            <h2 class="section-title">Statistiques</h2>
-            <div class="grid grid-4">
-                <div class="stat-card">
-                    <div class="stat-number">150+</div>
-                    <div class="stat-label">Courses</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">500+</div>
-                    <div class="stat-label">Pilotes</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">15+</div>
-                    <div class="stat-label">Clubs</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">5000+</div>
-                    <div class="stat-label">Résultats</div>
-                </div>
+            <h2 class="section-title">Infos clubs</h2>
+            <div class="contact-clubs">
+                <article class="info-panel">
+                    <h3>Slot 4000</h3>
+                    <p>Quai de la Boverie 78-87, 4020 Liège — au-dessus de Hobby 2000.</p>
+                    <p>Vendredi dès 18h · +32 434 129 87</p>
+                    <div class="cluster">
+                        <a href="/selectRace/slot4000" class="btn btn-primary">Voir les courses</a>
+                        <a href="https://www.facebook.com/slot4000" class="btn btn-outline" target="_blank" rel="noopener">Facebook</a>
+                    </div>
+                </article>
+                <article class="info-panel">
+                    <h3>SRCS</h3>
+                    <p>Rue Champs d’Oiseaux 240, 4101 Jemeppe-sur-Meuse.</p>
+                    <p>Mardi dès 18h · Thibaut Lenertz 0491335150</p>
+                    <div class="cluster">
+                        <a href="/selectRace/srcs" class="btn btn-primary">Voir les courses</a>
+                        <a href="https://www.facebook.com/groups/slotracingclubseraing" class="btn btn-outline" target="_blank" rel="noopener">Facebook</a>
+                    </div>
+                </article>
             </div>
         </div>
     </section>
 
-    <!-- Section Informations -->
-    <section class="section" style="background: var(--gray-50);">
-        <div class="container">
-            <h2 class="section-title">À propos du Slot Racing</h2>
-            <div class="grid grid-2">
-                <div class="info-card">
-                    <h3>🏁 Qu'est-ce que le Slot Racing ?</h3>
-                    <p>Le slot racing est une discipline de modélisme où des voitures miniatures (échelles 1/24, 1/32, 1/43) roulent sur des pistes électrifiées. Les pilotes contrôlent la vitesse de leur véhicule via un pistolet de commande, créant des courses passionnantes et techniques.</p>
-                    <ul class="info-list">
-                        <li>🏆 Compétitions officielles belges</li>
-                        <li>📏 Échelles : 1/24, 1/32, 1/43</li>
-                        <li>⚡ Vitesses jusqu'à 80 km/h</li>
-                        <li>🎯 Précision au centième de seconde</li>
-                    </ul>
-                </div>
-                <div class="info-card">
-                    <h3>🇧🇪 Le Slot Racing en Belgique</h3>
-                    <p>La Belgique compte parmi les nations les plus actives en slot racing avec une tradition remontant aux années 1970. De nombreux clubs organisent des compétitions régulières et des championnats nationaux reconnus par la Fédération Belge de Modélisme.</p>
-                    <ul class="info-list">
-                        <li>🏛️ Fédération Belge de Modélisme</li>
-                        <li>🏆 Championnats nationaux annuels</li>
-                        <li>🌍 Compétitions internationales</li>
-                        <li>📚 Formation et initiation</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section Contact Clubs -->
-    <section class="contact-section">
-        <div class="container">
-            <div class="section-header text-center">
-                <div class="section-icon">📞</div>
-                <h2 class="section-title">Contact Clubs</h2>
-                <p class="section-subtitle">Retrouvez les informations de contact de nos clubs partenaires</p>
-            </div>
-            
-            <div class="contact-grid">
-                <!-- Slot 4000 -->
-                <div class="contact-card premium-card">
-                    <div class="card-glow"></div>
-                    <div class="contact-header">
-                        <div class="contact-badge">
-                            <div class="badge-icon">🏁</div>
-                            <div class="badge-pulse"></div>
-                        </div>
-                        <div class="contact-info">
-                            <h3 class="club-title">Slot 4000</h3>
-                            <p class="contact-subtitle">Club de Slot Racing à Liège</p>
-                            <div class="club-status">
-                                <span class="status-dot active"></span>
-                                <span class="status-text">Actif</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-details">
-                        <div class="contact-item">
-                            <div class="contact-icon-wrapper">
-                                <span class="contact-icon">📍</span>
-                            </div>
-                            <span class="contact-text">Quai de la Boverie 78-87, 4020 Liège</span>
-                        </div>
-                        <div class="contact-item">
-                            <div class="contact-icon-wrapper">
-                                <span class="contact-icon">🏪</span>
-                            </div>
-                            <span class="contact-text">Au-dessus du magasin Hobby 2000</span>
-                        </div>
-                        <div class="contact-item">
-                            <div class="contact-icon-wrapper">
-                                <span class="contact-icon">📅</span>
-                            </div>
-                            <span class="contact-text">Mercredi et vendredi dès 19h30</span>
-                        </div>
-                        <div class="contact-item">
-                            <div class="contact-icon-wrapper">
-                                <span class="contact-icon">🚂</span>
-                            </div>
-                            <span class="contact-text">Partage locaux avec Ferro-Liège</span>
-                        </div>
-                        <div class="contact-item">
-                            <div class="contact-icon-wrapper">
-                                <span class="contact-icon">📱</span>
-                            </div>
-                            <span class="contact-text">+32 434 129 87</span>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-actions">
-                        <a href="/selectRace" class="btn btn-primary btn-glow">
-                            <span class="btn-icon">🏁</span>
-                            <span class="btn-text">Voir les Courses</span>
-                        </a>
-                        <a href="https://www.facebook.com/slot4000" class="btn btn-secondary btn-outline" target="_blank">
-                            <span class="btn-icon">📘</span>
-                            <span class="btn-text">Facebook</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- SRCS -->
-                <div class="contact-card premium-card">
-                    <div class="card-glow"></div>
-                    <div class="contact-header">
-                        <div class="contact-badge">
-                            <div class="badge-icon">🏎️</div>
-                            <div class="badge-pulse"></div>
-                        </div>
-                        <div class="contact-info">
-                            <h3 class="club-title">SRCS</h3>
-                            <p class="contact-subtitle">Slot Racing Club Seraing</p>
-                            <div class="club-status">
-                                <span class="status-dot active"></span>
-                                <span class="status-text">Actif</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-details">
-                        <div class="contact-item">
-                            <div class="contact-icon-wrapper">
-                                <span class="contact-icon">📍</span>
-                            </div>
-                            <span class="contact-text">Rue Champs d'Oiseaux 240, 4101 Jemeppe-sur-Meuse (Seraing)</span>
-                        </div>
-                        <div class="contact-item">
-                            <div class="contact-icon-wrapper">
-                                <span class="contact-icon">📅</span>
-                            </div>
-                            <span class="contact-text">Mardi à partir de 17h</span>
-                        </div>
-                        <div class="contact-item">
-                            <div class="contact-icon-wrapper">
-                                <span class="contact-icon">👨‍💼</span>
-                            </div>
-                            <span class="contact-text">Président : Dédé Mercator</span>
-                        </div>
-                        <div class="contact-item">
-                            <div class="contact-icon-wrapper">
-                                <span class="contact-icon">🏁</span>
-                            </div>
-                            <span class="contact-text">Piste professionnelle 1/32</span>
-                        </div>
-                        <div class="contact-item">
-                            <div class="contact-icon-wrapper">
-                                <span class="contact-icon">🏆</span>
-                            </div>
-                            <span class="contact-text">Manches officielles BPC</span>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-actions">
-                        <a href="https://www.facebook.com/groups/slotracingclubseraing" class="btn btn-secondary btn-outline" target="_blank">
-                            <span class="btn-icon">📘</span>
-                            <span class="btn-text">Groupe Facebook SRCS</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <style>
-        /* Styles pour la section Contact Clubs améliorée */
-        .contact-section {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            padding: var(--spacing-16) 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .contact-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23e2e8f0" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            opacity: 0.3;
-        }
-
-        .section-header.text-center {
-            text-align: center;
-            margin-bottom: var(--spacing-12);
-            position: relative;
-            z-index: 2;
-        }
-
-        .section-icon {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-4);
-            display: inline-block;
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        .section-title {
-            font-size: var(--font-size-3xl);
-            font-weight: 700;
-            color: var(--gray-800);
-            margin-bottom: var(--spacing-4);
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .section-subtitle {
-            font-size: var(--font-size-lg);
-            color: var(--gray-600);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .contact-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: var(--spacing-8);
-            position: relative;
-            z-index: 2;
-        }
-
-        .premium-card {
-            position: relative;
-            background: var(--white);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .premium-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .card-glow {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--primary-light), #3b82f6);
-            background-size: 200% 100%;
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-
-        .contact-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-            padding: var(--spacing-6);
-            color: var(--white);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .contact-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .contact-badge {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            margin-bottom: var(--spacing-4);
-            backdrop-filter: blur(10px);
-        }
-
-        .badge-icon {
-            font-size: 1.5rem;
-            z-index: 2;
-            position: relative;
-        }
-
-        .badge-pulse {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.5; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .club-title {
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-            margin-bottom: var(--spacing-2);
-            position: relative;
-            z-index: 2;
-        }
-
-        .contact-subtitle {
-            font-size: var(--font-size-base);
-            opacity: 0.9;
-            margin-bottom: var(--spacing-3);
-            position: relative;
-            z-index: 2;
-        }
-
-        .club-status {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-2);
-            position: relative;
-            z-index: 2;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        .status-dot.active {
-            background: #10b981;
-        }
-
-        @keyframes status-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .status-text {
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-            opacity: 0.9;
-        }
-
-        .contact-details {
-            padding: var(--spacing-6);
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-4);
-            padding: var(--spacing-3) 0;
-            border-bottom: 1px solid var(--gray-100);
-            transition: all 0.2s ease;
-        }
-
-        .contact-item:last-child {
-            border-bottom: none;
-        }
-
-        .contact-item:hover {
-            background: var(--gray-50);
-            margin: 0 calc(-1 * var(--spacing-6));
-            padding: var(--spacing-3) var(--spacing-6);
-            border-radius: 8px;
-        }
-
-        .contact-icon-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            border-radius: 10px;
-            flex-shrink: 0;
-            transition: all 0.2s ease;
-        }
-
-        .contact-item:hover .contact-icon-wrapper {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .contact-icon {
-            font-size: 1.2rem;
-            color: var(--white);
-        }
-
-        .contact-text {
-            font-size: var(--font-size-base);
-            color: var(--gray-700);
-            font-weight: 500;
-            line-height: 1.5;
-        }
-
-        .contact-actions {
-            padding: var(--spacing-6);
-            background: var(--gray-50);
-            display: flex;
-            gap: var(--spacing-3);
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-2);
-            padding: var(--spacing-3) var(--spacing-6);
-            border-radius: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid transparent;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-glow {
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        @keyframes glow {
-            from { box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
-            to { box-shadow: 0 4px 20px rgba(59, 130, 246, 0.6); }
-        }
-
-        .btn-secondary {
-            background: var(--white);
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-        }
-
-        .btn-secondary:hover {
-            background: var(--primary-color);
-            color: var(--white);
-            transform: translateY(-2px);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--gray-700);
-            border: 2px solid var(--gray-300);
-        }
-
-        .btn-outline:hover {
-            background: var(--gray-100);
-            border-color: var(--gray-400);
-            color: var(--gray-800);
-        }
-
-        .btn-icon {
-            font-size: 1.1rem;
-        }
-
-        .btn-text {
-            font-weight: 600;
-        }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .contact-grid {
-                grid-template-columns: 1fr;
-                gap: var(--spacing-6);
-            }
-
-            .contact-actions {
-                flex-direction: column;
-            }
-
-            .btn {
-                justify-content: center;
-            }
-        }
-
-        /* Styles existants */
-        .club-stats {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-2);
-            margin-top: auto;
-        }
-        
-        .stat {
-            font-size: var(--font-size-sm);
-            color: var(--gray-500);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-2);
-        }
-        
-        .feature-card {
-            text-align: center;
-            padding: var(--spacing-8);
-        }
-        
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-4);
-            display: block;
-        }
-        
-        .feature-card h3 {
-            font-size: var(--font-size-xl);
-            font-weight: 600;
-            margin-bottom: var(--spacing-4);
-            color: var(--gray-800);
-        }
-        
-        .feature-card p {
-            color: var(--gray-600);
-            line-height: 1.6;
-        }
-        
-        .stat-card {
-            text-align: center;
-            padding: var(--spacing-6);
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: var(--white);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
-            transition: var(--transition-normal);
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .stat-number {
-            font-size: var(--font-size-4xl);
-            font-weight: 800;
-            margin-bottom: var(--spacing-2);
-        }
-        
-        .stat-label {
-            font-size: var(--font-size-lg);
-            font-weight: 500;
-            opacity: 0.9;
-        }
-
-        .info-card {
-            background: var(--white);
-            padding: var(--spacing-8);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--gray-200);
-        }
-
-        .info-card h3 {
-            font-size: var(--font-size-xl);
-            font-weight: 600;
-            margin-bottom: var(--spacing-4);
-            color: var(--gray-800);
-        }
-
-        .info-card p {
-            color: var(--gray-600);
-            line-height: 1.7;
-            margin-bottom: var(--spacing-4);
-        }
-
-        .info-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .info-list li {
-            padding: var(--spacing-2) 0;
-            color: var(--gray-700);
-            font-weight: 500;
-            border-bottom: 1px solid var(--gray-100);
-        }
-
-        .info-list li:last-child {
-            border-bottom: none;
-        }
-
-        /* Section Contact */
-        .contact-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: var(--spacing-8);
-        }
-
-        .contact-card {
-            background: var(--white);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--gray-200);
-            overflow: hidden;
-            transition: var(--transition-normal);
-        }
-
-        .contact-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .contact-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: var(--white);
-            padding: var(--spacing-6);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .contact-header h3 {
-            margin: 0;
-            font-size: var(--font-size-xl);
-            font-weight: 600;
-        }
-
-        .contact-badge {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--white);
-            padding: var(--spacing-1) var(--spacing-3);
-            border-radius: var(--border-radius);
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-        }
-
-        .contact-info {
-            padding: var(--spacing-6);
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: flex-start;
-            gap: var(--spacing-4);
-            margin-bottom: var(--spacing-4);
-        }
-
-        .contact-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .contact-icon {
-            font-size: var(--font-size-xl);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--gray-100);
-            border-radius: var(--border-radius);
-            flex-shrink: 0;
-        }
-
-        .contact-details strong {
-            display: block;
-            color: var(--gray-800);
-            font-weight: 600;
-            margin-bottom: var(--spacing-1);
-        }
-
-        .contact-details p {
-            color: var(--gray-600);
-            margin: 0;
-            line-height: 1.5;
-        }
-
-        .contact-actions {
-            padding: var(--spacing-6);
-            background: var(--gray-50);
-            display: flex;
-            gap: var(--spacing-3);
-            border-top: 1px solid var(--gray-200);
-        }
-
-        .contact-actions .btn {
-            flex: 1;
-            justify-content: center;
-        }
-
-        /* Responsive pour la section règlement */
-        @media (max-width: 768px) {
-            .reglement-header {
-                flex-direction: column;
-                text-align: center;
-                gap: var(--spacing-3);
-            }
-
-            .reglement-highlights {
-                grid-template-columns: 1fr;
-            }
-
-            .reglement-actions {
-                flex-direction: column;
-            }
-
-            .reglement-actions .btn {
-                min-width: auto;
-            }
-        }
-        
-        /* Animations supprimées pour éviter les animations au chargement */
-    </style>
-
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
     <script>
-        // Smooth scroll pour les ancres
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            let goto = params.get('goto');
+
+            if (goto) {
+                sessionStorage.setItem('bscGoto', goto);
+            } else {
+                goto = sessionStorage.getItem('bscGoto') || 'courses';
+            }
+
+            const destinations = {
+                courses: (club) => '/selectRace/' + club,
+                results: (club) => '/selectRace/' + club,
+                championnat: (club) => '/championnat?club=' + encodeURIComponent(club),
+                calendrier: (club) => '/prochain-evenement?club=' + encodeURIComponent(club)
+            };
+
+            const labels = {
+                courses: 'Choisissez un club pour voir les courses et résultats.',
+                results: 'Choisissez un club pour voir les courses et résultats.',
+                championnat: 'Choisissez un club pour accéder au championnat.',
+                calendrier: 'Choisissez un club pour accéder au calendrier.'
+            };
+
+            const resolve = destinations[goto] || destinations.courses;
+            const lead = document.getElementById('clubSelectLead');
+            if (lead && labels[goto]) {
+                lead.textContent = labels[goto];
+            }
+
+            document.querySelectorAll('.club-tile[data-club]').forEach(function (tile) {
+                const club = tile.getAttribute('data-club');
+                tile.setAttribute('href', resolve(club));
+                tile.addEventListener('click', function () {
+                    sessionStorage.removeItem('bscGoto');
+                });
             });
-        });
+        })();
     </script>
 </body>
 </html>

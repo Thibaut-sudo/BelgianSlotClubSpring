@@ -1,2045 +1,823 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sélection de Course - Belgian Slot Club</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="icon" type="image/png" href="/images/favicon.png">
-</head>
+<head th:replace="~{fragments/layout :: head(title='Courses — Belgian Slot Club')}"></head>
 <body>
-    <!-- Navigation -->
-    <nav class="nav-container">
-        <div class="nav-content">
-            <a href="/" class="logo">
-                <div class="logo-icon">🏁</div>
-                <span>Belgian Slot Club</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="/">Accueil</a></li>
-                <li><a th:href="@{/championnat(club=${club})}" class="active">Championnat</a></li>
-                <li><a href="/calendar/upload">📅 Calendrier</a></li>
-                <li><a href="/reglement">Règlement</a></li>
-                <li><a href="/contact">Contact</a></li>
-                <li><a href="#" id="uploadButton" class="btn btn-primary">📁 Ajouter une course</a></li>
-            </ul>
-        </div>
-    </nav>
 
-    <!-- Formulaire caché pour l'upload -->
+    <header th:replace="~{fragments/layout :: nav(active='courses', club=${club})}"></header>
+
+    <!-- Hidden upload form -->
     <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" style="display: none;">
         <input type="file" id="fileInput" name="file" accept=".xls,.xlsx">
         <input type="hidden" id="clubInput" name="club" th:value="${club}">
     </form>
 
-    <!-- En-tête de la page -->
-    <section class="page-header">
-        <div class="container">
-            <div class="page-header-content">
-                <div class="club-info">
-                    <div class="club-logo">
-                        <img th:if="${club == 'slot4000'}" src="/images/images.jfif" alt="Slot4000">
-                        <img th:if="${club == 'srcs'}" src="/images/SRCS.png" alt="SRCS">
-                        <div class="club-logo-overlay">
-                            <div class="club-logo-icon">🏁</div>
-                        </div>
-                        <div class="club-logo-badge">
-                            <span class="badge-text">CLUB</span>
-                        </div>
-                        <div class="club-logo-shine"></div>
-                        <div class="club-logo-particles">
-                            <div class="particle"></div>
-                            <div class="particle"></div>
-                            <div class="particle"></div>
-                            <div class="particle"></div>
-                            <div class="particle"></div>
-                        </div>
-                    </div>
-                    <div class="club-details">
-                        <h1 class="club-name" th:text="${club == 'slot4000' ? 'Slot4000' : 'SRCS'}">Club</h1>
-                        <p class="club-description">Sélectionnez une course pour voir les résultats détaillés</p>
-                        <div class="club-stats">
-                            <div class="stat-item">
-                                <span class="stat-icon">📅</span>
-                                <span class="stat-label">Courses disponibles</span>
-                                <span class="stat-value" th:text="${#maps.isEmpty(raceResultDate) ? '0' : #maps.size(raceResultDate)}">0</span>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Page hero -->
+    <section class="page-hero page-hero--club"
+             th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+        <div class="page-hero-content">
+            <div class="page-hero-main">
+                <h1 class="page-hero-title"
+                    th:text="${club == 'slot4000' ? 'Slot 4000' : (club == 'srcs' ? 'SRCS' : club)}">
+                    Club
+                </h1>
+                <p class="page-hero-sub">Sélectionnez une course pour consulter les résultats détaillés.</p>
+                <div class="page-hero-meta">
+                    <span class="meta-item">
+                        <span th:text="${raceSummaries != null ? #lists.size(raceSummaries) : 0}">0</span>
+                        course(s) disponible(s)
+                    </span>
+                    <span class="meta-item" th:if="${club == 'slot4000'}">Liège</span>
+                    <span class="meta-item" th:if="${club == 'srcs'}">Seraing</span>
                 </div>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="showUploadModal()">
-                        📊 Importer Excel
-                    </button>
-                    <a th:href="@{/championnat(club=${club})}" class="btn btn-primary">
-                        🏆 Voir Championnat
-                    </a>
-                    <button class="btn btn-outline" onclick="showQuickStats()">
-                        📈 Statistiques
-                    </button>
-                    <a href="/reglement" class="btn btn-outline">
-                        📋 Règlement
-                    </a>
-                </div>
+            </div>
+            <div class="page-hero-actions cluster">
+                <button type="button" id="uploadButton" class="btn btn-secondary">Importer Excel</button>
+                <a th:href="@{/championnat(club=${club})}" class="btn btn-primary">Voir Championnat</a>
+                <a th:href="@{/prochain-evenement(club=${club})}" class="btn btn-outline">Calendrier</a>
+                <a href="/reglement" class="btn btn-outline">Règlement</a>
             </div>
         </div>
     </section>
 
-    <!-- Statistiques rapides -->
-    <section class="quick-stats">
+    <!-- Next event -->
+    <section class="section section--alt" th:if="${club == 'slot4000' or club == 'srcs'}">
         <div class="container">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">🏁</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalRaces">0</div>
-                        <div class="stat-text">Courses Total</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🏆</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalCategories">5</div>
-                        <div class="stat-text">Catégories</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📅</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalYears">3</div>
-                        <div class="stat-text">Années</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalPilots">25+</div>
-                        <div class="stat-text">Pilotes</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Prochain événement -->
-    <section class="next-event-section" th:if="${club == 'slot4000' or club == 'srcs'}">
-        <div class="container">
-            <div class="next-event-card" th:classappend="'event-' + ${eventType}">
+            <article class="next-event-card" th:classappend="${eventType != null and !eventType.isEmpty()} ? 'event-' + ${eventType} : ''">
                 <div class="next-event-header">
-                    <div class="next-event-icon">🎯</div>
                     <div class="next-event-info">
-                        <h3 th:text="'Prochain Événement ' + ${club == 'slot4000' ? 'SLOT4000' : 'SRCS'}">Prochain Événement</h3>
-                        <p class="next-event-name" th:text="${nextEventName}">Événement</p>
+                        <p class="next-event-label"
+                           th:text="${hasUpcomingEvent} ? ('Prochain événement ' + ${clubDisplayName}) : ('Dernier événement ' + ${clubDisplayName})">
+                            Prochain événement
+                        </p>
+                        <h2 class="next-event-name" th:text="${nextEventName}">Événement</h2>
                         <p class="next-event-date" th:text="${nextEventDate}">Date</p>
                     </div>
                     <div class="next-event-countdown">
-                        <div class="countdown-number" th:text="${daysUntilNext}">0</div>
-                        <div class="countdown-label">jours</div>
+                        <th:block th:if="${hasUpcomingEvent}">
+                            <span class="countdown-number" th:text="${daysUntilNext}">0</span>
+                            <span class="countdown-label">jours</span>
+                        </th:block>
+                        <th:block th:unless="${hasUpcomingEvent}">
+                            <span class="countdown-number">—</span>
+                            <span class="countdown-label">saison terminée</span>
+                        </th:block>
                     </div>
                 </div>
-                <div class="next-event-actions">
-                    <a th:href="@{/prochain-evenement(club=${club})}" class="btn btn-primary">
-                        📅 Voir Calendrier Complet
-                    </a>
-                    <a th:href="@{/championnat(club=${club})}" class="btn btn-secondary">
-                        🏆 Voir Championnat
-                    </a>
+                <div class="next-event-actions cluster">
+                    <a th:href="@{/prochain-evenement(club=${club})}" class="btn btn-primary">Voir le calendrier</a>
+                    <a th:href="@{/championnat(club=${club})}" class="btn btn-secondary">Championnat</a>
                 </div>
-            </div>
+            </article>
         </div>
     </section>
 
-    <!-- Contenu principal -->
-    <section class="page-content">
+    <!-- Main content -->
+    <section class="section">
         <div class="container">
-            <div class="content-layout">
-                <!-- Filtres -->
-                <aside class="filters-sidebar">
-                    <div class="card filters-card">
-                        <div class="card-header filters-header">
-                            <div class="filters-title">
-                                <div class="filters-icon">🔍</div>
-                                <div>
-                                    <h3>Filtres</h3>
-                                    <p>Affinez votre recherche</p>
-                                </div>
-                            </div>
-                            <div class="filters-toggle">
-                                <span class="toggle-icon">⚙️</span>
-                            </div>
+            <div class="races-layout">
+
+                <!-- Filters sidebar -->
+                <aside class="races-sidebar">
+                    <div class="filters-panel">
+                        <h2 class="filters-panel-title">Filtres</h2>
+                        <p class="filters-panel-lead">Affinez la liste des courses.</p>
+
+                        <div class="form-group">
+                            <label for="categoryFilter" class="form-label">Catégorie</label>
+                            <select id="categoryFilter" class="form-select filter-select">
+                                <option value="">Toutes les catégories</option>
+                                <option th:each="categorie : ${listeCategorie}"
+                                        th:value="${categorie}"
+                                        th:text="${categorie}"></option>
+                            </select>
                         </div>
-                        <div class="card-body filters-body">
-                            <div class="form-group filter-group">
-                                <label for="categoryFilter" class="form-label">
-                                    <span class="label-icon">🏷️</span>
-                                    Catégorie
-                                </label>
-                                <div class="select-wrapper">
-                                    <select id="categoryFilter" class="form-select filter-select">
-                                        <option value="">Toutes les catégories</option>
-                                        <option th:each="categorie : ${listeCategorie}" 
-                                                th:value="${categorie}" 
-                                                th:text="${categorie}"></option>
-                                    </select>
-                                    <div class="select-arrow">▼</div>
-                                </div>
-                            </div>
 
-                            <div class="form-group filter-group">
-                                <label for="yearFilter" class="form-label">
-                                    <span class="label-icon">📅</span>
-                                    Année
-                                </label>
-                                <div class="select-wrapper">
-                                    <select id="yearFilter" class="form-select filter-select">
-                                        <option value="">Toutes les années</option>
-                                        <option th:each="annee : ${listeAnnees}" 
-                                                th:value="${annee}" 
-                                                th:text="${annee}"></option>
-                                    </select>
-                                    <div class="select-arrow">▼</div>
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label for="yearFilter" class="form-label">Année</label>
+                            <select id="yearFilter" class="form-select filter-select">
+                                <option value="">Toutes les années</option>
+                                <option th:each="annee : ${listeAnnees}"
+                                        th:value="${annee}"
+                                        th:text="${annee}"></option>
+                            </select>
+                        </div>
 
-                            <div class="form-group filter-group">
-                                <label for="searchFilter" class="form-label">
-                                    <span class="label-icon">🔎</span>
-                                    Recherche
-                                </label>
-                                <div class="input-wrapper">
-                                    <input type="text" id="searchFilter" class="form-input filter-input" placeholder="Rechercher une course...">
-                                    <div class="input-icon">🔍</div>
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label for="searchFilter" class="form-label">Recherche</label>
+                            <input type="text"
+                                   id="searchFilter"
+                                   class="form-input filter-input"
+                                   placeholder="Rechercher une course…">
+                        </div>
 
-                            <div class="form-group filter-group">
-                                <label for="sortFilter" class="form-label">
-                                    <span class="label-icon">📊</span>
-                                    Tri
-                                </label>
-                                <div class="select-wrapper">
-                                    <select id="sortFilter" class="form-select filter-select">
-                                        <option value="date-desc">Date (récent)</option>
-                                        <option value="date-asc">Date (ancien)</option>
-                                        <option value="category">Catégorie</option>
-                                    </select>
-                                    <div class="select-arrow">▼</div>
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label for="sortFilter" class="form-label">Tri</label>
+                            <select id="sortFilter" class="form-select filter-select">
+                                <option value="date-desc">Date (récent)</option>
+                                <option value="date-asc">Date (ancien)</option>
+                                <option value="category">Catégorie</option>
+                            </select>
+                        </div>
 
-                            <div class="filters-actions">
-                                <button onclick="applyFilters()" class="btn btn-primary filter-btn apply-btn">
-                                    <span class="btn-icon">🔍</span>
-                                    Appliquer les filtres
-                                </button>
-                                
-                                <button onclick="resetFilters()" class="btn btn-secondary filter-btn reset-btn">
-                                    <span class="btn-icon">🔄</span>
-                                    Réinitialiser
-                                </button>
-                            </div>
-
-                            <div class="filter-actions">
-                                <button onclick="exportFilteredRaces()" class="btn btn-outline filter-btn export-btn">
-                                    <span class="btn-icon">📤</span>
-                                    Exporter la liste
-                                </button>
-                            </div>
+                        <div class="filters-panel-actions stack-sm">
+                            <button type="button" onclick="applyFilters()" class="btn btn-primary filter-btn">Appliquer</button>
+                            <button type="button" onclick="resetFilters()" class="btn btn-secondary filter-btn">Réinitialiser</button>
+                            <button type="button" onclick="exportFilteredRaces()" class="btn btn-outline filter-btn">Exporter la liste</button>
                         </div>
                     </div>
 
-                    <!-- Filtres actifs -->
-                    <div class="card active-filters" id="activeFilters" style="display: none;">
-                        <div class="card-header active-filters-header">
-                            <div class="active-filters-title">
-                                <div class="active-filters-icon">✅</div>
-                                <h3>Filtres actifs</h3>
-                            </div>
-                            <div class="active-filters-count">
-                                <span id="activeFiltersCount">0</span>
-                            </div>
+                    <!-- Active filters -->
+                    <div class="active-filters-panel" id="activeFilters" style="display: none;">
+                        <div class="active-filters-header">
+                            <h3>Filtres actifs</h3>
+                            <span class="active-filters-badge" id="activeFiltersCount">0</span>
                         </div>
-                        <div class="card-body active-filters-body">
-                            <div id="activeFiltersList" class="active-filters-list"></div>
-                            <button onclick="clearAllFilters()" class="btn btn-error filter-btn clear-all-btn">
-                                <span class="btn-icon">🗑️</span>
-                                Effacer tous les filtres
-                            </button>
-                        </div>
+                        <div id="activeFiltersList" class="active-filters-list"></div>
+                        <button type="button" onclick="clearAllFilters()" class="btn btn-outline btn-sm filter-btn clear-all-btn">
+                            Effacer tous les filtres
+                        </button>
                     </div>
                 </aside>
 
-                <!-- Liste des courses -->
-                <section class="races-section">
-                    <div class="races-header">
-                        <div class="races-title">
-                            <h2>🏁 Courses disponibles</h2>
-                            <p class="races-subtitle">Consultez les résultats de vos courses préférées</p>
+                <!-- Race list -->
+                <div class="races-main">
+                    <div class="races-toolbar">
+                        <div>
+                            <h2 class="section-title mb-0">Courses disponibles</h2>
+                            <p class="races-toolbar-sub">Consultez les résultats de chaque course.</p>
                         </div>
-                        <div class="races-controls">
+                        <div class="races-toolbar-controls cluster">
                             <div class="races-count">
-                                <span class="count-number" th:text="${#maps.isEmpty(raceResultDate) ? '0' : #maps.size(raceResultDate)}">0</span>
+                                <span class="count-number" th:text="${raceSummaries != null ? #lists.size(raceSummaries) : 0}">0</span>
                                 <span class="count-label">course(s)</span>
                             </div>
-                            <div class="view-controls">
-                                <button class="view-btn active" data-view="grid" onclick="switchView('grid')">
-                                    <span>⊞</span>
+                            <div class="view-controls" role="group" aria-label="Mode d'affichage">
+                                <button type="button" class="view-btn active" data-view="grid" onclick="switchView('grid')" aria-label="Grille" title="Grille">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
                                 </button>
-                                <button class="view-btn" data-view="list" onclick="switchView('list')">
-                                    <span>☰</span>
+                                <button type="button" class="view-btn" data-view="list" onclick="switchView('list')" aria-label="Liste" title="Liste">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="7" width="14" height="2" rx="1"/><rect x="1" y="12" width="14" height="2" rx="1"/></svg>
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="races-grid" id="raceContainer">
-                        <th:block th:if="${raceResultDate != null and not #maps.isEmpty(raceResultDate)}">
-                            <form th:each="entry : ${raceResultDate}" 
-                                  th:action="@{/processRaceDate}" 
-                                  method="post" 
+                    <div class="race-grid grid-view" id="raceContainer">
+                        <th:block th:if="${raceSummaries != null and not #lists.isEmpty(raceSummaries)}">
+                            <form th:each="race : ${raceSummaries}"
+                                  th:action="@{/processRaceDate}"
+                                  method="post"
                                   class="race-form">
-                                <button type="submit" 
-                                        class="race-card card"
-                                        th:attr="data-club=${club}, data-category=${entry.value}, data-date=${entry.key}">
-                                    <div class="race-content">
-                                        <div class="race-header">
-                                            <div class="race-date" th:text="${entry.key}"></div>
-                                            <div class="race-category" th:text="${entry.value}"></div>
-                                        </div>
-                                        <div class="race-info">
-                                            <span class="race-icon">🏁</span>
-                                            <span class="race-text">Voir les résultats</span>
-                                        </div>
-                                        <div class="race-meta">
-                                            <span class="race-year" th:text="${#strings.substring(entry.key, 0, 4)}"></span>
-                                            <span class="race-status">Disponible</span>
-                                        </div>
+                                <button type="submit"
+                                        class="race-card race-tile"
+                                        th:attr="data-club=${club}, data-category=${race.category()}, data-date=${race.date()}">
+                                    <div class="race-tile-header">
+                                        <span class="race-tile-title race-date" th:text="${race.date()}"></span>
+                                        <span class="race-category" th:text="${race.category()}"></span>
                                     </div>
-                                    <input type="hidden" name="raceDate" th:value="${entry.key}">
-                                    <div class="race-arrow">→</div>
+                                    <span class="race-text">Voir les résultats</span>
+                                    <div class="race-tile-meta">
+                                        <span class="race-year" th:text="${race.date().year}"></span>
+                                        <span class="race-status" th:text="${clubDisplayName}">Club</span>
+                                    </div>
+                                    <input type="hidden" name="raceDate" th:value="${race.date()}">
+                                    <input type="hidden" name="club" th:value="${club}">
+                                    <span class="race-arrow" aria-hidden="true">→</span>
                                 </button>
                             </form>
                         </th:block>
-                        
-                        <div class="no-races" th:if="${#maps.isEmpty(raceResultDate)}">
-                            <div class="no-races-icon">🏁</div>
+
+                        <div class="no-races" th:if="${raceSummaries == null or #lists.isEmpty(raceSummaries)}">
                             <h3>Aucune course disponible</h3>
                             <p>Il n'y a actuellement aucune course enregistrée pour ce club.</p>
-                            <div class="no-races-actions">
-                                <button class="btn btn-primary" onclick="showUploadModal()">
-                                    📁 Ajouter une course
-                                </button>
-                                <button class="btn btn-secondary" onclick="refreshPage()">
-                                    🔄 Actualiser
-                                </button>
+                            <div class="cluster">
+                                <button type="button" class="btn btn-primary" onclick="showUploadModal()">Ajouter une course</button>
+                                <button type="button" class="btn btn-secondary" onclick="refreshPage()">Actualiser</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Pagination -->
-                    <div class="pagination" id="pagination" style="display: none;">
-                        <button class="pagination-btn" onclick="previousPage()">← Précédent</button>
+                    <nav class="pagination" id="pagination" style="display: none;" aria-label="Pagination des courses">
+                        <button type="button" class="btn btn-secondary btn-sm pagination-btn" onclick="previousPage()">Précédent</button>
                         <div class="pagination-info">
                             <span id="currentPage">1</span> / <span id="totalPages">1</span>
                         </div>
-                        <button class="pagination-btn" onclick="nextPage()">Suivant →</button>
-                    </div>
-                </section>
+                        <button type="button" class="btn btn-secondary btn-sm pagination-btn" onclick="nextPage()">Suivant</button>
+                    </nav>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer amélioré -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="container">
-                <div class="footer-grid">
-                    <div class="footer-section">
-                        <div class="footer-logo">
-                            <div class="logo-icon">🏁</div>
-                            <span>Belgian Slot Club</span>
-                        </div>
-                        <p class="footer-description">
-                            La référence pour suivre les résultats des courses de slot racing en Belgique.
-                        </p>
-                        <div class="footer-social">
-                            <a href="#" class="social-link">📧</a>
-                            <a href="#" class="social-link">📱</a>
-                            <a href="#" class="social-link">🌐</a>
-                        </div>
-                    </div>
-                    
-                    <div class="footer-section">
-                        <h4>Navigation</h4>
-                        <ul class="footer-links">
-                            <li><a href="/">🏠 Accueil</a></li>
-                            <li><a th:href="@{/championnat(club=${club})}">🏆 Championnat</a></li>
-                            <li><a href="/contact">📞 Contact</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="footer-section">
-                        <h4>Clubs</h4>
-                        <ul class="footer-links">
-                            <li><a href="/selectRace/slot4000">🏁 Slot4000</a></li>
-                            <li><a href="/selectRace/srcs">🏁 SRCS</a></li>
-                            <li><a href="#">🏁 Autres clubs</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="footer-section">
-                        <h4>Support</h4>
-                        <ul class="footer-links">
-                            <li><a href="#">📋 Mentions légales</a></li>
-                            <li><a href="#">🔒 Politique de confidentialité</a></li>
-                            <li><a href="#">❓ FAQ</a></li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="footer-bottom">
-                    <div class="footer-copyright">
-                        <p>&copy; 2025 Belgian Slot Club. Tous droits réservés.</p>
-                    </div>
-                    <div class="footer-version">
-                        <span>Version 2.1 - Interface avancée</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Modal d'upload amélioré -->
-    <div id="uploadModal" class="modal" style="display: none;">
-        <div class="modal-content">
+    <!-- Upload modal -->
+    <div id="uploadModal" class="modal" style="display: none;" role="dialog" aria-labelledby="uploadModalTitle" aria-modal="true">
+        <div class="modal-panel">
             <div class="modal-header">
-                <h3>📁 Ajouter une course</h3>
-                <button class="modal-close" onclick="hideUploadModal()">×</button>
+                <h3 id="uploadModalTitle">Ajouter une course</h3>
+                <button type="button" class="modal-close" onclick="hideUploadModal()" aria-label="Fermer">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="upload-instructions">
                     <h4>Instructions d'import</h4>
                     <ul>
                         <li>Format accepté : Excel (.xls, .xlsx)</li>
-                        <li>Le fichier doit contenir les colonnes : Pilote, Temps, Tours</li>
-                        <li>Taille maximale : 10 MB</li>
+                        <li>Colonnes attendues : Pilote, Temps, Tours</li>
+                        <li>Taille maximale : 10 Mo</li>
                     </ul>
                 </div>
                 <div class="file-upload-area" id="fileUploadArea">
-                    <div class="upload-icon">📁</div>
                     <p>Glissez-déposez votre fichier ici ou cliquez pour sélectionner</p>
                     <input type="file" id="modalFileInput" accept=".xls,.xlsx" class="file-input">
                 </div>
                 <div class="upload-preview" id="uploadPreview" style="display: none;">
-                    <h4>Fichier sélectionné :</h4>
+                    <h4>Fichier sélectionné</h4>
                     <div class="file-info">
                         <span id="fileName"></span>
                         <span id="fileSize"></span>
                     </div>
                 </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="hideUploadModal()">Annuler</button>
-                    <button class="btn btn-primary" onclick="uploadFile()" id="uploadBtn" disabled>Importer</button>
-                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="hideUploadModal()">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="uploadFile()" id="uploadBtn" disabled>Importer</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de confirmation -->
-    <div id="confirmModal" class="modal" style="display: none;">
-        <div class="modal-content confirm-modal">
+    <!-- Confirm modal -->
+    <div id="confirmModal" class="modal" style="display: none;" role="dialog" aria-labelledby="confirmModalTitle" aria-modal="true">
+        <div class="modal-panel confirm-modal">
             <div class="modal-header">
-                <h3>⚠️ Confirmation</h3>
+                <h3 id="confirmModalTitle">Confirmation</h3>
             </div>
             <div class="modal-body">
                 <p id="confirmMessage">Êtes-vous sûr de vouloir effectuer cette action ?</p>
             </div>
             <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="hideConfirmModal()">Annuler</button>
-                <button class="btn btn-primary" onclick="confirmAction()">Confirmer</button>
+                <button type="button" class="btn btn-secondary" onclick="hideConfirmModal()">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="confirmAction()">Confirmer</button>
             </div>
         </div>
     </div>
 
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
     <style>
-        /* Header amélioré */
-        .page-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-            color: var(--white);
-            padding: var(--spacing-16) 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .page-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            opacity: 0.3;
-        }
-
-        .page-header-content {
-            position: relative;
-            z-index: 1;
+        /* Page hero layout */
+        .page-hero-content {
             display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
             justify-content: space-between;
-            align-items: center;
-            gap: var(--spacing-8);
+            gap: var(--space-6);
         }
 
-        .club-info {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-6);
+        .page-hero-actions .btn-outline {
+            border-color: rgb(255 255 255 / 0.45);
+            color: var(--color-white);
         }
 
-        .club-logo {
-            position: relative;
-            width: 180px;
-            height: 180px;
-            border-radius: var(--border-radius-xl);
-            overflow: hidden;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            box-shadow: var(--shadow-xl);
-            transition: var(--transition-normal);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            backdrop-filter: blur(10px);
-
+        .page-hero-actions .btn-outline:hover {
+            background: rgb(255 255 255 / 0.12);
+            border-color: var(--color-white);
+            color: var(--color-white);
         }
 
-        .club-logo:hover {
-            transform: scale(1.1) rotate(2deg);
-            border-color: rgba(255, 255, 255, 0.6);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(255, 255, 255, 0.2);
-        }
-
-        .club-logo::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--warning-color));
-            border-radius: var(--border-radius-xl);
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .club-logo:hover::before {
-            opacity: 1;
-        }
-
-        .club-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .club-logo:hover img {
-            transform: scale(1.05);
-        }
-
-        .club-logo-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.8));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: var(--transition-normal);
-        }
-
-        .club-logo:hover .club-logo-overlay {
-            opacity: 1;
-        }
-
-        .club-logo-icon {
-            font-size: 3rem;
-            color: var(--white);
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        /* @keyframes pulse supprimé pour éviter l'animation au chargement */
-
-        .club-logo-badge {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--white);
-            padding: var(--spacing-1) var(--spacing-3);
-            border-bottom-left-radius: var(--border-radius-md);
-            box-shadow: var(--shadow-sm);
-            z-index: 2;
-            font-size: var(--font-size-xs);
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        /* @keyframes slideIn supprimé pour éviter l'animation au chargement */
-
-        .badge-text {
-            position: relative;
-            z-index: 1;
-        }
-
-        .club-logo-badge::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        /* @keyframes shimmer supprimé pour éviter l'animation au chargement */
-
-        .club-logo-shine {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(255, 255, 255, 0.2) 50%, 
-                transparent 100%);
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            pointer-events: none;
-            transform: translateX(-100%);
-        }
-
-        .club-logo:hover .club-logo-shine {
-            opacity: 1;
-            transform: translateX(100%);
-            transition: transform 0.6s ease-in-out, opacity 0.5s ease-in-out;
-        }
-
-        .club-logo-particles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .particle {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        .particle:nth-child(1) {
-            width: 4px;
-            height: 4px;
-            top: 20%;
-            left: 20%;
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        .particle:nth-child(2) {
-            width: 6px;
-            height: 6px;
-            top: 60%;
-            left: 80%;
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        .particle:nth-child(3) {
-            width: 3px;
-            height: 3px;
-            top: 80%;
-            left: 30%;
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        .particle:nth-child(4) {
-            width: 5px;
-            height: 5px;
-            top: 30%;
-            left: 70%;
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        .particle:nth-child(5) {
-            width: 4px;
-            height: 4px;
-            top: 70%;
-            left: 60%;
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        @keyframes particle-float {
-            0% {
-                transform: translateY(0) translateX(0) scale(0.5);
-                opacity: 0;
-            }
-            20% {
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(-100px) translateX(100px) scale(0.8);
-                opacity: 0;
-            }
-        }
-
-        .club-logo {
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        /* @keyframes logo-entrance supprimé pour éviter l'animation au chargement */
-
-        .club-details {
-            flex: 1;
-        }
-
-        .club-name {
-            font-size: var(--font-size-4xl);
-            font-weight: 800;
-            margin-bottom: var(--spacing-2);
-            background: linear-gradient(135deg, var(--white), var(--gray-100));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .club-description {
-            font-size: var(--font-size-lg);
-            margin-bottom: var(--spacing-4);
-            opacity: 0.9;
-        }
-
-        .club-stats {
-            display: flex;
-            gap: var(--spacing-6);
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-2);
-            background: rgba(255, 255, 255, 0.1);
-            padding: var(--spacing-2) var(--spacing-3);
-            border-radius: var(--border-radius);
-            backdrop-filter: blur(10px);
-        }
-
-        .stat-icon {
-            font-size: var(--font-size-lg);
-        }
-
-        .stat-label {
-            font-size: var(--font-size-sm);
-            opacity: 0.8;
-        }
-
-        .stat-value {
-            font-weight: 600;
-            color: var(--secondary-color);
-        }
-
-        .header-actions {
-            display: flex;
-            gap: var(--spacing-3);
-        }
-
-        /* Section statistiques rapides */
-        .quick-stats {
-            background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
-            padding: var(--spacing-12) 0;
-            margin-top: var(--spacing-16);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--spacing-6);
-            padding: 0 var(--spacing-4);
-        }
-
-        .stat-card {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-4);
-            padding: var(--spacing-4);
-            background: var(--white);
-            border-radius: var(--border-radius-md);
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition-normal);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .stat-icon {
-            font-size: var(--font-size-2xl);
-            color: var(--primary-color);
-        }
-
-        .stat-content h3 {
-            font-size: var(--font-size-md);
-            font-weight: 600;
-            color: var(--gray-800);
-            margin-bottom: var(--spacing-1);
-        }
-
-        .stat-number {
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        .stat-text {
-            font-size: var(--font-size-sm);
-            color: var(--gray-600);
-        }
-
-        /* Section prochain événement */
-        .next-event-section {
-            background: linear-gradient(135deg, var(--gray-50), var(--white));
-            padding: var(--spacing-12) 0;
-            margin-top: var(--spacing-8);
-        }
-
+        /* Next event */
         .next-event-card {
-            background: var(--white);
-            border-radius: var(--border-radius-xl);
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--gray-200);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            transition: var(--transition-normal);
-            position: relative;
-        }
-
-        .next-event-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-        }
-
-        .next-event-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-xl);
+            box-shadow: var(--shadow-sm);
         }
 
         .next-event-header {
             display: flex;
             align-items: center;
-            gap: var(--spacing-6);
-            padding: var(--spacing-8);
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: var(--white);
+            justify-content: space-between;
+            gap: var(--space-6);
+            padding: var(--space-6);
+            background: var(--color-asphalt);
+            color: var(--color-white);
         }
 
-        .next-event-icon {
-            font-size: var(--font-size-3xl);
-            background: rgba(255, 255, 255, 0.2);
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            flex-shrink: 0;
-        }
-
-        .next-event-info {
-            flex: 1;
-        }
-
-        .next-event-info h3 {
-            font-size: var(--font-size-lg);
-            font-weight: 700;
-            margin: 0 0 var(--spacing-2) 0;
-            opacity: 0.9;
+        .next-event-label {
+            margin: 0 0 var(--space-2);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            opacity: 0.75;
         }
 
         .next-event-name {
-            font-size: var(--font-size-2xl);
-            font-weight: 800;
-            margin: 0 0 var(--spacing-1) 0;
+            margin: 0 0 var(--space-1);
+            font-size: 1.375rem;
+            color: var(--color-white);
         }
 
         .next-event-date {
-            font-size: var(--font-size-lg);
-            opacity: 0.8;
             margin: 0;
+            font-size: 0.9375rem;
+            opacity: 0.85;
         }
 
         .next-event-countdown {
+            flex-shrink: 0;
             text-align: center;
-            background: rgba(255, 255, 255, 0.15);
-            padding: var(--spacing-4) var(--spacing-6);
-            border-radius: var(--border-radius-lg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: var(--space-4) var(--space-5);
+            background: rgb(255 255 255 / 0.1);
+            border: 1px solid rgb(255 255 255 / 0.15);
+            border-radius: var(--radius);
         }
 
         .countdown-number {
-            font-size: var(--font-size-4xl);
-            font-weight: 900;
-            color: #ef4444;
-            margin-bottom: var(--spacing-1);
+            display: block;
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            color: var(--color-amber);
         }
 
         .countdown-label {
-            font-size: var(--font-size-sm);
+            display: block;
+            margin-top: var(--space-1);
+            font-size: 0.75rem;
             font-weight: 600;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            opacity: 0.9;
+            opacity: 0.85;
         }
 
         .next-event-actions {
-            display: flex;
-            gap: var(--spacing-4);
-            padding: var(--spacing-6);
-            background: var(--white);
-            border-top: 1px solid var(--gray-200);
+            padding: var(--space-4) var(--space-6);
+            border-top: 1px solid var(--color-border);
         }
 
-        /* Couleurs des événements SLOT4000 */
-        .event-proto32 .next-event-header { background: linear-gradient(135deg, #10b981, #059669); }
-        .event-gt32 .next-event-header { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .event-tcr-scale .next-event-header { background: linear-gradient(135deg, #ec4899, #db2777); }
-        .event-slot-it .next-event-header { background: linear-gradient(135deg, #84cc16, #65a30d); }
-        .event-gr5 .next-event-header { background: linear-gradient(135deg, #10b981, #059669); }
-        .event-proto24 .next-event-header { background: linear-gradient(135deg, #f97316, #ea580c); }
-        .event-gt24 .next-event-header { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-        .event-1000kms .next-event-header { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .event-scaleauto .next-event-header { background: linear-gradient(135deg, #6b7280, #4b5563); }
-        .event-bpc .next-event-header { background: linear-gradient(135deg, #6b7280, #4b5563); }
-        .event-bel-lms .next-event-header { background: linear-gradient(135deg, #6b7280, #4b5563); }
+        /* Event header colors */
+        .event-proto32 .next-event-header { background: linear-gradient(135deg, #1a7a4c, #145c3a); }
+        .event-gt32 .next-event-header { background: linear-gradient(135deg, #c8102e, #a50d25); }
+        .event-tcr-scale .next-event-header { background: linear-gradient(135deg, #2563a8, #1a4a80); }
+        .event-slot-it .next-event-header { background: linear-gradient(135deg, #6b4fa0, #553d80); }
+        .event-gr5 .next-event-header { background: linear-gradient(135deg, #3d3d42, #2b2b2e); }
+        .event-proto24 .next-event-header { background: linear-gradient(135deg, #e8650a, #c55408); }
+        .event-gt24 .next-event-header { background: linear-gradient(135deg, #7c3aed, #6429c7); }
+        .event-1000kms .next-event-header { background: linear-gradient(135deg, #0d7377, #0a585b); }
+        .event-scaleauto .next-event-header { background: linear-gradient(135deg, #b8860b, #96700a); }
+        .event-revoslot .next-event-header { background: linear-gradient(135deg, #c0392b, #962d22); }
+        .event-brm .next-event-header { background: linear-gradient(135deg, #2c5282, #1e3a5f); }
+        .event-bpc .next-event-header { background: linear-gradient(135deg, #805ad5, #6842b8); }
+        .event-bel-lms .next-event-header { background: linear-gradient(135deg, #276749, #1d4f37); }
+        .event-revo .next-event-header { background: linear-gradient(135deg, #9b2c2c, #742020); }
+        .event-dephtone .next-event-header { background: linear-gradient(135deg, #4a5568, #374151); }
+        .event-chall .next-event-header { background: linear-gradient(135deg, #d69e2e, #b8860b); }
+        .event-ds-c-a .next-event-header { background: linear-gradient(135deg, #4a5568, #374151); }
+        .event-chimay .next-event-header { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+        .event-s4all .next-event-header { background: linear-gradient(135deg, #e8650a, #c55408); }
+        .event-slot-4000 .next-event-header { background: linear-gradient(135deg, #3d3d42, #2b2b2e); }
+        .event-fastlane .next-event-header { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+        .event-dulmen .next-event-header { background: linear-gradient(135deg, #4a5568, #374151); }
+        .event-dsca .next-event-header { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+        .event-stolberg .next-event-header { background: linear-gradient(135deg, #4a5568, #374151); }
+        .event-diepenbeek .next-event-header { background: linear-gradient(135deg, #e8650a, #c55408); }
+        .event-eindhoven .next-event-header { background: linear-gradient(135deg, #e8650a, #c55408); }
+        .event-mrtu .next-event-header { background: linear-gradient(135deg, #4a5568, #374151); }
+        .event-srcs .next-event-header { background: linear-gradient(135deg, #c0392b, #962d22); }
 
-        /* Couleurs des événements SRCS */
-        .event-revoslot .next-event-header { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
-        .event-brm .next-event-header { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
-        .event-gt24 .next-event-header { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .event-proto24 .next-event-header { background: linear-gradient(135deg, #10b981, #059669); }
-        .event-scaleauto .next-event-header { background: linear-gradient(135deg, #fca5a5, #f87171); }
-        .event-bpc .next-event-header { background: linear-gradient(135deg, #6b7280, #4b5563); }
-        .event-bel-lms .next-event-header { background: linear-gradient(135deg, #5eead4, #14b8a6); }
-        .event-revo .next-event-header { background: linear-gradient(135deg, #f97316, #ea580c); }
-        .event-dephtone .next-event-header { background: linear-gradient(135deg, #ec4899, #db2777); }
-        .event-chall .next-event-header { background: linear-gradient(135deg, #ec4899, #db2777); }
-        .event-ds-c-a .next-event-header { background: linear-gradient(135deg, #6b7280, #4b5563); }
-        .event-chimay .next-event-header { background: linear-gradient(135deg, #5eead4, #14b8a6); }
-        .event-s4all .next-event-header { background: linear-gradient(135deg, #f97316, #ea580c); }
-        .event-slot-4000 .next-event-header { background: linear-gradient(135deg, #6b7280, #4b5563); }
-        .event-fastlane .next-event-header { background: linear-gradient(135deg, #5eead4, #14b8a6); }
-        .event-dulmen .next-event-header { background: linear-gradient(135deg, #6b7280, #4b5563); }
-        .event-dsca .next-event-header { background: linear-gradient(135deg, #5eead4, #14b8a6); }
-        .event-stolberg .next-event-header { background: linear-gradient(135deg, #6b7280, #4b5563); }
-        .event-diepenbeek .next-event-header { background: linear-gradient(135deg, #f97316, #ea580c); }
-        .event-eindhoven .next-event-header { background: linear-gradient(135deg, #f97316, #ea580c); }
-        .event-mrtu .next-event-header { background: linear-gradient(135deg, #6b7280, #4b5563); }
-        .event-srcs .next-event-header { background: linear-gradient(135deg, #fca5a5, #f87171); }
-
-        /* Contenu principal */
-        .page-content {
-            padding: var(--spacing-16) 0;
+        /* Filters sidebar */
+        .filters-panel,
+        .active-filters-panel {
+            padding: var(--space-5);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
         }
 
-        .content-layout {
-            display: flex;
-            gap: var(--spacing-8);
+        .filters-panel-title {
+            margin-bottom: var(--space-2);
+            font-size: 1rem;
         }
 
-        .filters-sidebar {
-            flex: 0 0 300px; /* Fixed width for filters */
-            position: sticky;
-            top: var(--spacing-16); /* Adjust as needed */
-            height: fit-content;
+        .filters-panel-lead {
+            margin-bottom: var(--space-5);
+            font-size: 0.875rem;
+            color: var(--color-muted);
         }
 
-        .races-section {
-            flex: 1;
+        .filters-panel-actions {
+            margin-top: var(--space-2);
         }
 
-        .races-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-6);
-            padding: 0 var(--spacing-4);
-        }
-
-        .races-title h2 {
-            font-size: var(--font-size-3xl);
-            color: var(--gray-900);
-            margin-bottom: var(--spacing-2);
-        }
-
-        .races-subtitle {
-            font-size: var(--font-size-md);
-            color: var(--gray-600);
-            margin-bottom: var(--spacing-2);
-        }
-
-        .races-count {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-2);
-            background: var(--primary-light);
-            padding: var(--spacing-2) var(--spacing-3);
-            border-radius: var(--border-radius);
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .races-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: var(--spacing-6);
-            padding: 0 var(--spacing-4);
-        }
-
-        .race-card {
-            display: flex;
-            flex-direction: column;
-            background: var(--white);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
-            overflow: hidden;
-            transition: var(--transition-normal);
-            border: 1px solid var(--gray-200);
-        }
-
-        .race-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .race-content {
-            padding: var(--spacing-4);
-            flex-grow: 1;
-        }
-
-        .race-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-3);
-        }
-
-        .race-date {
-            font-size: var(--font-size-lg);
-            font-weight: 700;
-            color: var(--gray-800);
-        }
-
-        .race-category {
-            font-size: var(--font-size-md);
-            font-weight: 600;
-            color: var(--primary-color);
-            background: var(--primary-light);
-            padding: var(--spacing-1) var(--spacing-2);
-            border-radius: var(--border-radius-sm);
-            border: 1px solid var(--primary-color);
-        }
-
-        .race-info {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-2);
-            margin-top: var(--spacing-3);
-        }
-
-        .race-icon {
-            font-size: var(--font-size-lg);
-            color: var(--primary-color);
-        }
-
-        .race-text {
-            font-size: var(--font-size-md);
-            font-weight: 500;
-            color: var(--gray-700);
-        }
-
-        .race-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: var(--spacing-3);
-            font-size: var(--font-size-sm);
-            color: var(--gray-600);
-        }
-
-        .race-year {
-            font-weight: 600;
-            color: var(--gray-800);
-        }
-
-        .race-status {
-            font-size: var(--font-size-sm);
-            color: var(--success-color);
-            background: var(--success-light);
-            padding: var(--spacing-1) var(--spacing-2);
-            border-radius: var(--border-radius-sm);
-        }
-
-        .race-arrow {
-            font-size: var(--font-size-2xl);
-            color: var(--gray-400);
-            align-self: center;
-            margin-left: auto;
-        }
-
-        .no-races {
-            text-align: center;
-            padding: var(--spacing-12) var(--spacing-4);
-            background: var(--white);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
-            border: 1px dashed var(--gray-300);
-        }
-
-        .no-races-icon {
-            font-size: var(--font-size-4xl);
-            color: var(--gray-400);
-            margin-bottom: var(--spacing-4);
-        }
-
-        .no-races h3 {
-            font-size: var(--font-size-2xl);
-            color: var(--gray-800);
-            margin-bottom: var(--spacing-2);
-        }
-
-        .no-races p {
-            font-size: var(--font-size-lg);
-            color: var(--gray-600);
-            margin-bottom: var(--spacing-4);
-        }
-
-        .no-races-actions {
-            display: flex;
-            gap: var(--spacing-3);
-            justify-content: center;
-        }
-
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: var(--spacing-8);
-            padding: var(--spacing-4) 0;
-            border-top: 1px solid var(--gray-200);
-        }
-
-        .pagination-btn {
-            background: var(--primary-color);
-            color: var(--white);
-            padding: var(--spacing-3) var(--spacing-6);
-            border-radius: var(--border-radius-md);
-            border: none;
-            cursor: pointer;
-            font-size: var(--font-size-md);
-            font-weight: 600;
-            transition: var(--transition-normal);
-            margin: 0 var(--spacing-2);
-        }
-
-        .pagination-btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .pagination-btn:disabled {
-            background: var(--gray-300);
-            color: var(--gray-500);
-            cursor: not-allowed;
-        }
-
-        .pagination-info {
-            font-size: var(--font-size-md);
-            color: var(--gray-700);
-            margin: 0 var(--spacing-4);
-        }
-
-        /* View Switcher */
-        .view-controls {
-            display: flex;
-            gap: var(--spacing-2);
-        }
-
-        .view-btn {
-            background: var(--gray-200);
-            color: var(--gray-600);
-            padding: var(--spacing-2) var(--spacing-4);
-            border-radius: var(--border-radius-md);
-            border: none;
-            cursor: pointer;
-            font-size: var(--font-size-lg);
-            transition: var(--transition-normal);
-        }
-
-        .view-btn:hover {
-            background: var(--gray-300);
-        }
-
-        .view-btn.active {
-            background: var(--primary-color);
-            color: var(--white);
-        }
-
-        /* Filtres actifs */
-        #activeFilters {
-            margin-top: var(--spacing-6);
-            background: var(--white);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--gray-200);
-        }
-
-        #activeFilters h3 {
-            font-size: var(--font-size-lg);
-            color: var(--gray-800);
-            padding: var(--spacing-4);
-            border-bottom: 1px solid var(--gray-100);
-            margin: 0;
-        }
-
-        #activeFiltersList {
-            padding: var(--spacing-4);
-            max-height: 200px; /* Adjust as needed */
-            overflow-y: auto;
-        }
-
-        #activeFiltersList .filter-tag {
-            display: inline-block;
-            background: var(--primary-light);
-            color: var(--primary-color);
-            padding: var(--spacing-1) var(--spacing-2);
-            border-radius: var(--border-radius-sm);
-            font-size: var(--font-size-sm);
-            margin: var(--spacing-2) var(--spacing-1) 0 0;
-            border: 1px solid var(--primary-color);
-        }
-
-        #activeFiltersList .filter-tag .remove-filter {
-            cursor: pointer;
-            margin-left: var(--spacing-1);
-            font-size: var(--font-size-sm);
-            color: var(--gray-500);
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
-            .content-layout {
-                flex-direction: column;
-            }
-
-            .filters-sidebar {
-                position: static;
-                width: 100%;
-                margin-bottom: var(--spacing-8);
-            }
-
-            .races-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: var(--spacing-4);
-            }
-
-            .races-count {
-                margin-left: auto;
-            }
-
-            .view-controls {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .footer-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .page-header-content {
-                flex-direction: column;
-                text-align: center;
-                gap: var(--spacing-6);
-            }
-
-            .club-info {
-                flex-direction: column;
-                gap: var(--spacing-4);
-            }
-
-            .club-stats {
-                justify-content: center;
-            }
-
-            .header-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .next-event-header {
-                flex-direction: column;
-                text-align: center;
-                gap: var(--spacing-4);
-            }
-
-            .next-event-actions {
-                flex-direction: column;
-            }
-
-            .races-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .no-races-actions {
-                flex-direction: column;
-                gap: var(--spacing-3);
-            }
-
-            .footer-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-
-        /* Footer amélioré */
-        .footer {
-            background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
-            color: var(--white);
-            margin-top: var(--spacing-16);
-        }
-
-        .footer-content {
-            padding: var(--spacing-16) 0 var(--spacing-8) 0;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-8);
-            margin-bottom: var(--spacing-8);
-        }
-
-        .footer-section h4 {
-            font-size: var(--font-size-lg);
-            font-weight: 600;
-            margin-bottom: var(--spacing-4);
-            color: var(--secondary-color);
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-3);
-            font-size: var(--font-size-xl);
-            font-weight: 700;
-            margin-bottom: var(--spacing-4);
-        }
-
-        .footer-logo .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--secondary-color), var(--warning-color));
-            border-radius: var(--border-radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            font-weight: bold;
-        }
-
-        .footer-description {
-            color: var(--gray-300);
-            margin-bottom: var(--spacing-4);
-            line-height: 1.6;
-        }
-
-        .footer-social {
-            display: flex;
-            gap: var(--spacing-3);
-        }
-
-        .social-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: var(--border-radius);
-            color: var(--white);
-            text-decoration: none;
-            transition: var(--transition-normal);
-            font-size: var(--font-size-lg);
-        }
-
-        .social-link:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .footer-links {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-links li {
-            margin-bottom: var(--spacing-2);
-        }
-
-        .footer-links a {
-            color: var(--gray-300);
-            text-decoration: none;
-            transition: var(--transition-normal);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-2);
-        }
-
-        .footer-links a:hover {
-            color: var(--secondary-color);
-            transform: translateX(4px);
-        }
-
-        .footer-bottom {
-            border-top: 1px solid var(--gray-700);
-            padding-top: var(--spacing-6);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: var(--spacing-4);
-        }
-
-        .footer-copyright {
-            color: var(--gray-400);
-        }
-
-        .footer-version {
-            color: var(--gray-500);
-            font-size: var(--font-size-sm);
-        }
-
-        /* Modal amélioré */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .filters-panel-actions .btn {
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
         }
 
-        .modal-content {
-            background: var(--white);
-            border-radius: var(--border-radius-lg);
-            max-width: 500px;
-            width: 90%;
-            box-shadow: var(--shadow-xl);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: var(--spacing-6);
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: var(--font-size-2xl);
-            cursor: pointer;
-            color: var(--gray-500);
-            transition: var(--transition-normal);
-        }
-
-        .modal-close:hover {
-            color: var(--error-color);
-        }
-
-        .modal-body {
-            padding: var(--spacing-6);
-        }
-
-        /* Upload area styles */
-        .upload-instructions {
-            margin-bottom: var(--spacing-4);
-        }
-
-        .upload-instructions h4 {
-            font-size: var(--font-size-lg);
-            color: var(--gray-800);
-            margin-bottom: var(--spacing-2);
-        }
-
-        .upload-instructions ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .upload-instructions li {
-            padding: var(--spacing-1) 0;
-            color: var(--gray-600);
-            position: relative;
-            padding-left: var(--spacing-4);
-        }
-
-        .upload-instructions li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: var(--success-color);
-            font-weight: bold;
-        }
-
-        .file-upload-area {
-            border: 2px dashed var(--gray-300);
-            border-radius: var(--border-radius-lg);
-            padding: var(--spacing-8);
-            text-align: center;
-            transition: var(--transition-normal);
-            cursor: pointer;
-            margin: var(--spacing-4) 0;
-        }
-
-        .file-upload-area:hover {
-            border-color: var(--primary-color);
-            background: var(--primary-light);
-        }
-
-        .file-upload-area.dragover {
-            border-color: var(--primary-color);
-            background: var(--primary-light);
-        }
-
-        .upload-icon {
-            font-size: var(--font-size-4xl);
-            color: var(--gray-400);
-            margin-bottom: var(--spacing-2);
-        }
-
-        .file-upload-area p {
-            color: var(--gray-600);
-            margin: 0;
-        }
-
-        .file-input {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        .upload-preview {
-            background: var(--gray-50);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-4);
-            margin: var(--spacing-4) 0;
-        }
-
-        .upload-preview h4 {
-            font-size: var(--font-size-md);
-            color: var(--gray-800);
-            margin-bottom: var(--spacing-2);
-        }
-
-        .file-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: var(--font-size-sm);
-            color: var(--gray-600);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: var(--spacing-3);
-            justify-content: flex-end;
-            margin-top: var(--spacing-4);
-        }
-
-        /* Confirm modal */
-        .confirm-modal {
-            max-width: 400px;
-        }
-
-        /* Button styles */
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-
-        .btn-outline:hover {
-            background: var(--primary-color);
-            color: var(--white);
-        }
-
-        .btn-error {
-            background: var(--error-color);
-            color: var(--white);
-        }
-
-        .btn-error:hover {
-            background: var(--error-dark);
-        }
-
-        /* List view styles */
-        .races-grid.list-view {
-            grid-template-columns: 1fr;
-        }
-
-        .list-view .race-card {
-            flex-direction: row;
-            align-items: center;
-            padding: var(--spacing-4);
-        }
-
-        .list-view .race-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-4);
-        }
-
-        .list-view .race-header {
-            margin-bottom: 0;
-            flex: 1;
-        }
-
-        .list-view .race-info {
-            margin-top: 0;
-            flex: 0 0 auto;
-        }
-
-        .list-view .race-meta {
-            margin-top: 0;
-            flex: 0 0 auto;
-        }
-
-        /* Animations au scroll supprimées pour éviter les animations au chargement */
-
-        /* Animation d'apparition progressive */
-        .club-logo:focus {
-            outline: none;
-            transform: scale(1.05);
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
-        }
-
-        .club-logo:focus-within {
-            transform: scale(1.05);
-        }
-
-        /* Amélioration de l'accessibilité */
-        .club-logo:focus-visible {
-            outline: 3px solid var(--secondary-color);
-            outline-offset: 2px;
-        }
-
-        /* Effet de pulsation au survol - animations supprimées */
-        .club-logo:hover .club-logo-icon {
-            /* Animations supprimées pour éviter l'animation au chargement */
-        }
-
-        /* @keyframes bounce supprimé pour éviter l'animation au chargement */
-
-        /* Effet de particules au survol */
-        .club-logo:hover .particle {
-            animation-duration: 3s;
-            background: rgba(255, 255, 255, 0.6);
-        }
-
-        /* Responsive pour le logo */
-        @media (max-width: 768px) {
-            .club-logo {
-                width: 150px;
-                height: 150px;
-            }
-
-            .club-logo-icon {
-                font-size: 3rem;
-            }
-
-            .club-logo-badge {
-                font-size: 0.8rem;
-                padding: var(--spacing-1) var(--spacing-3);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .club-logo {
-                width: 120px;
-                height: 120px;
-            }
-
-            .club-logo-icon {
-                font-size: 2.5rem;
-            }
-
-            .club-logo-badge {
-                font-size: 0.7rem;
-                padding: var(--spacing-1) var(--spacing-2);
-            }
-        }
-
-        /* Filtres améliorés */
-        .filters-card {
-            background: linear-gradient(135deg, var(--white) 0%, var(--gray-50) 100%);
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow-lg);
-            border-radius: var(--border-radius-xl);
-            overflow: hidden;
-            transition: var(--transition-normal);
-        }
-
-        .filters-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .filters-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-            color: var(--white);
-            padding: var(--spacing-6);
-            border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .filters-title {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-3);
-        }
-
-        .filters-icon {
-            font-size: var(--font-size-2xl);
-            background: rgba(255, 255, 255, 0.2);
-            width: 50px;
-            height: 50px;
-            border-radius: var(--border-radius-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .filters-title h3 {
-            margin: 0;
-            font-size: var(--font-size-xl);
-            font-weight: 700;
-        }
-
-        .filters-title p {
-            margin: var(--spacing-1) 0 0 0;
-            opacity: 0.9;
-            font-size: var(--font-size-sm);
-        }
-
-        .filters-toggle {
-            background: rgba(255, 255, 255, 0.2);
-            width: 40px;
-            height: 40px;
-            border-radius: var(--border-radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition-normal);
-        }
-
-        .filters-toggle:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: rotate(90deg);
-        }
-
-        .toggle-icon {
-            font-size: var(--font-size-lg);
-        }
-
-        .filters-body {
-            padding: var(--spacing-6);
-        }
-
-        .filter-group {
-            margin-bottom: var(--spacing-6);
-        }
-
-        .form-label {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-2);
-            font-weight: 600;
-            color: var(--gray-800);
-            margin-bottom: var(--spacing-2);
-            font-size: var(--font-size-md);
-        }
-
-        .label-icon {
-            font-size: var(--font-size-lg);
-            opacity: 0.8;
-        }
-
-        .select-wrapper, .input-wrapper {
-            position: relative;
-        }
-
-        .filter-select, .filter-input {
-            width: 100%;
-            padding: var(--spacing-3) var(--spacing-4);
-            border: 2px solid var(--gray-200);
-            border-radius: var(--border-radius-lg);
-            background: var(--white);
-            font-size: var(--font-size-md);
-            transition: var(--transition-normal);
-            appearance: none;
-        }
-
-        .filter-select:focus, .filter-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .filter-select:hover, .filter-input:hover {
-            border-color: var(--primary-light);
-        }
-
-        .select-arrow {
-            position: absolute;
-            right: var(--spacing-3);
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray-500);
-            font-size: var(--font-size-sm);
-            pointer-events: none;
-            transition: var(--transition-normal);
-        }
-
-        .select-wrapper:hover .select-arrow {
-            color: var(--primary-color);
-        }
-
-        .input-icon {
-            position: absolute;
-            right: var(--spacing-3);
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray-400);
-            font-size: var(--font-size-md);
-            pointer-events: none;
-        }
-
-        .filter-input:focus + .input-icon {
-            color: var(--primary-color);
-        }
-
-        .filters-actions {
-            display: flex;
-            gap: var(--spacing-3);
-            margin-bottom: var(--spacing-4);
-        }
-
-        .filter-btn {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--spacing-2);
-            padding: var(--spacing-3) var(--spacing-4);
-            border-radius: var(--border-radius-lg);
-            font-weight: 600;
-            transition: var(--transition-normal);
-            border: none;
-            cursor: pointer;
-        }
-
-        .apply-btn {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: var(--white);
-        }
-
-        .apply-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .reset-btn {
-            background: linear-gradient(135deg, var(--gray-600), var(--gray-700));
-            color: var(--white);
-        }
-
-        .reset-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .export-btn {
-            background: transparent;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-
-        .export-btn:hover {
-            background: var(--primary-color);
-            color: var(--white);
-            transform: translateY(-2px);
-        }
-
-        .btn-icon {
-            font-size: var(--font-size-md);
-        }
-
-        /* Filtres actifs améliorés */
-        .active-filters {
-            margin-top: var(--spacing-6);
-            background: linear-gradient(135deg, var(--success-light) 0%, var(--white) 100%);
-            border: 1px solid var(--success-color);
+        .active-filters-panel {
+            margin-top: var(--space-4);
         }
 
         .active-filters-header {
-            background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
-            color: var(--white);
-            padding: var(--spacing-4) var(--spacing-6);
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
+            margin-bottom: var(--space-4);
         }
 
-        .active-filters-title {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-2);
-        }
-
-        .active-filters-icon {
-            font-size: var(--font-size-lg);
-        }
-
-        .active-filters-title h3 {
+        .active-filters-header h3 {
             margin: 0;
-            font-size: var(--font-size-lg);
-            font-weight: 600;
+            font-size: 0.875rem;
         }
 
-        .active-filters-count {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--white);
-            padding: var(--spacing-1) var(--spacing-3);
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            font-size: var(--font-size-sm);
-        }
-
-        .active-filters-body {
-            padding: var(--spacing-4) var(--spacing-6);
+        .active-filters-badge {
+            display: inline-grid;
+            place-items: center;
+            min-width: 1.5rem;
+            height: 1.5rem;
+            padding-inline: var(--space-2);
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: var(--color-accent);
+            color: var(--color-white);
+            border-radius: var(--radius-sm);
         }
 
         .active-filters-list {
-            margin-bottom: var(--spacing-4);
-            max-height: 200px;
-            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+            margin-bottom: var(--space-4);
         }
 
         .filter-tag {
             display: inline-flex;
             align-items: center;
-            background: linear-gradient(135deg, var(--success-color), var(--success-light));
-            color: var(--white);
-            padding: var(--spacing-2) var(--spacing-3);
-            border-radius: var(--border-radius-lg);
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-            margin: var(--spacing-1) var(--spacing-1) 0 0;
-            border: 1px solid var(--success-color);
-            transition: var(--transition-normal);
-            /* Animation supprimée pour éviter l'animation au chargement */
-        }
-
-        /* @keyframes tagEntrance supprimé pour éviter l'animation au chargement */
-
-        .filter-tag:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
+            gap: var(--space-2);
+            padding: var(--space-1) var(--space-3);
+            font-size: 0.8125rem;
+            background: var(--color-paper);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
         }
 
         .remove-filter {
             cursor: pointer;
-            margin-left: var(--spacing-2);
-            font-size: var(--font-size-sm);
-            opacity: 0.8;
-            transition: var(--transition-normal);
+            font-size: 1rem;
+            line-height: 1;
+            color: var(--color-muted);
         }
 
         .remove-filter:hover {
-            opacity: 1;
-            transform: scale(1.2);
+            color: var(--color-accent);
         }
 
         .clear-all-btn {
-            background: linear-gradient(135deg, var(--error-color), var(--error-dark));
-            color: var(--white);
             width: 100%;
         }
 
-        .clear-all-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+        /* Races toolbar */
+        .races-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        .races-toolbar-sub {
+            margin: var(--space-2) 0 0;
+            font-size: 0.9375rem;
+            color: var(--color-muted);
+        }
+
+        .races-count {
+            display: inline-flex;
+            align-items: baseline;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            font-size: 0.875rem;
+            background: var(--color-paper);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+        }
+
+        .count-number {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .count-label {
+            color: var(--color-muted);
+        }
+
+        .view-controls {
+            display: inline-flex;
+            gap: var(--space-1);
+            padding: var(--space-1);
+            background: var(--color-paper);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+        }
+
+        .view-btn {
+            display: grid;
+            place-items: center;
+            width: 2rem;
+            height: 2rem;
+            padding: 0;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--color-muted);
+            transition: background var(--transition), color var(--transition);
+        }
+
+        .view-btn:hover {
+            color: var(--color-ink);
+            background: var(--color-white);
+        }
+
+        .view-btn.active {
+            color: var(--color-white);
+            background: var(--color-accent);
+        }
+
+        /* Race cards */
+        .race-form {
+            display: flex;
+            min-width: 0;
+        }
+
+        .race-card {
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            border: 1px solid var(--color-border);
+            font: inherit;
+        }
+
+        .race-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow);
+        }
+
+        .race-tile-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-3);
+        }
+
+        .race-category {
+            flex-shrink: 0;
+            padding: var(--space-1) var(--space-2);
+            font-size: 0.6875rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--color-white);
+            background: var(--color-asphalt);
+            border-radius: var(--radius-sm);
+        }
+
+        .race-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-muted);
+        }
+
+        .race-card:hover .race-text {
+            color: var(--color-accent);
+        }
+
+        .race-tile-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-3);
+            margin-top: auto;
+            padding-top: var(--space-3);
+            border-top: 1px solid var(--color-border);
+            font-size: 0.8125rem;
+        }
+
+        .race-year {
+            font-weight: 600;
+            color: var(--color-ink);
+        }
+
+        .race-status {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--color-success);
+        }
+
+        .race-arrow {
+            display: none;
+        }
+
+        /* List view */
+        .race-grid.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .list-view .race-form {
+            width: 100%;
+        }
+
+        .list-view .race-card {
+            flex-direction: row;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .list-view .race-tile-header {
+            flex: 0 0 12rem;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .list-view .race-text {
+            flex: 1;
+        }
+
+        .list-view .race-tile-meta {
+            flex: 0 0 auto;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .list-view .race-arrow {
+            display: block;
+            flex-shrink: 0;
+            font-size: 1.125rem;
+            color: var(--color-muted);
+        }
+
+        .list-view .race-card:hover .race-arrow {
+            color: var(--color-accent);
+        }
+
+        /* Empty state */
+        .no-races {
+            grid-column: 1 / -1;
+            padding: var(--space-10) var(--space-6);
+            text-align: center;
+            background: var(--color-white);
+            border: 1px dashed var(--color-border);
+            border-radius: var(--radius-lg);
+        }
+
+        .no-races h3 {
+            margin-bottom: var(--space-3);
+        }
+
+        .no-races p {
+            margin-bottom: var(--space-6);
+            color: var(--color-muted);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-4);
+            margin-top: var(--space-8);
+            padding-top: var(--space-6);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .pagination-info {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-muted);
+        }
+
+        /* Modal extras */
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            line-height: 1;
+            color: var(--color-muted);
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: var(--color-accent);
+        }
+
+        .upload-instructions h4 {
+            margin-bottom: var(--space-3);
+            font-size: 0.875rem;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .upload-instructions ul {
+            margin-bottom: var(--space-4);
+        }
+
+        .upload-instructions li {
+            position: relative;
+            padding-left: var(--space-4);
+            font-size: 0.875rem;
+            color: var(--color-muted);
+        }
+
+        .upload-instructions li::before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+        }
+
+        .file-upload-area {
+            position: relative;
+            padding: var(--space-8) var(--space-4);
+            text-align: center;
+            border: 2px dashed var(--color-border);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: border-color var(--transition), background var(--transition);
+        }
+
+        .file-upload-area:hover,
+        .file-upload-area.dragover {
+            border-color: var(--color-accent);
+            background: rgb(200 16 46 / 0.04);
+        }
+
+        .file-upload-area p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--color-muted);
+        }
+
+        .file-input {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-preview {
+            margin-top: var(--space-4);
+            padding: var(--space-4);
+            background: var(--color-paper);
+            border-radius: var(--radius);
+        }
+
+        .upload-preview h4 {
+            margin-bottom: var(--space-2);
+            font-size: 0.8125rem;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .file-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: var(--space-2);
+            font-size: 0.8125rem;
+            color: var(--color-muted);
+        }
+
+        .confirm-modal {
+            max-width: 24rem;
+        }
+
+        @media (max-width: 768px) {
+            .next-event-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-hero-actions {
+                width: 100%;
+            }
+
+            .page-hero-actions .btn {
+                flex: 1;
+            }
         }
     </style>
 
-    <!-- Script JavaScript -->
     <script>
         // Gestion de l'upload de fichier
         document.getElementById('uploadButton').addEventListener('click', function(e) {
@@ -2048,6 +826,17 @@
         });
 
         function showUploadModal() {
+            const modalInput = document.getElementById('modalFileInput');
+            const uploadPreview = document.getElementById('uploadPreview');
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            if (modalInput) modalInput.value = '';
+            if (uploadPreview) uploadPreview.style.display = 'none';
+            if (uploadBtn) {
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = 'Importer';
+            }
+
             document.getElementById('uploadModal').style.display = 'flex';
         }
 
@@ -2055,14 +844,42 @@
             document.getElementById('uploadModal').style.display = 'none';
         }
 
+        function setFileInputFiles(input, file) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            input.files = dataTransfer.files;
+        }
+
         function uploadFile() {
-            const fileInput = document.getElementById('modalFileInput');
-            if (fileInput.files.length > 0) {
-                document.getElementById('fileInput').files = fileInput.files;
-                document.getElementById('uploadForm').submit();
-            } else {
+            const modalInput = document.getElementById('modalFileInput');
+            const formInput = document.getElementById('fileInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const clubInput = document.getElementById('clubInput');
+
+            if (!modalInput.files || modalInput.files.length === 0) {
                 alert('Veuillez sélectionner un fichier');
+                return;
             }
+
+            if (!clubInput || !clubInput.value) {
+                alert('Club introuvable. Rechargez la page et réessayez.');
+                return;
+            }
+
+            const file = modalInput.files[0];
+            setFileInputFiles(formInput, file);
+
+            if (!formInput.files || formInput.files.length === 0) {
+                alert('Impossible de préparer le fichier pour l\'envoi. Réessayez.');
+                return;
+            }
+
+            if (uploadBtn) {
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = 'Import en cours…';
+            }
+
+            document.getElementById('uploadForm').submit();
         }
 
         // Application des filtres
@@ -2106,8 +923,8 @@
             document.getElementById("categoryFilter").value = "";
             document.getElementById("yearFilter").value = "";
             document.getElementById("searchFilter").value = "";
-            document.getElementById("sortFilter").value = "date-desc"; // Reset to default sort
-            
+            document.getElementById("sortFilter").value = "date-desc";
+
             let raceCards = document.querySelectorAll(".race-card");
             raceCards.forEach(card => {
                 card.style.display = "block";
@@ -2126,19 +943,13 @@
             }
         }
 
-        // Initialisation sans animations au chargement
+        // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser les contrôles de vue
             initializeViewControls();
-            
-            // Initialiser le drag & drop
             initializeDragAndDrop();
-            
-            // Initialiser les filtres actifs
             updateActiveFilters();
         });
 
-        // Initialiser les contrôles de vue
         function initializeViewControls() {
             const viewBtns = document.querySelectorAll('.view-btn');
             viewBtns.forEach(btn => {
@@ -2149,12 +960,9 @@
             });
         }
 
-        // Initialiser le drag & drop
         function initializeDragAndDrop() {
             const uploadArea = document.getElementById('fileUploadArea');
             const fileInput = document.getElementById('modalFileInput');
-
-            uploadArea.addEventListener('click', () => fileInput.click());
 
             uploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -2170,7 +978,7 @@
                 uploadArea.classList.remove('dragover');
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
-                    fileInput.files = files;
+                    setFileInputFiles(fileInput, files[0]);
                     handleFileSelection(files[0]);
                 }
             });
@@ -2182,7 +990,6 @@
             });
         }
 
-        // Gérer la sélection de fichier
         function handleFileSelection(file) {
             const uploadPreview = document.getElementById('uploadPreview');
             const fileName = document.getElementById('fileName');
@@ -2194,14 +1001,12 @@
             uploadPreview.style.display = 'block';
             uploadBtn.disabled = false;
 
-            // Vérifier la taille du fichier
-            if (file.size > 10 * 1024 * 1024) { // 10MB
+            if (file.size > 10 * 1024 * 1024) {
                 alert('Le fichier est trop volumineux. Taille maximale : 10 MB');
                 uploadBtn.disabled = true;
             }
         }
 
-        // Formater la taille du fichier
         function formatFileSize(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
@@ -2210,25 +1015,22 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Fermer le modal en cliquant à l'extérieur
         document.getElementById('uploadModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideUploadModal();
             }
         });
 
-        // Fermer le modal de confirmation en cliquant à l'extérieur
         document.getElementById('confirmModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideConfirmModal();
             }
         });
 
-        // Gestion de la vue (grid/list)
         function switchView(view) {
             const raceContainer = document.getElementById('raceContainer');
             const viewBtns = document.querySelectorAll('.view-btn');
-            
+
             viewBtns.forEach(btn => btn.classList.remove('active'));
             document.querySelector(`[data-view="${view}"]`).classList.add('active');
 
@@ -2250,7 +1052,7 @@
             const visibleCards = document.querySelectorAll(".race-card[style='display: block'], .race-card:not([style])");
             totalItems = visibleCards.length;
             const totalPages = Math.ceil(totalItems / itemsPerPage);
-            
+
             document.getElementById('totalPages').textContent = totalPages;
             document.getElementById('currentPage').textContent = currentPage;
 
@@ -2260,7 +1062,6 @@
                 document.getElementById('pagination').style.display = 'none';
             }
 
-            // Afficher seulement les éléments de la page courante
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
 
@@ -2288,7 +1089,6 @@
             }
         }
 
-        // Export des résultats filtrés
         function exportFilteredRaces() {
             const categoryFilter = document.getElementById("categoryFilter").value;
             const yearFilter = document.getElementById("yearFilter").value;
@@ -2305,17 +1105,15 @@
             const filename = 'filtered_races.csv';
 
             showConfirmModal('Voulez-vous vraiment exporter les résultats filtrés vers un fichier CSV ?');
-            // Note: L'export réel nécessiterait une implémentation côté serveur
         }
 
-        // Gestion des filtres actifs
         function updateActiveFilters() {
             const activeFiltersList = document.getElementById('activeFiltersList');
             const activeFilters = document.getElementById('activeFilters');
             const activeFiltersCount = document.getElementById('activeFiltersCount');
-            
+
             activeFiltersList.innerHTML = '';
-            
+
             const categoryFilter = document.getElementById("categoryFilter").value;
             const yearFilter = document.getElementById("yearFilter").value;
             const searchFilter = document.getElementById("searchFilter").value;
@@ -2373,7 +1171,7 @@
             } else if (filterType === 'Tri') {
                 document.getElementById("sortFilter").value = "date-desc";
             }
-            
+
             applyFilters();
         }
 
@@ -2392,14 +1190,15 @@
             applyFilters();
         }
 
-        // Fonctions utilitaires
         function refreshPage() {
             window.location.reload();
         }
 
         function showQuickStats() {
             const quickStats = document.getElementById('quickStats');
-            quickStats.style.display = quickStats.style.display === 'none' ? 'block' : 'none';
+            if (quickStats) {
+                quickStats.style.display = quickStats.style.display === 'none' ? 'block' : 'none';
+            }
         }
 
         function showConfirmModal(message) {
@@ -2412,37 +1211,33 @@
         }
 
         function confirmAction() {
-            // Implémentation de l'action confirmée
             hideConfirmModal();
         }
 
-        // Écouteurs d'événements pour les filtres
         document.getElementById('sortFilter').addEventListener('change', function() {
             applyFilters();
         });
 
         document.getElementById('searchFilter').addEventListener('input', function() {
-            // Recherche en temps réel
             setTimeout(applyFilters, 300);
         });
 
-        // Fonction d'animation au scroll supprimée pour éviter les animations au chargement
-
-        // Amélioration de l'interactivité des filtres
         document.addEventListener('DOMContentLoaded', function() {
-            // Effet de focus amélioré pour les inputs
             const filterInputs = document.querySelectorAll('.filter-input, .filter-select');
             filterInputs.forEach(input => {
                 input.addEventListener('focus', function() {
-                    this.parentElement.style.transform = 'scale(1.02)';
+                    if (this.parentElement) {
+                        this.parentElement.style.transform = 'scale(1.02)';
+                    }
                 });
 
                 input.addEventListener('blur', function() {
-                    this.parentElement.style.transform = 'scale(1)';
+                    if (this.parentElement) {
+                        this.parentElement.style.transform = 'scale(1)';
+                    }
                 });
             });
 
-            // Animation des boutons au survol
             const filterBtns = document.querySelectorAll('.filter-btn');
             filterBtns.forEach(btn => {
                 btn.addEventListener('mouseenter', function() {

@@ -3,6 +3,7 @@ package org.example.belgianslotclubspring.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.belgianslotclubspring.models.Club;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -23,6 +24,7 @@ public class RaceResult {
     private LocalDate date;
     private String categoryName;
 
+    /** Code club (slot4000 | srcs). Champ historique — ne pas renommer (compatibilité schéma H2). */
     private String ClubName;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -62,7 +64,7 @@ public class RaceResult {
 
 
     public void setClub(String club) {
-        this.ClubName = club;
+        this.ClubName = Club.requireCode(club);
     }
 }
 

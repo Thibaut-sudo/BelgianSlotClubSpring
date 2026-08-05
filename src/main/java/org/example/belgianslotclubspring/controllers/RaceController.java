@@ -1,5 +1,7 @@
 package org.example.belgianslotclubspring.controllers;
 
+import org.example.belgianslotclubspring.models.Club;
+import org.example.belgianslotclubspring.models.RaceSummary;
 import org.example.belgianslotclubspring.services.RaceResultService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,19 +40,20 @@ public class RaceController {
      */
     @GetMapping("/{club}")
     public String selectRace(@PathVariable String club, Model model) {
-        // Récupération des dates des courses disponibles pour le club
-        Map<LocalDate, String> raceResultDate = raceResultService.getRaceResultDateByClub(club);
+        String clubCode = Club.requireCode(club);
+        Club clubEnum = Club.fromCode(clubCode).orElseThrow();
 
-        // Récupération des catégories disponibles pour le club
-        List<String> listeCategorie = raceResultService.getAllCategoriesClub(club);
+        List<RaceSummary> raceSummaries = raceResultService.getRaceSummariesByClub(clubCode);
+        // Map conservée pour compatibilité templates/JS (une catégorie par date)
+        Map<LocalDate, String> raceResultDate = raceResultService.getRaceResultDateByClub(clubCode);
 
-        // Récupération des années de course disponibles pour le club
-        List<String> listeAnnees = raceResultService.getAllYearsClub(club);
+        List<String> listeCategorie = raceResultService.getAllCategoriesClub(clubCode);
+        List<String> listeAnnees = raceResultService.getAllYearsClub(clubCode);
 
         // Données des événements selon le club
         java.util.Map<String, String> events2025 = new java.util.TreeMap<>();
         
-        if ("slot4000".equals(club)) {
+        if (clubEnum.isSlot4000()) {
             // Données des événements SLOT4000 2025 (corrigées selon le calendrier officiel)
             events2025.put("2025-01-10", "GT32");
             events2025.put("2025-01-24", "GR5");
@@ -95,7 +98,7 @@ public class RaceController {
             events2025.put("2025-12-12", "SLOT.IT");
             events2025.put("2025-12-19", "GT24");
             events2025.put("2025-12-26", "PROTO32");
-        } else if ("srcs".equals(club)) {
+        } else if (clubEnum.isSrcs()) {
             // Données des événements SRCS 2025 (selon le calendrier officiel SRCS)
             events2025.put("2025-01-04", "Revoslot");
             events2025.put("2025-01-11", "BEL-LMS S.R.C.S");
@@ -168,50 +171,60 @@ public class RaceController {
             events2025.put("2025-12-30", "GT 24");
         }
 
-        // Trouver le prochain événement
+        // Prochain événement du calendrier du club (jamais le fallback d'un autre club)
         LocalDate today = LocalDate.now();
         String nextEventDate = null;
         String nextEventName = null;
         long daysUntilNext = 0;
+        boolean hasUpcomingEvent = false;
 
         for (java.util.Map.Entry<String, String> entry : events2025.entrySet()) {
             LocalDate eventDate = LocalDate.parse(entry.getKey());
-            if (eventDate.isAfter(today) || eventDate.isEqual(today)) {
+            if (!eventDate.isBefore(today)) {
                 nextEventDate = entry.getKey();
                 nextEventName = entry.getValue();
                 daysUntilNext = java.time.temporal.ChronoUnit.DAYS.between(today, eventDate);
+                hasUpcomingEvent = true;
                 break;
             }
         }
 
-        // Si aucun événement futur trouvé, prendre le premier de l'année
-        if (nextEventDate == null) {
-            nextEventDate = "2025-01-10";
-            nextEventName = "GT32";
-            daysUntilNext = java.time.temporal.ChronoUnit.DAYS.between(today, LocalDate.parse(nextEventDate));
+        // Saison terminée : dernier événement du calendrier de CE club
+        if (nextEventDate == null && !events2025.isEmpty()) {
+            java.util.Map.Entry<String, String> last = null;
+            for (java.util.Map.Entry<String, String> entry : events2025.entrySet()) {
+                last = entry;
+            }
+            if (last != null) {
+                nextEventDate = last.getKey();
+                nextEventName = last.getValue();
+                daysUntilNext = 0;
+            }
         }
 
-        // Formater la date
-        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH);
-        LocalDate eventDate = LocalDate.parse(nextEventDate);
-        String formattedDate = eventDate.format(formatter);
+        java.time.format.DateTimeFormatter formatter =
+                java.time.format.DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH);
+        String formattedDate = nextEventDate != null
+                ? LocalDate.parse(nextEventDate).format(formatter)
+                : "—";
 
-        // Déterminer le type d'événement pour la couleur
-        String eventType = nextEventName.split(",")[0].trim().toLowerCase().replaceAll("[^a-z0-9]", "");
+        String eventType = nextEventName != null
+                ? nextEventName.split(",")[0].trim().toLowerCase().replaceAll("[^a-z0-9]", "")
+                : "";
 
-        // Ajout des données au modèle pour les passer à la vue
-        model.addAttribute("club", club);
+        model.addAttribute("club", clubCode);
+        model.addAttribute("clubDisplayName", clubEnum.getDisplayName());
         model.addAttribute("listeCategorie", listeCategorie);
         model.addAttribute("raceResultDate", raceResultDate);
+        model.addAttribute("raceSummaries", raceSummaries);
         model.addAttribute("listeAnnees", listeAnnees);
-        
-        // Ajout des données du prochain événement
+
         model.addAttribute("nextEventDate", formattedDate);
-        model.addAttribute("nextEventName", nextEventName);
+        model.addAttribute("nextEventName", nextEventName != null ? nextEventName : "Aucun événement");
         model.addAttribute("daysUntilNext", daysUntilNext);
+        model.addAttribute("hasUpcomingEvent", hasUpcomingEvent);
         model.addAttribute("eventType", eventType);
 
-        // Retourne la vue Thymeleaf "selectRace.html" pour affichage
         return "pages/selectRace.html";
     }
 }

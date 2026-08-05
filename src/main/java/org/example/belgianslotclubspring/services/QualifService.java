@@ -11,10 +11,13 @@ public interface QualifService {
     void deleteQualif(Qualif qualif);
     Qualif findQualifById(Long id);
 
-
     Qualif findQualifByName(String name);
 
     void saveQualifList(List<Qualif> qualifs);
 
+    /** @deprecated utiliser {@link #getQualifByDateAndClub(LocalDate, String)} */
+    @Deprecated
     List<Qualif> getQualifByDate(LocalDate selectedDate);
+
+    List<Qualif> getQualifByDateAndClub(LocalDate selectedDate, String club);
 }

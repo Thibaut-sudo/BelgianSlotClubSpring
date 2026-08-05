@@ -1,10 +1,12 @@
 package org.example.belgianslotclubspring.controllers;
 
+import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.services.RaceResultService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,26 +22,33 @@ public class ChampionnatController {
     }
 
     @GetMapping("/championnat")
-    public String getChampionnat(@RequestParam(value = "club", required = false) String club,
-                                 @RequestParam(value = "categorie", required = false) String category,
-                                 @RequestParam(value = "year", required = false) Integer year,
-                                 Model model) {
+    public String getChampionnat(
+            @RequestParam(value = "club", required = false) String club,
+            @RequestParam(value = "categorie", required = false) String category,
+            @RequestParam(value = "year", required = false) Integer year,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (club == null || club.isBlank()) {
+            redirectAttributes.addFlashAttribute("error", "Sélectionnez d'abord un club.");
+            return "redirect:/#clubs";
+        }
 
-        // Ajout du club au modèle
-        model.addAttribute("club", club);
+        String clubCode = Club.requireCode(club);
+        Club clubEnum = Club.fromCode(clubCode).orElseThrow();
 
-        // Liste des années disponibles
-        List<Integer> years = raceResultService.getAvailableYears(club);
+        model.addAttribute("club", clubCode);
+        model.addAttribute("clubDisplayName", clubEnum.getDisplayName());
+
+        List<Integer> years = raceResultService.getAvailableYears(clubCode);
         model.addAttribute("years", years);
 
-        // Sélection de l'année actuelle si aucune n'est spécifiée
         if (year == null) {
-            year = LocalDate.now().getYear();
+            year = years.isEmpty() ? LocalDate.now().getYear() : years.get(years.size() - 1);
         }
         model.addAttribute("selectedYear", year);
 
-        // Récupération des catégories disponibles pour le club donné
-        List<String> categories = raceResultService.getAllCategoriesClub(club);
+        List<String> categories = raceResultService.getAllCategoriesClub(clubCode);
         model.addAttribute("categories", categories);
 
         if (category == null && !categories.isEmpty()) {
@@ -47,8 +56,10 @@ public class ChampionnatController {
         }
         model.addAttribute("selectedCategory", category);
 
-        // Récupération des résultats pour l'année et la catégorie choisies
-        Map<LocalDate, Map<String, Double>> raceResults = raceResultService.getChampionshipResults(category, club, year);
+        Map<LocalDate, Map<String, Double>> raceResults =
+                (category == null)
+                        ? Map.of()
+                        : raceResultService.getChampionshipResults(category, clubCode, year);
         model.addAttribute("raceResults", raceResults);
 
         return "pages/championnat";

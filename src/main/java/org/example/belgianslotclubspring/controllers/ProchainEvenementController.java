@@ -1,9 +1,11 @@
 package org.example.belgianslotclubspring.controllers;
 
+import org.example.belgianslotclubspring.models.Club;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -15,11 +17,22 @@ import java.util.TreeMap;
 public class ProchainEvenementController {
 
     @GetMapping("/prochain-evenement")
-    public String prochainEvenement(@RequestParam(defaultValue = "slot4000") String club, Model model) {
-        // Données des événements selon le club
+    public String prochainEvenement(
+            @RequestParam(required = false) String club,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (club == null || club.isBlank()) {
+            redirectAttributes.addFlashAttribute("error", "Sélectionnez d'abord un club.");
+            return "redirect:/#clubs";
+        }
+
+        String clubCode = Club.requireCode(club);
+        Club clubEnum = Club.fromCode(clubCode).orElseThrow();
+
         Map<String, String> events2025 = new TreeMap<>();
-        
-        if ("slot4000".equals(club)) {
+
+        if (clubEnum.isSlot4000()) {
             // Données des événements SLOT4000 2025 (corrigées selon le calendrier officiel)
             events2025.put("2025-01-10", "GT32");
             events2025.put("2025-01-24", "GR5");
@@ -64,7 +77,7 @@ public class ProchainEvenementController {
             events2025.put("2025-12-12", "SLOT.IT");
             events2025.put("2025-12-19", "GT24");
             events2025.put("2025-12-26", "PROTO32");
-        } else if ("srcs".equals(club)) {
+        } else if (clubEnum.isSrcs()) {
             // Données des événements SRCS 2025 (selon le calendrier officiel SRCS)
             events2025.put("2025-01-04", "Revoslot");
             events2025.put("2025-01-11", "BEL-LMS S.R.C.S");
@@ -137,41 +150,51 @@ public class ProchainEvenementController {
             events2025.put("2025-12-30", "GT 24");
         }
 
-        // Trouver le prochain événement
         LocalDate today = LocalDate.now();
         String nextEventDate = null;
         String nextEventName = null;
         long daysUntilNext = 0;
+        boolean hasUpcomingEvent = false;
 
         for (Map.Entry<String, String> entry : events2025.entrySet()) {
             LocalDate eventDate = LocalDate.parse(entry.getKey());
-            if (eventDate.isAfter(today) || eventDate.isEqual(today)) {
+            if (!eventDate.isBefore(today)) {
                 nextEventDate = entry.getKey();
                 nextEventName = entry.getValue();
                 daysUntilNext = java.time.temporal.ChronoUnit.DAYS.between(today, eventDate);
+                hasUpcomingEvent = true;
                 break;
             }
         }
 
-        // Si aucun événement futur trouvé, prendre le premier de l'année
-        if (nextEventDate == null) {
-            nextEventDate = "2025-01-10";
-            nextEventName = "GT32";
-            daysUntilNext = java.time.temporal.ChronoUnit.DAYS.between(today, LocalDate.parse(nextEventDate));
+        // Saison terminée : dernier événement du calendrier de CE club
+        if (nextEventDate == null && !events2025.isEmpty()) {
+            Map.Entry<String, String> last = null;
+            for (Map.Entry<String, String> entry : events2025.entrySet()) {
+                last = entry;
+            }
+            if (last != null) {
+                nextEventDate = last.getKey();
+                nextEventName = last.getValue();
+                daysUntilNext = 0;
+            }
         }
 
-        // Formater la date
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH);
-        LocalDate eventDate = LocalDate.parse(nextEventDate);
-        String formattedDate = eventDate.format(formatter);
+        String formattedDate = nextEventDate != null
+                ? LocalDate.parse(nextEventDate).format(formatter)
+                : "—";
 
-        // Déterminer le type d'événement pour la couleur
-        String eventType = nextEventName.split(",")[0].trim().toLowerCase().replaceAll("[^a-z0-9]", "");
+        String eventType = nextEventName != null
+                ? nextEventName.split(",")[0].trim().toLowerCase().replaceAll("[^a-z0-9]", "")
+                : "";
 
-        model.addAttribute("club", club);
+        model.addAttribute("club", clubCode);
+        model.addAttribute("clubDisplayName", clubEnum.getDisplayName());
         model.addAttribute("nextEventDate", formattedDate);
-        model.addAttribute("nextEventName", nextEventName);
+        model.addAttribute("nextEventName", nextEventName != null ? nextEventName : "Aucun événement");
         model.addAttribute("daysUntilNext", daysUntilNext);
+        model.addAttribute("hasUpcomingEvent", hasUpcomingEvent);
         model.addAttribute("eventType", eventType);
         model.addAttribute("allEvents", events2025);
 

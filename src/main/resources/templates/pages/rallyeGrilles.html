@@ -42,7 +42,7 @@
             <button type="submit" form="grilleTimesForm" name="returnTo" value="grilles" class="btn btn-primary">Enregistrer les temps</button>
             <a class="btn btn-outline"
                th:href="@{/rallye/{id}/scan(id=${rallye.id}, boucle=${activeBoucle})}">Scanner une feuille</a>
-            <button type="button" class="btn btn-secondary" onclick="window.print()">Imprimer</button>
+            <button type="button" class="btn btn-secondary grille-btn-print" onclick="window.print()">Imprimer</button>
         </div>
     </div>
     <div class="container" th:if="${success}" style="padding-top:0.5rem">
@@ -338,6 +338,50 @@
 
   form.addEventListener('submit', syncHiddenInputs);
   syncHiddenInputs();
+})();
+</script>
+<script class="no-print">
+(function () {
+  var toolbar = document.querySelector('.grille-toolbar');
+  if (!toolbar) return;
+
+  var lastY = window.scrollY || 0;
+  var ticking = false;
+  var threshold = 8;
+
+  function isMobile() {
+    return window.matchMedia('(max-width: 768px)').matches;
+  }
+
+  function onScroll() {
+    if (!isMobile()) {
+      toolbar.classList.remove('is-hidden-scroll');
+      lastY = window.scrollY || 0;
+      return;
+    }
+
+    var y = window.scrollY || 0;
+    var delta = y - lastY;
+
+    if (y <= 12) {
+      toolbar.classList.remove('is-hidden-scroll');
+    } else if (delta > threshold) {
+      toolbar.classList.add('is-hidden-scroll');
+    } else if (delta < -threshold) {
+      toolbar.classList.remove('is-hidden-scroll');
+    }
+
+    lastY = y;
+  }
+
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(function () {
+      onScroll();
+      ticking = false;
+    });
+  }, { passive: true });
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js" class="no-print"></script>

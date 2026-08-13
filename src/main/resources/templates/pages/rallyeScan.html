@@ -20,8 +20,8 @@
             <a th:href="@{/rallye/{id}/grilles(id=${rallye.id}, boucle=${activeBoucle})}" class="page-hero-back">← Retour aux grilles</a>
             <h1 class="grille-toolbar-title">Scanner une feuille</h1>
             <p class="grille-toolbar-sub">
-                Photo de la feuille groupe → lecture QR + OCR prudent → tu valides avant enregistrement.
-                En cas de doute, la case reste vide (moins d’erreurs).
+                Photo nette de toute la feuille (QR + cases) → lecture case par case des temps manuscrits → tu valides avant enregistrement.
+                Cases orange = à vérifier. Laisse vide si illisible.
             </p>
         </div>
         <div class="cluster">
@@ -56,13 +56,19 @@
         <h2 class="section-title">2. Vérification</h2>
         <p class="section-lead" id="scanReviewLead">Corrige si besoin, puis enregistre.</p>
         <div id="scanBadges" class="scan-badges"></div>
-        <form id="scanTimesForm" method="post" th:action="@{/rallye/{id}/times(id=${rallye.id})}">
+        <form id="scanTimesForm"
+              class="js-times-patch"
+              method="post"
+              th:action="@{/rallye/{id}/times(id=${rallye.id})}"
+              th:attr="data-rallye-id=${rallye.id}"
+              data-times-ajax="1">
             <input type="hidden" name="boucle" id="scanBoucle" th:value="${activeBoucle}">
             <input type="hidden" name="returnTo" value="grilles">
+            <p id="timesSaveStatus" class="times-save-status" aria-live="polite"></p>
             <div id="scanReviewGrid" class="scan-review-grid"></div>
             <div class="rallye-save-bar">
                 <button type="submit" class="btn btn-primary" id="btnSaveScan">Enregistrer les temps validés</button>
-                <span class="rallye-hint">Les cases vides ou douteuses ne sont pas forcées.</span>
+                <span class="rallye-hint">Seules les cases remplies / corrigées sont envoyées (n’écrase pas le reste).</span>
             </div>
         </form>
     </section>
@@ -70,7 +76,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-<script src="/js/rallye-scan.js"></script>
+<script src="/js/rallye-times-save.js"></script>
+<script src="/js/rallye-scan.js?v=3"></script>
 <script src="/js/navigation.js"></script>
 </body>
 </html>

@@ -147,6 +147,19 @@
   color: #777;
 }
 
+.scan-thumb {
+  display: block;
+  width: 100%;
+  max-width: 9rem;
+  height: 2.4rem;
+  object-fit: contain;
+  object-position: center;
+  background: #f7f7f4;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  image-rendering: pixelated;
+}
+
 .scan-time-wrap {
   display: flex;
   flex-direction: column;

@@ -38,7 +38,7 @@
                             <span class="rallye-card-date" th:text="${#temporals.format(r.date, 'dd/MM/yyyy')}">01/01/2026</span>
                             <span class="rallye-card-name" th:text="${r.name}">Nom</span>
                             <span class="rallye-card-meta"
-                                  th:text="${r.boucleCount} + ' boucles · ' + ${r.stagesPerBoucle} + ' ES · ' + ${#lists.size(r.pilots)} + ' pilotes'">
+                                  th:text="${r.boucleCount} + ' boucles · ' + ${r.stagesPerBoucle} + ' ES · ' + ${r.pilots.size()} + ' pilotes' + (r.finished ? ' · Terminé' : '')">
                                 4 boucles · 5 ES
                             </span>
                         </a>

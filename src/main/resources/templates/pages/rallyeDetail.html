@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(title=${rallye.name} + ' — Rallye')}"></head>
-<link rel="stylesheet" href="/css/rallye-mobile.css">
+<link rel="stylesheet" href="/css/rallye-mobile.css?v=16">
 <body class="rallye-app">
 <header th:replace="~{fragments/layout :: nav(active='rallye', club=${club})}"></header>
 
@@ -18,10 +18,11 @@
             <span th:text="${clubDisplayName}">SRCS</span>
             <span th:text="${rallye.boucleCount} + ' boucles'">4 boucles</span>
             <span th:text="${rallye.stagesPerBoucle} + ' ES'">5 ES</span>
-            <span th:text="${#lists.size(rallye.pilots)} + ' pilotes'">0 pilotes</span>
+            <span th:text="${rallye.pilots.size()} + ' pilotes'">0 pilotes</span>
+            <span th:if="${rallye.finished}" class="rallye-finished-badge">Terminé</span>
         </div>
         <div class="page-hero-actions cluster page-hero-actions--desktop">
-            <a href="#saisie" class="btn btn-primary">Saisir les temps</a>
+            <a href="#saisie" class="btn btn-primary" th:text="${rallye.finished} ? 'Voir les temps' : 'Saisir les temps'">Saisir les temps</a>
             <a th:href="@{/rallye/{id}/grilles(id=${rallye.id})}" class="btn btn-secondary">Grilles à imprimer</a>
             <a href="#classement" class="btn btn-outline">Classement</a>
             <a href="#compte-rendu" class="btn btn-outline">Compte rendu</a>
@@ -66,30 +67,36 @@
 
         <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
         <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
+        <div th:if="${rallye.finished}" class="flash rallye-locked-banner" role="status">
+            Ce rallye est terminé. Les pilotes, temps et grilles ne peuvent plus être modifiés.
+        </div>
 
         <!-- Pilotes -->
         <div id="pilotes" class="rallye-block">
             <div class="rallye-block-header">
                 <div>
                     <h2 class="section-title">Pilotes</h2>
-                    <p class="section-lead section-lead--desktop">Ajoutez à la main ou importez la feuille « Pilotes » de votre Excel.</p>
+                    <p class="section-lead section-lead--desktop"
+                       th:text="${rallye.finished} ? 'Liste des engagés.' : 'Ajoutez à la main ou importez un Excel SRCS (pilotes + temps de chaque ES).'">
+                        Ajoutez à la main ou importez un Excel SRCS (pilotes + temps de chaque ES).
+                    </p>
                 </div>
                 <a th:if="${!#lists.isEmpty(rallye.pilots)}"
                    th:href="@{/rallye/{id}/grilles(id=${rallye.id})}"
                    class="btn btn-secondary btn-sm page-hero-actions--desktop">Grilles groupes</a>
             </div>
 
-            <div class="rallye-tools">
+            <div class="rallye-tools" th:unless="${rallye.finished}">
                 <form th:action="@{/rallye/{id}/pilots(id=${rallye.id})}" method="post" class="rallye-inline-form">
                     <input class="form-input" type="text" name="name" placeholder="Pilote" required>
                     <input class="form-input" type="text" name="car" placeholder="Voiture">
                     <input class="form-input" type="text" name="category" placeholder="Catégorie">
                     <button type="submit" class="btn btn-primary btn-sm">Ajouter</button>
                 </form>
-                <form th:action="@{/rallye/{id}/import-pilots(id=${rallye.id})}" method="post"
+                <form id="rallyeImportForm" th:action="@{/rallye/{id}/import-pilots(id=${rallye.id})}" method="post"
                       enctype="multipart/form-data" class="rallye-inline-form">
                     <input class="form-input" type="file" name="file" accept=".xls,.xlsx" required>
-                    <button type="submit" class="btn btn-secondary btn-sm">Importer Excel</button>
+                    <button type="submit" class="btn btn-secondary btn-sm" title="Importe pilotes et temps ES">Importer Excel</button>
                 </form>
             </div>
 
@@ -101,20 +108,46 @@
                         <th>Pilote</th>
                         <th>Voiture</th>
                         <th>Catégorie</th>
-                        <th></th>
+                        <th th:unless="${rallye.finished}"></th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="p : ${rallye.pilots}">
                         <td th:text="${p.startNumber}">1</td>
-                        <td th:text="${p.name}">Nom</td>
-                        <td th:text="${p.car}">Voiture</td>
-                        <td th:text="${p.category}">Cat</td>
-                        <td class="rallye-actions">
-                            <form th:action="@{/rallye/{id}/pilots/{pid}/delete(id=${rallye.id}, pid=${p.id})}"
-                                  method="post" onsubmit="return confirm('Supprimer ce pilote ?');">
-                                <button type="submit" class="btn btn-ghost btn-sm">Suppr.</button>
-                            </form>
+                        <td>
+                            <input class="form-input form-input--table" type="text" name="name"
+                                   th:form="${'pilot-edit-' + p.id}"
+                                   th:value="${p.name}"
+                                   placeholder="Pilote" required
+                                   th:readonly="${rallye.finished}">
+                        </td>
+                        <td>
+                            <input class="form-input form-input--table" type="text" name="car"
+                                   th:form="${'pilot-edit-' + p.id}"
+                                   th:value="${p.car}"
+                                   placeholder="Voiture"
+                                   th:readonly="${rallye.finished}">
+                        </td>
+                        <td>
+                            <input class="form-input form-input--table" type="text" name="category"
+                                   th:form="${'pilot-edit-' + p.id}"
+                                   th:value="${p.category}"
+                                   placeholder="Catégorie"
+                                   th:readonly="${rallye.finished}">
+                        </td>
+                        <td class="rallye-actions" th:unless="${rallye.finished}">
+                            <form th:id="${'pilot-edit-' + p.id}"
+                                  th:action="@{/rallye/{id}/pilots/{pid}/update(id=${rallye.id}, pid=${p.id})}"
+                                  method="post"></form>
+                            <div class="rallye-actions__btns">
+                                <button type="submit"
+                                        th:form="${'pilot-edit-' + p.id}"
+                                        class="btn btn-secondary btn-sm">Enreg.</button>
+                                <form th:action="@{/rallye/{id}/pilots/{pid}/delete(id=${rallye.id}, pid=${p.id})}"
+                                      method="post" onsubmit="return confirm('Supprimer ce pilote ?');">
+                                    <button type="submit" class="btn btn-ghost btn-sm">Suppr.</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     </tbody>
@@ -122,19 +155,28 @@
             </div>
 
             <div class="rallye-pilots-mobile" th:if="${!#lists.isEmpty(rallye.pilots)}">
-                <article class="rallye-pilot-card" th:each="p : ${rallye.pilots}">
+                <article class="rallye-pilot-card" th:classappend="${rallye.finished} ? '' : ' rallye-pilot-card--edit'" th:each="p : ${rallye.pilots}">
                     <div class="rallye-pilot-card__main">
                         <span class="rallye-pilot-card__num" th:text="${p.startNumber}">1</span>
-                        <div>
-                            <strong th:text="${p.name}">Nom</strong>
-                            <span class="rallye-pilot-car"
-                                  th:text="${p.car != null and !#strings.isEmpty(p.car)} ? ${p.car} : ''"></span>
-                            <span class="rallye-pilot-card__cat"
-                                  th:if="${p.category != null and !#strings.isEmpty(p.category)}"
-                                  th:text="${p.category}"></span>
-                        </div>
+                        <form class="rallye-pilot-edit-mobile"
+                              th:action="@{/rallye/{id}/pilots/{pid}/update(id=${rallye.id}, pid=${p.id})}"
+                              method="post">
+                            <input class="form-input" type="text" name="name"
+                                   th:value="${p.name}" placeholder="Pilote" required
+                                   th:readonly="${rallye.finished}">
+                            <input class="form-input" type="text" name="car"
+                                   th:value="${p.car}" placeholder="Voiture"
+                                   th:readonly="${rallye.finished}">
+                            <input class="form-input" type="text" name="category"
+                                   th:value="${p.category}" placeholder="Catégorie"
+                                   th:readonly="${rallye.finished}">
+                            <div class="rallye-pilot-edit-mobile__actions" th:unless="${rallye.finished}">
+                                <button type="submit" class="btn btn-secondary btn-sm">Enregistrer</button>
+                            </div>
+                        </form>
                     </div>
-                    <form th:action="@{/rallye/{id}/pilots/{pid}/delete(id=${rallye.id}, pid=${p.id})}"
+                    <form th:unless="${rallye.finished}"
+                          th:action="@{/rallye/{id}/pilots/{pid}/delete(id=${rallye.id}, pid=${p.id})}"
                           method="post" onsubmit="return confirm('Supprimer ce pilote ?');">
                         <button type="submit" class="btn btn-ghost btn-sm">Suppr.</button>
                     </form>
@@ -150,7 +192,7 @@
                     <h2 class="section-title">Saisie des temps</h2>
                     <p class="section-lead section-lead--desktop">
                         Choisissez d’abord la <strong>boucle</strong> (passage), puis saisissez le temps de chaque <strong>ES</strong> (spéciale).
-                        Formats : <code>12.345</code> ou <code>1:23.45</code>.
+                        Formats : <code>72,784</code> · <code>12.345</code> · <code>1:23.45</code>.
                     </p>
                     <p class="section-lead section-lead--mobile">Boucle puis temps ES · ex. <code>12.345</code></p>
                 </div>
@@ -165,7 +207,7 @@
                        th:classappend="${b == activeBoucle} ? ' is-active'"
                        th:text="'Boucle ' + ${b}">Boucle 1</a>
                 </div>
-                <div class="rallye-add-forms">
+                <div class="rallye-add-forms" th:unless="${rallye.finished}">
                     <form th:action="@{/rallye/{id}/add-boucle(id=${rallye.id})}" method="post" class="rallye-add-form">
                         <button type="submit" class="btn btn-outline btn-sm"
                                 th:disabled="${rallye.boucleCount >= 12}"
@@ -186,7 +228,7 @@
             </p>
             <div class="rallye-tabs-row rallye-tabs-row--es">
                 <p class="rallye-es-count" th:text="${rallye.stagesPerBoucle} + ' spéciale(s)'">5 spéciales</p>
-                <div class="rallye-add-forms">
+                <div class="rallye-add-forms" th:unless="${rallye.finished}">
                     <form th:action="@{/rallye/{id}/add-stage(id=${rallye.id})}" method="post" class="rallye-add-form">
                         <input type="hidden" name="boucle" th:value="${activeBoucle}">
                         <button type="submit" class="btn btn-outline btn-sm"
@@ -206,8 +248,15 @@
             <form th:if="${!#lists.isEmpty(rallye.pilots)}"
                   id="rallyeTimesForm"
                   class="rallye-times-form"
-                  th:action="@{/rallye/{id}/times(id=${rallye.id})}" method="post">
+                  th:classappend="${rallye.finished} ? '' : ' js-times-patch'"
+                  th:action="@{/rallye/{id}/times(id=${rallye.id})}"
+                  method="post"
+                  th:attr="data-rallye-id=${rallye.id}, data-times-ajax=${rallye.finished} ? 0 : 1">
                 <input type="hidden" name="boucle" th:value="${activeBoucle}">
+                <p id="timesSaveStatus" class="times-save-status" aria-live="polite"
+                   th:unless="${rallye.finished}">
+                    Enregistrement case par case — plusieurs personnes peuvent saisir en même temps.
+                </p>
 
                 <!-- Desktop : tableau -->
                 <div class="table-wrap table-wrap--wide rallye-entry-desktop">
@@ -235,7 +284,8 @@
                                        th:name="'time_' + ${p.id} + '_' + ${s}"
                                        th:value="${timeDisplay[p.id + '_' + s]}"
                                        placeholder="—"
-                                       autocomplete="off">
+                                       autocomplete="off"
+                                       th:readonly="${rallye.finished}">
                             </td>
                             <td>
                                 <input class="form-input form-input--time form-input--peno"
@@ -244,7 +294,8 @@
                                        th:name="'time_' + ${p.id} + '_0'"
                                        th:value="${timeDisplay[p.id + '_0']}"
                                        placeholder="—"
-                                       autocomplete="off">
+                                       autocomplete="off"
+                                       th:readonly="${rallye.finished}">
                             </td>
                         </tr>
                         </tbody>
@@ -270,7 +321,8 @@
                                        th:attr="data-mirror=${'time_' + p.id + '_' + s}"
                                        th:value="${timeDisplay[p.id + '_' + s]}"
                                        placeholder="—"
-                                       autocomplete="off">
+                                       autocomplete="off"
+                                       th:readonly="${rallye.finished}">
                             </label>
                             <label class="rallye-entry-field rallye-entry-field--peno">
                                 <span>PENO</span>
@@ -280,13 +332,14 @@
                                        th:attr="data-mirror=${'time_' + p.id + '_0'}"
                                        th:value="${timeDisplay[p.id + '_0']}"
                                        placeholder="—"
-                                       autocomplete="off">
+                                       autocomplete="off"
+                                       th:readonly="${rallye.finished}">
                             </label>
                         </div>
                     </article>
                 </div>
 
-                <div class="rallye-save-bar rallye-save-bar--sticky">
+                <div class="rallye-save-bar rallye-save-bar--sticky" th:unless="${rallye.finished}">
                     <button type="submit" class="btn btn-primary btn-block-mobile">Enregistrer boucle <span th:text="${activeBoucle}">1</span></button>
                     <span class="rallye-hint rallye-hint--desktop">Les classements se mettent à jour après enregistrement.</span>
                 </div>
@@ -300,6 +353,10 @@
                 <div>
                     <h2 class="section-title">Classement général</h2>
                     <p class="section-lead section-lead--desktop">Cumul de toutes les ES (toutes boucles). Choisissez un seuil pour un classement intermédiaire.</p>
+                </div>
+                <div class="cluster rallye-export-actions no-print" th:if="${!#lists.isEmpty(standings)}">
+                    <button type="button" class="btn btn-secondary btn-sm" id="exportRallyeExcel">Exporter Excel</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="exportRallyePdf">Exporter PDF</button>
                 </div>
             </div>
 
@@ -331,7 +388,7 @@
             </div>
 
             <div class="table-wrap rallye-standings-desktop" th:if="${!#lists.isEmpty(standings)}">
-                <table class="data-table rallye-table">
+                <table class="data-table rallye-table" id="rallyeStandingsTable">
                     <thead>
                     <tr>
                         <th>Pos.</th>
@@ -339,7 +396,8 @@
                         <th>Voiture</th>
                         <th>Cat.</th>
                         <th>Temps</th>
-                        <th>Écart</th>
+                        <th title="Écart avec le pilote précédent">Préc.</th>
+                        <th title="Écart avec le leader">Au 1er</th>
                         <th>ES</th>
                     </tr>
                     </thead>
@@ -351,6 +409,7 @@
                         <td th:text="${row.car}">Voiture</td>
                         <td th:text="${row.category}">Cat</td>
                         <td class="mono" th:text="${row.totalFormatted}">0.000</td>
+                        <td class="mono" th:text="${row.gapToPreviousFormatted}">—</td>
                         <td class="mono" th:text="${row.gapFormatted}">—</td>
                         <td th:text="${row.stagesCompleted} + '/' + ${row.stagesExpected}">0/5</td>
                     </tr>
@@ -370,7 +429,11 @@
                     </div>
                     <div class="rallye-standing-card__times">
                         <span class="mono" th:text="${row.totalFormatted}">0.000</span>
-                        <span class="rallye-standing-card__gap mono" th:text="${row.gapFormatted}">—</span>
+                        <span class="rallye-standing-card__gap mono">
+                            <span title="Écart avec le précédent">préc. <span th:text="${row.gapToPreviousFormatted}">—</span></span>
+                            <span class="rallye-standing-card__gap-sep">·</span>
+                            <span title="Écart au leader">1er <span th:text="${row.gapFormatted}">—</span></span>
+                        </span>
                         <span class="rallye-standing-card__es"
                               th:text="${row.stagesCompleted} + '/' + ${row.stagesExpected}">0/5</span>
                     </div>
@@ -384,8 +447,13 @@
             <div class="rallye-block-header">
                 <div>
                     <h2 class="section-title">Compte rendu</h2>
-                    <p class="section-lead">Scratchs et coups durs pour les boucles démarrées — résumé final à la fin du rallye.</p>
+                    <p class="section-lead">Le récit des boucles : duels, scratchs, coups durs — et le grand final quand tout est terminé.</p>
                 </div>
+                <a class="btn btn-outline btn-sm rallye-recap-refresh"
+                   th:href="@{/rallye/{id}(id=${rallye.id}, boucle=${activeBoucle}, after=${afterStages}, category=${selectedCategory})} + '#compte-rendu'"
+                   title="Relancer l’analyse du compte rendu">
+                    Actualiser
+                </a>
             </div>
 
             <!-- Final (rallye terminé) -->
@@ -434,7 +502,7 @@
                     </ul>
                     <div class="rallye-recap__grid">
                         <div th:if="${!#lists.isEmpty(br.scratchLeaders)}">
-                            <h4>Scratchs</h4>
+                            <h4 th:text="'Scratchs — Boucle ' + ${br.boucle}">Scratchs</h4>
                             <ul class="rallye-recap__scratches">
                                 <li th:each="s : ${br.scratchLeaders}">
                                     <strong th:text="${s.pilotName}">Nom</strong>
@@ -448,10 +516,10 @@
                             </ul>
                         </div>
                         <div th:if="${!#lists.isEmpty(br.stages)}">
-                            <h4>Par spéciale</h4>
+                            <h4 th:text="'Spéciales — Boucle ' + ${br.boucle}">Par spéciale</h4>
                             <ul class="rallye-recap__stages">
                                 <li th:each="st : ${br.stages}">
-                                    <strong th:text="'ES ' + ${st.esNumber}">ES 1</strong>
+                                    <strong th:text="'Boucle ' + ${br.boucle} + ' · ES ' + ${st.esNumber}">Boucle 1 · ES 1</strong>
                                     <span th:text="' scratch ' + ${st.scratchPilotName} + ' (' + ${st.scratchTime} + ')'">
                                         scratch …
                                     </span>
@@ -469,6 +537,14 @@
         </div>
 
         <div class="rallye-danger">
+            <form th:unless="${rallye.finished}"
+                  th:action="@{/rallye/{id}/finish(id=${rallye.id})}" method="post"
+                  class="rallye-finish-form"
+                  onsubmit="return confirm('Terminer ce rallye ? Les pilotes, temps et grilles ne pourront plus être modifiés.');">
+                <button type="submit" class="btn btn-secondary btn-sm">Terminer le rallye</button>
+                <p class="form-hint">Fige les résultats : plus aucune modification ensuite.</p>
+            </form>
+            <p th:if="${rallye.finished}" class="form-hint">Ce rallye est terminé — les informations sont figées.</p>
             <form th:action="@{/rallye/{id}/delete(id=${rallye.id})}" method="post"
                   onsubmit="return confirm('Supprimer définitivement ce rallye ?');">
                 <button type="submit" class="btn btn-ghost btn-sm">Supprimer le rallye</button>
@@ -480,6 +556,12 @@
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script th:inline="javascript">
+    (function () {
+        if (typeof protectImportForm === 'function') {
+            protectImportForm(document.getElementById('rallyeImportForm'));
+        }
+    })();
+
     function filterCategory(value) {
         const id = /*[[${rallye.id}]]*/ 0;
         const boucle = /*[[${activeBoucle}]]*/ 1;
@@ -493,11 +575,31 @@
         var form = document.getElementById('rallyeTimesForm');
         if (!form) return;
 
+        function isMobileEntry() {
+            return window.matchMedia('(max-width: 768px)').matches;
+        }
+
+        function namedInput(name) {
+            return form.querySelector('[name="' + name + '"]');
+        }
+
+        /** Mobile → champs name (desktop caché). Ne jamais écraser en mode desktop. */
         function syncMirrorsToNamed() {
+            if (!isMobileEntry()) return;
             form.querySelectorAll('[data-mirror]').forEach(function (inp) {
                 var name = inp.getAttribute('data-mirror');
-                var target = form.querySelector('[name="' + name + '"]');
+                var target = namedInput(name);
                 if (target) target.value = inp.value;
+            });
+        }
+
+        /** Desktop → miroirs, pour rester cohérent si on passe en mobile. */
+        function syncNamedToMirrors() {
+            if (isMobileEntry()) return;
+            form.querySelectorAll('[data-mirror]').forEach(function (inp) {
+                var name = inp.getAttribute('data-mirror');
+                var source = namedInput(name);
+                if (source) inp.value = source.value;
             });
         }
 
@@ -505,7 +607,13 @@
             inp.addEventListener('input', syncMirrorsToNamed);
             inp.addEventListener('change', syncMirrorsToNamed);
         });
-        form.addEventListener('submit', syncMirrorsToNamed);
+        form.querySelectorAll('input[name^="time_"]').forEach(function (inp) {
+            inp.addEventListener('input', syncNamedToMirrors);
+            inp.addEventListener('change', syncNamedToMirrors);
+        });
+        form.addEventListener('submit', function () {
+            syncMirrorsToNamed();
+        });
     })();
 
     (function () {
@@ -551,13 +659,13 @@
         }
 
         function sourceHint(source) {
-            if (source === 'tunnel') {
-                return 'Tunnel 4G actif — scanne le QR (même hors Wi‑Fi).';
+            if (source === 'public' || source === 'tunnel') {
+                return 'Lien public — scanne le QR (Wi‑Fi ou 4G).';
             }
             if (source === 'lan') {
                 return 'Même Wi‑Fi requis — scanne le QR avec ton téléphone.';
             }
-            return 'Lien local — lance le tunnel (./tunnel.sh) pour la 4G.';
+            return 'Lien local — le site public n’est pas détecté.';
         }
 
         function renderQr(url) {
@@ -636,6 +744,126 @@
                 copyBtn.click();
             }
         });
+    })();
+</script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+<script src="/js/rallye-times-save.js?v=2"></script>
+<script src="/js/export-tables.js"></script>
+<script th:inline="javascript">
+    window.__rallyeExportMeta = {
+        name: /*[[${rallye.name}]]*/ 'Rallye',
+        date: /*[[${#temporals.format(rallye.date, 'dd-MM-yyyy')}]]*/ '',
+        after: /*[[${afterStages}]]*/ null
+    };
+</script>
+<script th:inline="none">
+    (function () {
+        function bindExports() {
+            var excelBtn = document.getElementById('exportRallyeExcel');
+            var pdfBtn = document.getElementById('exportRallyePdf');
+            if (!excelBtn && !pdfBtn) return;
+
+            if (typeof BscExport === 'undefined') {
+                function unavailable() {
+                    alert("Module d'export indisponible. Recharge la page.");
+                }
+                if (excelBtn) excelBtn.addEventListener('click', unavailable);
+                if (pdfBtn) pdfBtn.addEventListener('click', unavailable);
+                return;
+            }
+
+            var meta = window.__rallyeExportMeta || {};
+            var rallyeName = meta.name || 'Rallye';
+            var rallyeDate = meta.date || '';
+            var afterLabel = meta.after;
+            var baseName = ['rallye', rallyeName, afterLabel ? ('apres_' + afterLabel + 'ES') : null, rallyeDate]
+                .filter(Boolean).join('_');
+
+            function recapRows() {
+                var rows = [];
+                rows.push(['Section', 'Texte']);
+                document.querySelectorAll('#compte-rendu .rallye-recap').forEach(function (article) {
+                    var h3 = article.querySelector('h3');
+                    var title = ((h3 && h3.textContent) || 'Compte rendu').trim();
+                    article.querySelectorAll('.rallye-recap__headlines li').forEach(function (li) {
+                        rows.push([title, (li.textContent || '').trim()]);
+                    });
+                });
+                return rows.length > 1 ? rows : null;
+            }
+
+            function standingsRows() {
+                var table = document.getElementById('rallyeStandingsTable');
+                if (table) {
+                    return BscExport.tableToMatrix(table);
+                }
+                // Fallback mobile (cartes)
+                var rows = [];
+                rows.push(['Pos.', 'Pilote', 'Voiture', 'Cat.', 'Temps', 'Préc.', 'Au 1er', 'ES']);
+                document.querySelectorAll('.rallye-standing-card').forEach(function (card) {
+                    var pos = (card.querySelector('.rallye-standing-card__pos') || {}).textContent || '';
+                    var info = card.querySelector('.rallye-standing-card__info');
+                    var name = info ? (info.querySelector('strong, .name, div') || {}).textContent || '' : '';
+                    var times = card.querySelector('.rallye-standing-card__times');
+                    var total = times ? (times.querySelector(':scope > .mono') || {}).textContent || '' : '';
+                    var gaps = times ? times.querySelectorAll('.rallye-standing-card__gap > span') : [];
+                    var es = times ? (times.querySelector('.rallye-standing-card__es') || {}).textContent || '' : '';
+                    rows.push([
+                        pos.trim(),
+                        name.trim(),
+                        '',
+                        '',
+                        total.trim(),
+                        gaps[0] ? gaps[0].textContent.trim() : '',
+                        gaps[2] ? gaps[2].textContent.trim() : '',
+                        es.trim()
+                    ]);
+                });
+                return rows.length > 1 ? rows : [];
+            }
+
+            function sheets() {
+                var list = [{ name: 'Classement', rows: standingsRows() }];
+                var recap = recapRows();
+                if (recap) list.push({ name: 'Compte-rendu', rows: recap });
+                return list;
+            }
+
+            if (excelBtn) {
+                excelBtn.addEventListener('click', function () {
+                    try {
+                        BscExport.exportToExcel(sheets(), baseName);
+                    } catch (e) {
+                        console.error(e);
+                        alert("Export Excel impossible.");
+                    }
+                });
+            }
+            if (pdfBtn) {
+                pdfBtn.addEventListener('click', function () {
+                    try {
+                        BscExport.exportToPdf({
+                            title: rallyeName,
+                            subtitle: 'Classement' + (afterLabel ? (' après ' + afterLabel + ' ES') : '') +
+                                (rallyeDate ? (' · ' + String(rallyeDate).replace(/-/g, '/')) : ''),
+                            filename: baseName,
+                            sheets: sheets()
+                        });
+                    } catch (e) {
+                        console.error(e);
+                        alert("Export PDF impossible.");
+                    }
+                });
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindExports);
+        } else {
+            bindExports();
+        }
     })();
 </script>
 </body>

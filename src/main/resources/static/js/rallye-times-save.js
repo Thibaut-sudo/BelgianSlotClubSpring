@@ -80,6 +80,9 @@
 
   function bindForm(form) {
     if (!form || form.getAttribute('data-times-patch') === '1') return;
+    if (form.getAttribute('data-times-ajax') === '0' || form.querySelector('input[name^="time_"][readonly]')) {
+      return;
+    }
     form.setAttribute('data-times-patch', '1');
 
     var rallyeId = form.getAttribute('data-rallye-id')

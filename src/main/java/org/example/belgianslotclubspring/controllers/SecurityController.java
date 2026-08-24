@@ -1,5 +1,6 @@
 package org.example.belgianslotclubspring.controllers;
 
+import org.example.belgianslotclubspring.services.ImportAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,36 +9,29 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Contrôleur REST gérant la vérification d'un mot de passe sécurisé.
- * Il permet d'effectuer une vérification simple en comparant un mot de passe fourni
- * avec un mot de passe préconfiguré côté serveur.
+ * Vérifie le mot de passe d'import (courses Excel, rallye Excel).
  */
 @RestController
 @RequestMapping("/api")
 public class SecurityController {
 
-    // Mot de passe sécurisé défini en dur (idéalement à externaliser dans un fichier de configuration)
-    private static final String SECRET_PASSWORD = "MonMotDePasseSecurity";
+    private final ImportAuthService importAuthService;
+
+    public SecurityController(ImportAuthService importAuthService) {
+        this.importAuthService = importAuthService;
+    }
 
     /**
-     * Vérifie si le mot de passe fourni correspond au mot de passe sécurisé.
+     * Vérifie si le mot de passe fourni autorise un import.
      *
-     * @param request Une requête contenant un champ "password" envoyé en JSON.
-     * @return Une réponse JSON indiquant si l'authentification a réussi ou non.
-     *         - 200 OK si le mot de passe est correct.
-     *         - 401 Unauthorized si le mot de passe est incorrect.
+     * @return 200 si correct, 401 sinon.
      */
     @PostMapping("/verify-password")
     public ResponseEntity<Map<String, Boolean>> verifyPassword(@RequestBody Map<String, String> request) {
-        // Récupération du mot de passe fourni dans la requête
-        String password = request.get("password");
-
-        // Vérification du mot de passe
-        if (SECRET_PASSWORD.equals(password)) {
+        String password = request == null ? null : request.get("password");
+        if (importAuthService.matches(password)) {
             return ResponseEntity.ok(Collections.singletonMap("success", true));
         }
-
-        // Renvoie une réponse Unauthorized si le mot de passe est incorrect
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("success", false));
     }
 }

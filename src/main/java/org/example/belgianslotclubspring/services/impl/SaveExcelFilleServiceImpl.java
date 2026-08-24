@@ -6,6 +6,7 @@ import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.models.ExcelFilleResult;
 import org.example.belgianslotclubspring.repo.QualifRepo;
 import org.example.belgianslotclubspring.repo.RaceResultRepo;
+import org.example.belgianslotclubspring.services.RaceResultService;
 import org.example.belgianslotclubspring.services.SaveExcelFilleService;
 import org.example.belgianslotclubspring.utils.ExcelReader;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,14 @@ public class SaveExcelFilleServiceImpl implements SaveExcelFilleService {
     private final ExcelReader excelReader;
     private final QualifRepo qualifRepo;
     private final RaceResultRepo raceResultRepo;
+    private final RaceResultService raceResultService;
 
-    public SaveExcelFilleServiceImpl(ExcelReader excelReader, QualifRepo qualifRepo, RaceResultRepo raceResultRepo) {
+    public SaveExcelFilleServiceImpl(ExcelReader excelReader, QualifRepo qualifRepo, RaceResultRepo raceResultRepo,
+                                     RaceResultService raceResultService) {
         this.excelReader = excelReader;
         this.qualifRepo = qualifRepo;
         this.raceResultRepo = raceResultRepo;
+        this.raceResultService = raceResultService;
     }
 
     @Override
@@ -43,6 +47,8 @@ public class SaveExcelFilleServiceImpl implements SaveExcelFilleService {
             } else {
                 System.out.println("Aucun résultat de course à sauvegarder");
             }
+
+            raceResultService.invalidateClubMaintenanceCaches(clubCode);
 
         } catch (IllegalArgumentException e) {
             throw e;

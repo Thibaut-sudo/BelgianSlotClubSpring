@@ -35,6 +35,10 @@ public class Rallye {
     /** Nombre d'ES = épreuves spéciales distinctes (défaut 5). Indépendant des boucles. */
     private int stagesPerBoucle = 5;
 
+    /** Une fois terminé, plus aucune modification (pilotes, temps, grilles). */
+    @Column(nullable = false)
+    private boolean finished = false;
+
     /**
      * Set (pas List) : avec JOIN FETCH des stageTimes, une List dupliquait chaque pilote
      * une fois par temps saisi.

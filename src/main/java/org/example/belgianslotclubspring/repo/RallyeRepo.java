@@ -12,6 +12,14 @@ public interface RallyeRepo extends JpaRepository<Rallye, Long> {
 
     List<Rallye> findByClubNameOrderByDateDesc(String clubName);
 
+    /** Liste club avec pilotes initialisés (open-in-view désactivé en prod). */
+    @Query("""
+            SELECT DISTINCT r FROM Rallye r
+            LEFT JOIN FETCH r.pilots
+            WHERE r.clubName = :club
+            """)
+    List<Rallye> findByClubNameWithPilots(@Param("club") String club);
+
     @Query("""
             SELECT DISTINCT r FROM Rallye r
             LEFT JOIN FETCH r.pilots p

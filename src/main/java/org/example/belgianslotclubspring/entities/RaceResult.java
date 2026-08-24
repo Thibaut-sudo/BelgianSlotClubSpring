@@ -4,9 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.belgianslotclubspring.models.Club;
+import org.example.belgianslotclubspring.utils.CategoryNames;
+import org.example.belgianslotclubspring.utils.RaceDateParse;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Getter
@@ -42,7 +43,15 @@ public class RaceResult {
         this.nom = stringCellValue;
         this.totalTours = doubleCellValue;
         this.date = convertStringToLocalDate(date);
-        this.categoryName = categoryName;
+        this.categoryName = CategoryNames.canonical(categoryName);
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = CategoryNames.canonical(categoryName);
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
     }
 
     public void addTrackPerformance(int trackNumber, int laps, double bestTime) {
@@ -58,8 +67,7 @@ public class RaceResult {
     }
 
     private static LocalDate convertStringToLocalDate(String dateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.FRENCH);
-        return LocalDate.parse(dateString, formatter);
+        return RaceDateParse.parse(dateString);
     }
 
 

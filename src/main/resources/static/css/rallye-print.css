@@ -375,14 +375,18 @@
   text-align: right;
 }
 
-/* QR masqué à l'écran (évite le carré blanc) ; visible à l'impression pour le scan */
+/* QR toujours visible (écran + impression) — display:none cassait l'impression Chrome */
 .print-qr {
-  display: none;
-  width: 44px;
-  height: 44px;
+  display: block !important;
+  width: 88px;
+  height: 88px;
   flex-shrink: 0;
-  border: 0;
+  border: 1px solid #ccc;
   background: #fff;
+  padding: 2px;
+  box-sizing: border-box;
+  max-width: none;
+  image-rendering: pixelated;
 }
 
 .print-qr--footer {
@@ -396,11 +400,12 @@
 
 .ocr-anchor {
   display: none; /* visible uniquement à l'impression */
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.45rem;
-  line-height: 1;
-  letter-spacing: 0.02em;
-  color: #666;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.55rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  color: #222;
   text-align: right;
   user-select: none;
   margin-top: 0.05rem;
@@ -408,6 +413,29 @@
 
 .print-only-footer {
   display: none;
+}
+
+.times-save-status {
+  margin: 0 0 0.35rem;
+  font-size: 0.88rem;
+  color: #555;
+  min-height: 1.2em;
+}
+.times-save-status.is-ok { color: #1a7a3c; }
+.times-save-status.is-error { color: #b00020; font-weight: 600; }
+.times-save-status.is-busy { color: #222; }
+
+.time-input.is-dirty {
+  outline: 2px solid #e6a700;
+  outline-offset: 1px;
+}
+.time-input.is-saved {
+  outline: 2px solid #1a7a3c;
+  outline-offset: 1px;
+}
+.time-input.is-save-error {
+  outline: 2px solid #b00020;
+  outline-offset: 1px;
 }
 
 .print-es-title {
@@ -719,11 +747,13 @@
   }
 
   .print-qr {
-    display: inline-block;
-    width: 9mm;
-    height: 9mm;
-    border: 0;
-    vertical-align: middle;
+    display: block !important;
+    width: 18mm;
+    height: 18mm;
+    border: 0.3mm solid #111;
+    padding: 0.5mm;
+    background: #fff;
+    max-width: none;
   }
 
   .print-sheet-header {
@@ -750,10 +780,12 @@
 
   .ocr-anchor {
     display: block;
-    font-size: 4.5pt;
-    color: #bbb;
-    line-height: 1;
-    margin-top: 0.4mm;
+    font-size: 6.5pt;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.1;
+    margin-top: 0.5mm;
+    letter-spacing: 0.05em;
   }
 
   .print-sheet-footer {

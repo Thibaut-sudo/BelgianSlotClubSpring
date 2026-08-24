@@ -7,10 +7,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title} ?: 'Belgian Slot Club'">Belgian Slot Club</title>
+    <meta name="description" content="Belgian Slot Club — résultats, championnats et infos des clubs de slot racing belges (Slot 4000, SRCS et autres). Site officiel du club.">
+    <meta name="author" content="Belgian Slot Club">
+    <link rel="canonical" href="https://belgianslotclub.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Belgian Slot Club">
+    <meta property="og:title" th:content="${title} ?: 'Belgian Slot Club'">
+    <meta property="og:description" content="Résultats et championnats de slot racing en Belgique.">
+    <meta property="og:url" content="https://belgianslotclub.com/">
+    <meta property="og:locale" content="fr_BE">
+    <meta name="theme-color" content="#1a1a1a">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css?v=28">
     <link rel="icon" type="image/png" href="/images/favicon.png">
 </head>
 
@@ -59,6 +69,18 @@
                 </li>
                 <li>
                     <a class="nav-link"
+                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/forum(club=${club})} : '/?goto=forum#clubs'"
+                       th:classappend="${active == 'forum'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'forum'} ? 'page' : null">Forum</a>
+                </li>
+                <li>
+                    <a class="nav-link"
+                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/marketplace(club=${club})} : '/marketplace'"
+                       th:classappend="${active == 'marketplace'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'marketplace'} ? 'page' : null">Marketplace</a>
+                </li>
+                <li>
+                    <a class="nav-link"
                        th:href="${club != null and !#strings.isEmpty(club)} ? @{/prochain-evenement(club=${club})} : '/?goto=calendrier#clubs'"
                        th:classappend="${active == 'calendrier'} ? ' active' : ''"
                        th:attr="aria-current=${active == 'calendrier'} ? 'page' : null">Calendrier</a>
@@ -90,6 +112,8 @@
             <ul class="footer-links">
                 <li><a href="/">Accueil</a></li>
                 <li><a href="/contact">Contact</a></li>
+                <li><a href="/?goto=forum#clubs">Forum</a></li>
+                <li><a href="/marketplace">Marketplace</a></li>
                 <li><a href="/reglement">Règlement</a></li>
                 <li><a href="/selectRace/slot4000">Slot4000</a></li>
                 <li><a href="/selectRace/srcs">SRCS</a></li>
@@ -101,7 +125,29 @@
 
 <!-- Scripts fragment -->
 <th:block th:fragment="scripts">
+    <div id="importPasswordModal" class="modal" style="display: none;" role="dialog"
+         aria-labelledby="importPasswordTitle" aria-modal="true">
+        <div class="modal-panel confirm-modal">
+            <div class="modal-header">
+                <h3 id="importPasswordTitle">Mot de passe requis</h3>
+            </div>
+            <form id="importPasswordForm" class="import-password-form">
+                <div class="modal-body">
+                    <p>Entrez le mot de passe pour importer un fichier.</p>
+                    <label class="form-label" for="importPasswordInput">Mot de passe</label>
+                    <input class="form-input" type="password" id="importPasswordInput"
+                           name="importPassword" autocomplete="off" required>
+                    <p id="importPasswordError" class="import-password-error" hidden></p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="importPasswordCancel">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="importPasswordSubmit">Continuer</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script src="/js/navigation.js"></script>
+    <script src="/js/import-auth.js?v=1"></script>
 </th:block>
 
 </body>

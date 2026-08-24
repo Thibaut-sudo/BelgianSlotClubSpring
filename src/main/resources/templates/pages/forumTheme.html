@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title=${theme.title} + ' — Forum — Belgian Slot Club')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(active='forum', club=${club})}"></header>
+
+<section class="page-hero page-hero--club"
+         th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+    <div class="page-hero-content container">
+        <p class="page-hero-eyebrow">
+            <a th:href="@{/forum(club=${club})}" class="page-hero-back">← Forum</a>
+        </p>
+        <h1 class="page-hero-title" th:text="${theme.title}">Thème</h1>
+        <p class="page-hero-sub" th:text="${theme.description}">Description</p>
+        <div class="page-hero-meta">
+            <span>Club : <strong th:text="${clubDisplayName}">Club</strong></span>
+            <span th:text="${#lists.size(questions)} + ' question(s)'">0 question(s)</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
+        <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
+
+        <div class="forum-layout">
+            <div class="forum-main">
+                <h2 class="section-title">Questions</h2>
+                <div th:if="${#lists.isEmpty(questions)}" class="empty-state">
+                    <p>Pas encore de question dans ce thème. Posez la première.</p>
+                </div>
+                <ul class="forum-theme-list" th:unless="${#lists.isEmpty(questions)}">
+                    <li th:each="card : ${questions}">
+                        <a class="forum-theme-card" th:href="@{/forum/question/{id}(id=${card.question.id})}">
+                            <span class="forum-theme-card__title" th:text="${card.question.title}">Titre</span>
+                            <span class="forum-theme-card__meta">
+                                <span th:text="${card.question.author}">Auteur</span>
+                                <span th:text="' · ' + ${#temporals.format(card.question.createdAt, 'dd/MM/yyyy HH:mm')}"> · date</span>
+                                <span th:text="${card.replyCount} == 1 ? ' · 1 réponse' : ' · ' + ${card.replyCount} + ' réponses'"> · 0 réponses</span>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <aside class="forum-side">
+                <div class="filters-panel">
+                    <h2 class="filters-panel-title">Poser une question</h2>
+                    <p class="filters-panel-lead">Pas besoin de compte : indiquez votre nom et votre question.</p>
+                    <form th:action="@{/forum/theme/{id}/questions(id=${theme.id})}" method="post" class="stack-form">
+                        <div class="form-group">
+                            <label class="form-label" for="author">Votre nom</label>
+                            <input class="form-input" type="text" id="author" name="author"
+                                   maxlength="40" required placeholder="Prénom">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="title">Titre</label>
+                            <input class="form-input" type="text" id="title" name="title"
+                                   maxlength="120" required placeholder="Ex. Largeur max GT AM ?">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="body">Question</label>
+                            <textarea class="form-textarea" id="body" name="body" rows="5" maxlength="4000"
+                                      required placeholder="Décrivez votre question…"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Publier</button>
+                    </form>
+                </div>
+
+                <form id="forumDeleteThemeForm"
+                      th:action="@{/forum/theme/{id}/delete(id=${theme.id})}"
+                      method="post"
+                      class="forum-mod-form"
+                      onsubmit="return confirm('Supprimer ce thème et toutes ses questions ?');">
+                    <button type="submit" class="btn btn-ghost btn-sm">Supprimer le thème</button>
+                </form>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    if (typeof protectImportForm === 'function') {
+        protectImportForm(document.getElementById('forumDeleteThemeForm'));
+    }
+</script>
+</body>
+</html>

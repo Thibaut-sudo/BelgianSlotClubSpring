@@ -3,6 +3,7 @@ package org.example.belgianslotclubspring.services;
 import org.example.belgianslotclubspring.entities.Rallye;
 import org.example.belgianslotclubspring.entities.RallyePilot;
 import org.example.belgianslotclubspring.models.RallyeBoucleGrid;
+import org.example.belgianslotclubspring.models.RallyeImportResult;
 import org.example.belgianslotclubspring.models.RallyeRecaps;
 import org.example.belgianslotclubspring.models.RallyeStandingRow;
 
@@ -20,6 +21,9 @@ public interface RallyeService {
 
     void delete(Long id);
 
+    /** Fige le rallye : plus aucune modification ensuite. */
+    Rallye finish(Long id);
+
     RallyePilot addPilot(Long rallyeId, String name, String car, String category);
 
     void updatePilot(Long rallyeId, Long pilotId, String name, String car, String category);
@@ -29,8 +33,15 @@ public interface RallyeService {
     /**
      * Sauvegarde les temps d'une boucle.
      * Map clé = pilotId, valeur = map stage→temps texte (stage 0 = PENO).
+     * Seules les cases présentes dans la map sont touchées (les autres restent intactes).
+     * Chaîne vide / « — » → efface ce temps précis.
      */
     void saveBoucleTimes(Long rallyeId, int boucle, Map<Long, Map<Integer, String>> timesByPilot);
+
+    /**
+     * Patch partiel : même sémantique que {@link #saveBoucleTimes}, renvoie le nombre de cases écrites.
+     */
+    int patchBoucleTimes(Long rallyeId, int boucle, Map<Long, Map<Integer, String>> timesByPilot);
 
     /**
      * Classement après {@code afterStages} ES (ex. 5, 10, 15, 20).
@@ -41,8 +52,8 @@ public interface RallyeService {
     /** Compte-rendus par boucle + résumé final (scratchs, coups durs, podium). */
     RallyeRecaps buildRecaps(Long rallyeId);
 
-    /** Importe nom + voiture (+ catégorie) depuis la feuille « Pilotes » d'un Excel rallye SRCS. */
-    int importPilotsFromExcel(Long rallyeId, String filePath);
+    /** Importe pilotes + temps ES / PENO depuis la feuille « Pilotes » d'un Excel rallye SRCS. */
+    RallyeImportResult importPilotsFromExcel(Long rallyeId, String filePath);
 
     /**
      * Génère la grille de groupes / manches pour une boucle (comme feuilles B1–B4 Excel).

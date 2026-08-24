@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/main.css?v=20">
     <link rel="stylesheet" href="/css/rallye-print.css">
     <link rel="stylesheet" href="/css/rallye-mobile.css">
 </head>
@@ -39,11 +39,18 @@
                    th:classappend="${b == activeBoucle} ? ' is-active'"
                    th:text="'Boucle ' + ${b}">Boucle 1</a>
             </div>
-            <button type="submit" form="grilleTimesForm" name="returnTo" value="grilles" class="btn btn-primary">Enregistrer les temps</button>
+            <button type="submit" form="grilleTimesForm" name="returnTo" value="grilles" class="btn btn-primary"
+                    th:unless="${rallye.finished}">Enregistrer les temps</button>
             <a class="btn btn-outline"
+               th:unless="${rallye.finished}"
                th:href="@{/rallye/{id}/scan(id=${rallye.id}, boucle=${activeBoucle})}">Scanner une feuille</a>
             <button type="button" class="btn btn-secondary grille-btn-print" onclick="window.print()">Imprimer</button>
         </div>
+    </div>
+    <div class="container" style="padding-top:0.35rem">
+        <p id="timesSaveStatus" class="times-save-status" aria-live="polite" th:unless="${rallye.finished}">
+            Les temps s’enregistrent case par case (dès que tu quittes la case). Plusieurs personnes peuvent saisir en même temps.
+        </p>
     </div>
     <div class="container" th:if="${success}" style="padding-top:0.5rem">
         <div class="flash flash--success" th:text="${success}"></div>
@@ -60,10 +67,13 @@
 <main class="container grille-screen no-print" th:unless="${#lists.isEmpty(rallye.pilots)}">
     <section class="grille-preview-block">
         <h2 class="section-title">Composition des groupes — Boucle <span th:text="${activeBoucle}">1</span></h2>
-        <p class="section-lead">
+        <p class="section-lead" th:unless="${rallye.finished}">
             Glissez-déposez les pilotes d’un groupe à l’autre, puis enregistrez.
             <th:block th:if="${grid.manualGroups}"> Composition <strong>manuelle</strong> active.</th:block>
             <th:block th:unless="${grid.manualGroups}"> Répartition automatique (modifiable).</th:block>
+        </p>
+        <p class="section-lead" th:if="${rallye.finished}">
+            Rallye terminé : la composition des groupes n’est plus modifiable.
         </p>
         <p class="section-lead" th:if="${activeBoucle == 1 and !grid.manualGroups}">
             Répartition à tour de rôle (1→G1, 2→G2… puis on recommence).
@@ -100,9 +110,8 @@
                     </p>
                     <ol class="grille-drop-list" th:attr="data-group=${gStat.count}">
                         <li class="grille-pilot-item"
-                            draggable="true"
                             th:each="p : ${group}"
-                            th:attr="data-pilot-id=${p.id}">
+                            th:attr="draggable=${!rallye.finished}, data-pilot-id=${p.id}">
                             <span class="grille-num" th:if="${p.previousRank != null}" th:text="'R.' + ${p.previousRank}">R.1</span>
                             <span class="grille-num" th:if="${p.previousRank == null and p.startNumber != null}" th:text="${p.startNumber}">1</span>
                             <span class="grille-num" th:if="${p.previousRank == null and p.startNumber == null}">·</span>
@@ -118,7 +127,7 @@
                            value="">
                 </article>
             </div>
-            <div class="cluster grille-groups-actions">
+            <div class="cluster grille-groups-actions" th:unless="${rallye.finished}">
                 <button type="submit" class="btn btn-primary btn-sm">Enregistrer les groupes</button>
                 <button type="submit"
                         class="btn btn-outline btn-sm"
@@ -159,10 +168,13 @@
 
 <!-- Une feuille = un groupe (toutes les ES de la boucle) -->
 <form id="grilleTimesForm"
+      th:class="${rallye.finished} ? '' : 'js-times-patch'"
       th:action="@{/rallye/{id}/times(id=${rallye.id})}"
       method="post"
+      th:attr="data-rallye-id=${rallye.id}, data-times-ajax=${rallye.finished} ? 0 : 1"
       th:unless="${#lists.isEmpty(rallye.pilots)}">
     <input type="hidden" name="boucle" th:value="${activeBoucle}">
+    <input type="hidden" name="returnTo" id="grilleReturnTo" value="grilles">
 
     <div class="grille-print-root">
         <section class="print-sheet"
@@ -175,16 +187,22 @@
                     <p class="print-kicker" th:text="${clubDisplayName}">SRCS</p>
                     <h1 th:text="${rallye.name}">Rallye</h1>
                 </div>
-                <div class="print-sheet-meta">
-                    <p th:text="${#temporals.format(rallye.date, 'dd/MM/yyyy')}">01/01/2026</p>
-                    <p>
-                        <strong th:text="'Boucle ' + ${activeBoucle}">Boucle 1</strong>
-                        ·
-                        <strong class="print-es-title" th:text="'Groupe ' + ${sheet.groupNumber}">Groupe 1</strong>
-                    </p>
-                    <p class="print-seed-note">
-                        Écrire clairement : 12.345 ou 1:23.45 — chiffres uniquement
-                    </p>
+                <div class="print-sheet-meta print-sheet-meta--with-qr">
+                    <div>
+                        <p th:text="${#temporals.format(rallye.date, 'dd/MM/yyyy')}">01/01/2026</p>
+                        <p>
+                            <strong th:text="'Boucle ' + ${activeBoucle}">Boucle 1</strong>
+                            ·
+                            <strong class="print-es-title" th:text="'Groupe ' + ${sheet.groupNumber}">Groupe 1</strong>
+                        </p>
+                        <p class="print-seed-note">
+                            Écrire clairement : 12.345 ou 1:23.45 — chiffres uniquement
+                        </p>
+                    </div>
+                    <img class="print-qr"
+                         width="88" height="88"
+                         alt="QR"
+                         th:attr="data-qr=${sheet.qrPayload}">
                 </div>
             </header>
 
@@ -224,7 +242,8 @@
                                            placeholder=""
                                            th:name="'time_' + ${p.id} + '_' + ${st.esNumber}"
                                            th:value="${timeDisplay[p.id + '_' + st.esNumber]}"
-                                           th:aria-label="'Temps ' + ${p.name} + ' ES ' + ${st.esNumber}">
+                                           th:aria-label="'Temps ' + ${p.name} + ' ES ' + ${st.esNumber}"
+                                           th:readonly="${rallye.finished}">
                                     <span class="ocr-anchor"
                                           th:text="'p' + ${p.id} + 'e' + ${st.esNumber}">p1e1</span>
                                 </div>
@@ -239,16 +258,13 @@
             </div>
 
             <footer class="print-sheet-footer">
-                <span class="no-print">
+                <span class="no-print" th:unless="${rallye.finished}">
                     <button type="submit" name="returnTo" value="grilles" class="btn btn-primary btn-sm">Enregistrer</button>
                     <button type="submit" name="returnTo" value="saisie" class="btn btn-outline btn-sm">Enregistrer et voir saisie</button>
                 </span>
-                <canvas class="print-qr print-qr--footer"
-                        width="44" height="44"
-                        th:attr="data-qr=${sheet.qrPayload}"
-                        aria-hidden="true"></canvas>
                 <span>Feuille Groupe <span th:text="${sheet.groupNumber}">1</span>
-                    · Boucle <span th:text="${activeBoucle}">1</span></span>
+                    · Boucle <span th:text="${activeBoucle}">1</span>
+                    · QR en haut à droite</span>
                 <span th:text="'Groupe ' + ${sheet.groupNumber} + ' / ' + ${grid.groupCount}">Groupe 1 / 4</span>
             </footer>
         </section>
@@ -384,22 +400,30 @@
   }, { passive: true });
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js" class="no-print"></script>
-<script class="no-print">
+<script src="/js/qrcode-generator.js"></script>
+<script>
 (function () {
-  if (typeof QRCode === 'undefined') return;
-  document.querySelectorAll('canvas.print-qr[data-qr]').forEach(function (canvas) {
-    var payload = canvas.getAttribute('data-qr');
+  if (typeof qrcode === 'undefined') {
+    console.error('qrcode-generator non chargé');
+    return;
+  }
+  document.querySelectorAll('img.print-qr[data-qr]').forEach(function (img) {
+    var payload = img.getAttribute('data-qr');
     if (!payload) return;
-    QRCode.toCanvas(canvas, payload, {
-      width: 44,
-      margin: 0,
-      errorCorrectionLevel: 'M',
-      color: { dark: '#111111', light: '#ffffff' }
-    });
+    try {
+      var qr = qrcode(0, 'M');
+      qr.addData(payload);
+      qr.make();
+      img.src = qr.createDataURL(4, 2);
+      img.removeAttribute('alt');
+    } catch (e) {
+      console.error('QR échec', e);
+      img.alt = 'QR erreur';
+    }
   });
 })();
 </script>
-<script src="/js/navigation.js" class="no-print"></script>
+<script src="/js/rallye-times-save.js?v=2" class="no-print"></script>
+<script src="/js/navigation.js?v=20" class="no-print"></script>
 </body>
 </html>

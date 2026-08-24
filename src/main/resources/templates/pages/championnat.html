@@ -96,9 +96,7 @@
                             <li><strong>4<sup>e</sup> place :</strong> 32 points</li>
                             <li><strong>5<sup>e</sup> place :</strong> 30 points</li>
                             <li><strong>6<sup>e</sup> à 10<sup>e</sup> :</strong> 28, 26, 24, 22, 20 points</li>
-                            <li><strong>11<sup>e</sup> à 15<sup>e</sup> :</strong> 19, 18, 17, 16, 15 points</li>
-                            <li><strong>16<sup>e</sup> à 20<sup>e</sup> :</strong> 14, 13, 12, 11, 10 points</li>
-                            <li><strong>21<sup>e</sup> à 28<sup>e</sup> :</strong> 9, 8, 7, 6, 5, 4, 3, 2 points</li>
+                            <li><strong>11<sup>e</sup> à 28<sup>e</sup> :</strong> 19 → 2 points (−1 par place)</li>
                             <li><strong>29<sup>e</sup> et plus :</strong> 1 point</li>
                         </ul>
                     </div>
@@ -121,9 +119,9 @@
                                 <div class="points-row"><span class="position">12</span><span class="points">18</span></div>
                                 <div class="points-row"><span class="position">13</span><span class="points">17</span></div>
                                 <div class="points-row"><span class="position">14</span><span class="points">16</span></div>
+                                <div class="points-row"><span class="position">15</span><span class="points">15</span></div>
                             </div>
                             <div class="points-column">
-                                <div class="points-row"><span class="position">15</span><span class="points">15</span></div>
                                 <div class="points-row"><span class="position">16</span><span class="points">14</span></div>
                                 <div class="points-row"><span class="position">17</span><span class="points">13</span></div>
                                 <div class="points-row"><span class="position">18</span><span class="points">12</span></div>
@@ -136,7 +134,8 @@
                                 <div class="points-row"><span class="position">25</span><span class="points">5</span></div>
                                 <div class="points-row"><span class="position">26</span><span class="points">4</span></div>
                                 <div class="points-row"><span class="position">27</span><span class="points">3</span></div>
-                                <div class="points-row"><span class="position">28+</span><span class="points">2</span></div>
+                                <div class="points-row"><span class="position">28</span><span class="points">2</span></div>
+                                <div class="points-row"><span class="position">29+</span><span class="points">1</span></div>
                             </div>
                         </div>
                     </div>
@@ -144,10 +143,10 @@
                     <div class="points-notes">
                         <h3>Notes importantes</h3>
                         <ul class="notes-list">
-                            <li>Les points sont attribués selon la position finale de chaque course</li>
-                            <li>En cas d'égalité, le meilleur résultat en course départage</li>
-                            <li>Les pénalités peuvent réduire le nombre de points obtenus</li>
-                            <li>Le classement final est basé sur le total des points de toutes les courses</li>
+                            <li>Les points sont attribués selon la position finale (tours) de chaque course</li>
+                            <li>À tours égaux, les pilotes reçoivent les mêmes points (ex-æquo)</li>
+                            <li><strong>Total − 1</strong> : on retire le plus mauvais résultat (joker) — une absence compte comme 0 et est écartée en priorité</li>
+                            <li>Le classement officiel est basé sur le <strong>Total − 1</strong></li>
                         </ul>
                     </div>
                 </div>
@@ -175,7 +174,7 @@
             </div>
 
             <!-- Classement Catégorie Bis -->
-            <div class="table-container excluded-table-container">
+            <div class="table-container championship-table-container bis-table-container">
                 <div class="table-header">
                     <h2>Classement catégorie bis</h2>
                     <p>Classement des pilotes en catégorie bis</p>
@@ -204,6 +203,7 @@
                 </div>
                 <div class="navigation-actions cluster">
                     <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-primary">Voir les courses</a>
+                    <a th:href="@{/statistiques/{club}(club=${club})}" class="btn btn-secondary">Statistiques</a>
                     <a href="/" class="btn btn-outline">Retour à l'accueil</a>
                 </div>
             </div>
@@ -217,6 +217,10 @@
     <script th:inline="javascript">
         const raceResults = /*[[${raceResults}]]*/ {};
     </script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+    <script src="/js/export-tables.js"></script>
 
     <style>
         /* Hero stats */
@@ -380,15 +384,41 @@
             color: var(--color-ink);
         }
 
-        /* Excluded rows */
-        .excluded-row {
-            background: var(--color-paper);
-            opacity: 0.85;
+        .bis-table-container {
+            margin-top: var(--space-8);
         }
 
-        .excluded-row td {
+        .bis-table-container .table-header,
+        .championship-table-container .table-header {
+            padding: var(--space-6) var(--space-6);
+        }
+
+        .bis-badge {
+            display: inline-block;
+            margin-left: var(--space-2);
+            padding: 0.1em 0.45em;
+            font-family: var(--font-display);
+            font-size: 0.625rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--color-white);
+            background: var(--color-track);
+            border-radius: var(--radius-sm);
+            vertical-align: middle;
+        }
+
+        .championship-table td.race-score.is-scored {
+            background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+            font-weight: 600;
+            color: var(--color-ink);
+        }
+
+        .empty-bis {
+            text-align: center;
             color: var(--color-muted);
-            font-style: italic;
+            padding: var(--space-5);
+            font-size: 0.9375rem;
         }
 
         /* Actions bar */
@@ -481,18 +511,19 @@
                 });
 
                 let total1 = total;
-                let nonZeroScores = scores.filter(s => s > 0);
-
-                if (nonZeroScores.length > 1) {
-                    let minScore = Math.min(...nonZeroScores);
+                // Joker : on retire le plus mauvais résultat de la saison.
+                // Une absence (0 / « - ») compte comme 0 → c'est elle qui est écartée,
+                // pas un score réellement obtenu.
+                if (scores.length > 1) {
+                    let minScore = Math.min(...scores);
                     total1 -= minScore;
                 }
 
                 return { name, total, total1, scores };
             });
 
-            let excludedPilotes = pilotes.filter(p => p.name.includes("*"));
-            let validPilotes = pilotes.filter(p => !p.name.includes("*"));
+            let excludedPilotes = pilotes.filter(p => isBisPilot(p.name));
+            let validPilotes = pilotes.filter(p => !isBisPilot(p.name));
 
             // Trier les pilotes valides par total1 (décroissant)
             validPilotes.sort((a, b) => b.total1 - a.total1);
@@ -500,9 +531,19 @@
             // Trier les pilotes avec * (catégorie bis) par total1 (décroissant)
             excludedPilotes.sort((a, b) => b.total1 - a.total1);
 
-            function appendToTable(body, pilote, isExcluded = false) {
+            function isBisPilot(name) {
+                return typeof name === "string" && /[*∗＊]/.test(name);
+            }
+
+            function displayPilotName(name) {
+                return String(name || "")
+                    .replace(/[＊∗*]/g, "")
+                    .replace(/\s+/g, " ")
+                    .trim();
+            }
+
+            function appendToTable(body, pilote, isBis = false) {
                 let tr = document.createElement("tr");
-                if (isExcluded) tr.classList.add("excluded-row");
 
                 let tdPosition = document.createElement("td");
                 tdPosition.className = "position";
@@ -515,7 +556,14 @@
 
                 let tdName = document.createElement("td");
                 tdName.className = "pilot-name";
-                tdName.textContent = pilote.name;
+                tdName.textContent = displayPilotName(pilote.name);
+                if (isBis) {
+                    let badge = document.createElement("span");
+                    badge.className = "bis-badge";
+                    badge.textContent = "bis";
+                    tdName.appendChild(document.createTextNode(" "));
+                    tdName.appendChild(badge);
+                }
                 tr.appendChild(tdName);
 
                 let tdTotal = document.createElement("td");
@@ -533,8 +581,7 @@
                     td.className = "race-score";
                     td.textContent = score || "-";
                     if (score > 0) {
-                        td.style.backgroundColor = "rgba(16, 185, 129, 0.1)";
-                        td.style.fontWeight = "600";
+                        td.classList.add("is-scored");
                     }
                     tr.appendChild(td);
                 });
@@ -543,7 +590,17 @@
             }
 
             validPilotes.forEach(p => appendToTable(tableBody, p));
-            excludedPilotes.forEach(p => appendToTable(excludedBody, p, true));
+            if (excludedPilotes.length === 0) {
+                let tr = document.createElement("tr");
+                let td = document.createElement("td");
+                td.colSpan = 4 + dates.length;
+                td.className = "empty-bis";
+                td.textContent = "Aucun pilote catégorie bis pour cette sélection.";
+                tr.appendChild(td);
+                excludedBody.appendChild(tr);
+            } else {
+                excludedPilotes.forEach(p => appendToTable(excludedBody, p, true));
+            }
         }
 
         // Mise à jour des statistiques
@@ -613,11 +670,34 @@
 
         // Fonctions d'export
         function exportToExcel() {
-            alert('Fonctionnalité d\'export Excel en cours de développement');
+            if (typeof BscExport === 'undefined') {
+                alert('Module d’export indisponible.');
+                return;
+            }
+            const year = document.getElementById('year')?.value || '';
+            const cat = document.getElementById('categorie')?.value || '';
+            BscExport.exportToExcel([
+                { name: 'Général', table: '#raceTable' },
+                { name: 'Catégorie bis', table: '#excludedTable' }
+            ], ['championnat', cat, year].filter(Boolean).join('_'));
         }
 
         function exportToPDF() {
-            alert('Fonctionnalité d\'export PDF en cours de développement');
+            if (typeof BscExport === 'undefined') {
+                alert('Module d’export indisponible.');
+                return;
+            }
+            const year = document.getElementById('year')?.value || '';
+            const cat = document.getElementById('categorie')?.value || '';
+            BscExport.exportToPdf({
+                title: 'Classement championnat',
+                subtitle: [cat, year].filter(Boolean).join(' · '),
+                filename: ['championnat', cat, year].filter(Boolean).join('_'),
+                sheets: [
+                    { name: 'Général', table: '#raceTable' },
+                    { name: 'Catégorie bis', table: '#excludedTable' }
+                ]
+            });
         }
 
         function shareChampionship() {

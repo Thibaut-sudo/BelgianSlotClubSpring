@@ -1,0 +1,26 @@
+Preuves techniques — belgianslotclub.com
+Date : 12 août 2026
+
+1) Redirection HTTP → HTTPS
+   curl -I http://belgianslotclub.com/
+   → HTTP/1.1 301 Moved Permanently
+   → Location: https://belgianslotclub.com/
+
+2) HTTPS actif + HSTS
+   curl -I https://belgianslotclub.com/
+   → HTTP/2 200
+   → server: cloudflare
+   → strict-transport-security: max-age=31536000; includeSubDomains
+   → x-content-type-options: nosniff
+
+3) Protection / CDN
+   Name servers : damian.ns.cloudflare.com / naya.ns.cloudflare.com
+   Domaine derrière Cloudflare (IP d'origine masquée)
+
+4) Nature du site
+   Site officiel du Belgian Slot Club (slot racing Belgique)
+   Résultats de courses, championnats, informations clubs
+   Contact : contact@belgianslotclub.be
+   Aucune collecte de mots de passe bancaires / phishing
+
+Conclusion : le blocage Orange Mobile Serenity est un faux positif.

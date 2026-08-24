@@ -14,11 +14,11 @@
                     <p class="page-hero-sub">
                         Découvrez le prochain événement
                         <span th:text="${club == 'slot4000' ? 'SLOT4000' : 'SRCS'}">club</span>
-                        et consultez le planning complet de la saison 2025.
+                        et consultez le planning complet de la saison.
                     </p>
                     <div class="page-hero-meta">
                         <span th:text="${club == 'slot4000' ? 'SLOT4000' : 'SRCS'}">Club</span>
-                        <span>Saison 2025</span>
+                        <span>Saison 2026–2027</span>
                     </div>
                 </div>
                 <aside class="countdown-panel" aria-label="Compte à rebours">
@@ -66,9 +66,42 @@
                 <div class="cluster next-event-actions">
                     <a th:href="@{/championnat(club=${club})}" class="btn btn-primary">Voir championnat</a>
                     <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-secondary">Voir courses</a>
-                    <button type="button" class="btn btn-outline" onclick="addToCalendar()">Ajouter au calendrier</button>
+                    <a th:href="@{/calendrier/{club}/google(club=${club})}"
+                       class="btn btn-outline"
+                       target="_blank"
+                       rel="noopener">Google Agenda</a>
+                    <a th:if="${club == 'srcs'}"
+                       class="btn btn-outline"
+                       href="/docs/Calendrier_SRCS_mardis_2026-2027.pdf"
+                       download>Télécharger le PDF</a>
+                    <a th:if="${club == 'slot4000'}"
+                       class="btn btn-outline"
+                       href="/docs/Calendrier_Slot4000_Hobby2000_2026.pdf"
+                       download>Télécharger le PDF</a>
                 </div>
             </article>
+
+            <section class="calendar-subscribe" aria-labelledby="subscribe-heading">
+                <h2 id="subscribe-heading" class="section-title">Ajouter à mon agenda</h2>
+                <p class="section-lead">
+                    Abonne-toi au calendrier
+                    <span th:text="${club == 'slot4000' ? 'Slot 4000' : 'SRCS'}">club</span>
+                    : les dates se mettent à jour toutes seules.
+                </p>
+                <div class="cluster">
+                    <a class="btn btn-primary"
+                       th:href="@{/calendrier/{club}/google(club=${club})}"
+                       target="_blank"
+                       rel="noopener">Google Agenda</a>
+                    <a class="btn btn-secondary"
+                       th:href="@{/calendrier/{club}/apple(club=${club})}">Apple Calendar</a>
+                    <a class="btn btn-outline"
+                       th:href="|/calendrier/${club}.ics|"
+                       th:download="${club == 'slot4000' ? 'calendrier-slot4000.ics' : 'calendrier-srcs.ics'}">
+                        Fichier .ics (Outlook)
+                    </a>
+                </div>
+            </section>
 
             <section class="calendar-section" aria-labelledby="calendar-heading">
                 <header class="calendar-section-header">
@@ -131,23 +164,19 @@
                         <div class="legend-color event-scaleauto"></div>
                         <span>SCALEAUTO/BPC/BEL LMS</span>
                     </div>
+                    <div class="legend-item">
+                        <div class="legend-color event-tcrall"></div>
+                        <span>TCR ALL</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color event-soiree"></div>
+                        <span>Soirée</span>
+                    </div>
                 </div>
                 <div class="legend-grid" th:if="${club == 'srcs'}">
                     <div class="legend-item">
-                        <div class="legend-color event-revoslot"></div>
-                        <span>Revoslot</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color event-brm"></div>
-                        <span>BRM</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color event-gt24"></div>
-                        <span>GT24</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color event-proto24"></div>
-                        <span>Proto 24</span>
+                        <div class="legend-color event-gt24proto24"></div>
+                        <span>GT24 / Proto 24</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color event-scaleauto"></div>
@@ -158,12 +187,20 @@
                         <span>BPC</span>
                     </div>
                     <div class="legend-item">
+                        <div class="legend-color event-revoslot"></div>
+                        <span>Revoslot</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color event-brm"></div>
+                        <span>BRM</span>
+                    </div>
+                    <div class="legend-item">
                         <div class="legend-color event-bel-lms"></div>
                         <span>BEL-LMS</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color event-revo"></div>
-                        <span>Revo</span>
+                        <span>Revo (interclubs)</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color event-dephtone"></div>
@@ -305,6 +342,22 @@
         .next-event-actions {
             padding: var(--space-4) var(--space-6) var(--space-6);
             border-top: 1px solid var(--color-border);
+        }
+
+        .calendar-subscribe {
+            margin: 0 0 var(--space-10);
+            padding: var(--space-6);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+        }
+
+        .calendar-subscribe .section-title {
+            margin-bottom: var(--space-2);
+        }
+
+        .calendar-subscribe .section-lead {
+            margin-bottom: var(--space-4);
         }
 
         .calendar-section {
@@ -509,6 +562,20 @@
             color: var(--color-ink);
         }
 
+        .event-tcrall,
+        .legend-color.event-tcrall {
+            background-color: #0f766e;
+        }
+
+        .event-soiree,
+        .legend-color.event-soiree,
+        .event-soirevab,
+        .legend-color.event-soirevab,
+        .event-soirefun,
+        .legend-color.event-soirefun {
+            background-color: #be185d;
+        }
+
         @media (min-width: 768px) {
             .next-event-details {
                 grid-template-columns: repeat(3, 1fr);
@@ -532,185 +599,10 @@
         }
     </style>
 
-    <script>
-        // Données des événements selon le club
+    <script th:inline="javascript">
         const clubElement = document.querySelector('[data-club]');
         const club = clubElement ? clubElement.getAttribute('data-club') : 'slot4000';
-        console.log('Club détecté:', club);
-        console.log('Type de club:', typeof club);
-        let events2025 = {};
-
-        if (club === 'slot4000') {
-            console.log('Chargement des événements SLOT4000');
-            // Données des événements SLOT4000 2025 (corrigées selon le calendrier officiel)
-            events2025 = {
-                '2025-01-10': 'GT32',
-                '2025-01-24': 'GR5',
-                '2025-01-31': 'PROTO24',
-                '2025-02-07': 'PROTO32, GT32',
-                '2025-02-14': 'TCR-SCALE, PROTO24',
-                '2025-02-21': 'SLOT.IT, SCALEAUTO',
-                '2025-02-22': 'BPC',
-                '2025-02-23': 'BPC',
-                '2025-02-28': 'GT24',
-                '2025-03-07': 'GT32',
-                '2025-03-21': 'GR5',
-                '2025-03-27': '1000KMS',
-                '2025-03-28': '1000KMS',
-                '2025-03-29': '1000KMS',
-                '2025-04-04': 'PROTO32',
-                '2025-04-11': 'GT24',
-                '2025-04-18': 'SLOT.IT',
-                '2025-04-25': 'PROTO24',
-                '2025-05-02': 'GT32',
-                '2025-05-09': 'TCR-SCALE',
-                '2025-05-16': 'GR5',
-                '2025-05-30': 'PROTO32',
-                '2025-06-06': 'PROTO24',
-                '2025-06-13': 'SLOT.IT',
-                '2025-06-20': 'TCR-SCALE',
-                '2025-06-27': 'GT32',
-                '2025-09-05': 'GR5',
-                '2025-09-12': 'PROTO24',
-                '2025-09-19': 'PROTO32',
-                '2025-09-26': 'GT24',
-                '2025-10-03': 'SLOT.IT',
-                '2025-10-10': 'TCR-SCALE',
-                '2025-10-17': 'GT32',
-                '2025-10-24': 'PROTO24',
-                '2025-10-31': 'GR5',
-                '2025-11-07': 'GT24',
-                '2025-11-14': 'PROTO24',
-                '2025-11-21': 'TCR-SCALE',
-                '2025-11-27': 'GT24, BEL LMS',
-                '2025-12-05': 'PROTO24',
-                '2025-12-12': 'SLOT.IT',
-                '2025-12-19': 'GT24',
-                '2025-12-26': 'PROTO32'
-            };
-        } else if (club === 'srcs') {
-            console.log('Chargement des événements SRCS');
-            // Données des événements SRCS 2025 (selon le calendrier officiel SRCS)
-            events2025 = {
-                '2025-01-04': 'Revoslot',
-                '2025-01-11': 'BEL-LMS S.R.C.S',
-                '2025-01-18': 'BPC D.S.C.A',
-                '2025-01-21': 'GT24',
-                '2025-01-25': 'GT 24',
-                '2025-01-28': 'BRM',
-                '2025-02-08': 'BEL-LMS Chimay',
-                '2025-02-15': 'Revo S4all',
-                '2025-02-16': 'BPC Chimay',
-                '2025-02-18': 'Scaleauto',
-                '2025-02-23': 'BPC Slot 4000',
-                '2025-02-25': 'BRM',
-                '2025-03-04': 'BPC',
-                '2025-03-11': 'proto 24',
-                '2025-03-18': 'Scaleauto',
-                '2025-03-22': 'Scaleauto',
-                '2025-03-29': 'BPC',
-                '2025-04-01': 'Revoslot',
-                '2025-04-08': 'GT 24',
-                '2025-04-12': 'BEL-LMS fastlane',
-                '2025-04-15': 'Proto 24',
-                '2025-04-25': 'Proto 24',
-                '2025-05-06': 'BRM',
-                '2025-05-11': 'BPC Dulmen',
-                '2025-05-13': 'Revoslot',
-                '2025-05-20': 'GT 24',
-                '2025-05-24': 'BEL-LMS D.S.C.A',
-                '2025-05-27': 'Proto 24',
-                '2025-05-29': 'BPC Stolberg',
-                '2025-06-03': 'Revoslot',
-                '2025-06-07': 'Revo Diepenbeek',
-                '2025-06-10': 'BRM',
-                '2025-06-17': 'Deph\'one F1',
-                '2025-06-29': 'BPC Stolberg',
-                '2025-09-01': 'BPC',
-                '2025-09-07': 'BPC S.R.C.S',
-                '2025-09-09': 'Deph\'one F1',
-                '2025-09-16': 'Revoslot',
-                '2025-09-20': 'Revo S.R.C.S',
-                '2025-09-23': 'BRM',
-                '2025-09-25': 'Chall. E.Pirotte',
-                '2025-09-28': 'BPC',
-                '2025-09-30': 'GT 24',
-                '2025-10-02': 'BPC M.R.T.U',
-                '2025-10-04': 'BRM',
-                '2025-10-07': 'Proto 24',
-                '2025-10-08': 'Revo Eindhoven',
-                '2025-10-11': 'Revoslot',
-                '2025-10-14': 'GT 24',
-                '2025-10-18': 'Deph\'one F1',
-                '2025-10-25': 'Chall. E.Pirotte',
-                '2025-10-26': 'Chall. E. Pirotte',
-                '2025-10-28': 'BPC',
-                '2025-11-01': 'BPC M.R.T.U',
-                '2025-11-08': 'Revo Eindhoven',
-                '2025-11-11': 'Revoslot',
-                '2025-11-13': 'Revo DSCA',
-                '2025-11-16': 'BRM',
-                '2025-11-18': 'Deph\'one F1',
-                '2025-11-25': 'Scaleauto',
-                '2025-11-26': 'Scaleauto S.R.C.S',
-                '2025-12-02': 'BPC',
-                '2025-12-09': 'Revoslot',
-                '2025-12-13': 'Revo DSCA',
-                '2025-12-16': 'BRM',
-                '2025-12-20': 'Revo S.R.C.S',
-                '2025-12-23': 'BRM',
-                '2025-12-27': 'BRM',
-                '2025-12-30': 'GT 24'
-            };
-        } else {
-            console.log('Club non reconnu, utilisation des événements SLOT4000 par défaut');
-            // Données des événements SLOT4000 2025 par défaut
-            events2025 = {
-                '2025-01-10': 'GT32',
-                '2025-01-24': 'GR5',
-                '2025-01-31': 'PROTO24',
-                '2025-02-07': 'PROTO32, GT32',
-                '2025-02-14': 'TCR-SCALE, PROTO24',
-                '2025-02-21': 'SLOT.IT, SCALEAUTO',
-                '2025-02-22': 'BPC',
-                '2025-02-23': 'BPC',
-                '2025-02-28': 'GT24',
-                '2025-03-07': 'GT32',
-                '2025-03-21': 'GR5',
-                '2025-03-27': '1000KMS',
-                '2025-03-28': '1000KMS',
-                '2025-03-29': '1000KMS',
-                '2025-04-04': 'PROTO32',
-                '2025-04-11': 'GT24',
-                '2025-04-18': 'SLOT.IT',
-                '2025-04-25': 'PROTO24',
-                '2025-05-02': 'GT32',
-                '2025-05-09': 'TCR-SCALE',
-                '2025-05-16': 'GR5',
-                '2025-05-30': 'PROTO32',
-                '2025-06-06': 'PROTO24',
-                '2025-06-13': 'SLOT.IT',
-                '2025-06-20': 'TCR-SCALE',
-                '2025-06-27': 'GT32',
-                '2025-09-05': 'GR5',
-                '2025-09-12': 'PROTO24',
-                '2025-09-19': 'PROTO32',
-                '2025-09-26': 'GT24',
-                '2025-10-03': 'SLOT.IT',
-                '2025-10-10': 'TCR-SCALE',
-                '2025-10-17': 'GT32',
-                '2025-10-24': 'PROTO24',
-                '2025-10-31': 'GR5',
-                '2025-11-07': 'GT24',
-                '2025-11-14': 'PROTO24',
-                '2025-11-21': 'TCR-SCALE',
-                '2025-11-27': 'GT24, BEL LMS',
-                '2025-12-05': 'PROTO24',
-                '2025-12-12': 'SLOT.IT',
-                '2025-12-19': 'GT24',
-                '2025-12-26': 'PROTO32'
-            };
-        }
+        const events2025 = /*[[${allEvents}]]*/ {};
 
         const MIN_YEAR = 2024;
         const MAX_YEAR = 2027;
@@ -796,6 +688,10 @@
                             eventClass = 'slotit';
                         } else if (firstEventRaw.includes('tcr') && firstEventRaw.includes('scale')) {
                             eventClass = 'tcr-scale';
+                        } else if (firstEventRaw.includes('tcr')) {
+                            eventClass = 'tcrall';
+                        } else if (firstEventRaw.includes('soir')) {
+                            eventClass = 'soiree';
                         } else if (firstEventRaw.includes('bel') && firstEventRaw.includes('lms')) {
                             eventClass = 'bel-lms';
                         } else if (firstEventRaw.includes('1000kms')) {
@@ -808,6 +704,8 @@
                             eventClass = 'revoslot';
                         } else if (firstEventRaw.includes('revo') && !firstEventRaw.includes('revoslot')) {
                             eventClass = 'revo';
+                        } else if (firstEventRaw.includes('gt') && firstEventRaw.includes('proto')) {
+                            eventClass = 'gt24proto24';
                         } else if (firstEventRaw.includes('gt') && firstEventRaw.includes('24')) {
                             eventClass = 'gt24';
                         } else if (firstEventRaw.includes('proto') && firstEventRaw.includes('24')) {
@@ -826,6 +724,10 @@
 
                         if (eventTypes.length > 1) {
                             contentSpan.textContent = day.toString();
+                            contentSpan.style.fontWeight = 'bold';
+                        } else if (eventClass === 'gt24proto24') {
+                            contentSpan.textContent = 'GT24/P24';
+                            contentSpan.style.fontSize = '0.6rem';
                             contentSpan.style.fontWeight = 'bold';
                         } else {
                             const shortName = eventTypes[0].length > 8 ?
@@ -850,30 +752,6 @@
                 monthDiv.appendChild(monthDays);
                 calendarGrid.appendChild(monthDiv);
             });
-        }
-
-        function addToCalendar() {
-            const eventName = document.querySelector('.next-event-title').textContent;
-            const eventDate = document.querySelector('.next-event-date').textContent;
-
-            const event = {
-                title: `SLOT4000 - ${eventName}`,
-                start: new Date(eventDate),
-                end: new Date(eventDate),
-                description: `Événement SLOT4000 : ${eventName}`
-            };
-
-            if (navigator.share) {
-                navigator.share({
-                    title: event.title,
-                    text: `${event.description} le ${eventDate}`,
-                    url: window.location.href
-                });
-            } else {
-                const eventText = `${event.title} - ${eventDate}`;
-                navigator.clipboard.writeText(eventText);
-                alert('Informations de l\'événement copiées dans le presse-papiers !');
-            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {

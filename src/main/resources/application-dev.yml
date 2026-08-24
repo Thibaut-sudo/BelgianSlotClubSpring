@@ -28,6 +28,11 @@ spring:
     encoding: UTF-8
     cache: false
 
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 80MB
+
 # Configuration du serveur
 server:
   port: 8080

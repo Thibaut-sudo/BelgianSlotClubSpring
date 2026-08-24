@@ -22,6 +22,9 @@ public interface RaceResultService {
 
     List<RaceResult> getRaceResultByDateAndClub(LocalDate date, String club);
 
+    /** Résultats d'une course (date + club + catégorie normalisée). */
+    List<RaceResult> getRaceResultByDateClubAndCategory(LocalDate date, String club, String category);
+
     /** Liste des courses d'un club (date + catégorie), sans collision. */
     List<RaceSummary> getRaceSummariesByClub(String club);
 
@@ -35,9 +38,17 @@ public interface RaceResultService {
 
     List<String> getAllCategoriesClub(String club);
 
+    List<String> getAllCategoriesClub(String club, Integer year);
+
     Map<LocalDate, Map<String, Double>> getChampionshipResults(String category, String club, Integer year);
 
     List<String> getAllYearsClub(String club);
 
     List<Integer> getAvailableYears(String club);
+
+    /** Supprime une course (résultats + qualifs si plus rien pour cette date). */
+    void deleteRace(LocalDate date, String club, String category);
+
+    /** Invalide les caches de maintenance et des pages championnat après import Excel. */
+    void invalidateClubMaintenanceCaches(String club);
 }

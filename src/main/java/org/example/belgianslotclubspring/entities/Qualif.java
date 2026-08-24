@@ -7,9 +7,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
 
+import org.example.belgianslotclubspring.utils.RaceDateParse;
+
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 
 @AllArgsConstructor
@@ -33,14 +33,14 @@ public class Qualif {
     private String clubName;
 
     public Qualif(String qualifName, String qualiTime) {
-        this.bestTime = Float.parseFloat(qualiTime);
+        this.bestTime = parseQualiTime(qualiTime);
         this.pilotName = qualifName;
     }
 
     public Qualif(String qualifName, String qualiTime, String date) {
-        this.bestTime = Float.parseFloat(qualiTime);
+        this.bestTime = parseQualiTime(qualiTime);
         this.pilotName = qualifName;
-        this.date = convertStringToLocalDate(date);
+        this.date = RaceDateParse.parse(date);
     }
 
     public Qualif() {
@@ -50,8 +50,15 @@ public class Qualif {
         this.clubName = club;
     }
 
-    private static LocalDate convertStringToLocalDate(String dateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.FRENCH);
-        return LocalDate.parse(dateString, formatter);
+    private static float parseQualiTime(String raw) {
+        if (raw == null || raw.isBlank()) {
+            throw new IllegalArgumentException("Temps de qualification vide.");
+        }
+        String value = raw.trim().replace(',', '.');
+        try {
+            return Float.parseFloat(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Temps de qualification illisible (« " + raw + " »).", e);
+        }
     }
 }

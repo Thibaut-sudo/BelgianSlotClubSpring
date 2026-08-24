@@ -12,6 +12,7 @@
             <p class="hero-lead">Suivez les résultats et les championnats des clubs de slot racing belges.</p>
             <div class="cluster">
                 <a href="#clubs" class="btn btn-primary btn-lg">Choisir un club</a>
+                <a href="/marketplace" class="btn btn-outline btn-lg">Marketplace</a>
                 <a href="/contact" class="btn btn-outline btn-lg">Nous contacter</a>
             </div>
         </div>
@@ -23,7 +24,7 @@
             <p class="section-lead" id="clubSelectLead">Accédez aux courses, au classement et au calendrier de votre club.</p>
             <div class="club-grid">
                 <a href="/selectRace/slot4000" class="club-tile" data-club="slot4000">
-                    <img src="/images/images.jfif" alt="Slot 4000" class="club-tile-image">
+                    <img src="/images/images.jfif" alt="Slot 4000" class="club-tile-image" loading="lazy" decoding="async">
                     <div class="club-tile-body">
                         <h3>Slot 4000</h3>
                         <p>Club de slot racing à Liège, au-dessus de Hobby 2000. Actif depuis 2008.</p>
@@ -35,7 +36,7 @@
                 </a>
 
                 <a href="/selectRace/srcs" class="club-tile" data-club="srcs">
-                    <img src="/images/SRCS.png" alt="SRCS" class="club-tile-image">
+                    <img src="/images/SRCS.png" alt="SRCS" class="club-tile-image" loading="lazy" decoding="async">
                     <div class="club-tile-body">
                         <h3>SRCS</h3>
                         <p>Slot Racing Club Seraing, fondé en 2009. Ouvert aux débutants et aux expérimentés.</p>
@@ -47,7 +48,7 @@
                 </a>
 
                 <div class="club-tile club-tile-muted">
-                    <img src="/images/autres-clubs.jpg" alt="Autres clubs" class="club-tile-image">
+                    <img src="/images/autres-clubs.jpg" alt="Autres clubs" class="club-tile-image" loading="lazy" decoding="async">
                     <div class="club-tile-body">
                         <h3>Autres clubs</h3>
                         <p>D’autres clubs belges seront bientôt disponibles sur la plateforme.</p>
@@ -105,7 +106,8 @@
                 results: (club) => '/selectRace/' + club,
                 championnat: (club) => '/championnat?club=' + encodeURIComponent(club),
                 calendrier: (club) => '/prochain-evenement?club=' + encodeURIComponent(club),
-                rallye: (club) => '/rallye?club=' + encodeURIComponent(club)
+                rallye: (club) => '/rallye?club=' + encodeURIComponent(club),
+                forum: (club) => '/forum?club=' + encodeURIComponent(club)
             };
 
             const labels = {
@@ -113,7 +115,8 @@
                 results: 'Choisissez un club pour voir les courses et résultats.',
                 championnat: 'Choisissez un club pour accéder au championnat.',
                 calendrier: 'Choisissez un club pour accéder au calendrier.',
-                rallye: 'Choisissez un club pour gérer les classements rallye.'
+                rallye: 'Choisissez un club pour gérer les classements rallye.',
+                forum: 'Choisissez un club pour poser une question sur le forum.'
             };
 
             const resolve = destinations[goto] || destinations.courses;

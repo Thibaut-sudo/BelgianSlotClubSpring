@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Statistiques — Belgian Slot Club')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: nav(active='courses', club=${club})}"></header>
+
+    <section class="page-hero page-hero--club"
+             th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+        <div class="page-hero-content container">
+            <p class="page-hero-eyebrow">
+                <a th:href="@{/selectRace/{club}(club=${club})}" class="page-hero-back">‹ Courses</a>
+            </p>
+            <h1 class="page-hero-title">Statistiques</h1>
+            <p class="page-hero-sub">Vue d’ensemble des courses, des pelotons et des records.</p>
+            <div class="page-hero-meta">
+                <span>Club : <strong th:text="${clubDisplayName}">Club</strong></span>
+                <span th:if="${selectedYear != null}">Saison : <strong th:text="${selectedYear}">2026</strong></span>
+                <span th:unless="${selectedYear != null}">Saison : <strong>Toutes les années</strong></span>
+            </div>
+            <div class="page-hero-actions cluster" style="margin-top: var(--space-5);">
+                <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-secondary">Voir les courses</a>
+                <a th:href="@{/championnat(club=${club})}" class="btn btn-primary">Championnat</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <label for="year" class="filter-label">Année</label>
+                    <select id="year" name="year" class="filter-select form-select" onchange="applyYearFilter()">
+                        <option value="" th:selected="${selectedYear == null}">Toutes les années</option>
+                        <option th:each="y : ${years}"
+                                th:value="${y}"
+                                th:text="${y}"
+                                th:selected="${selectedYear != null and selectedYear == y}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <th:block th:if="${stats.raceCount() == 0}">
+                <div class="empty-state">
+                    <p>Aucune course enregistrée pour ce filtre.</p>
+                    <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-primary">Retour aux courses</a>
+                </div>
+            </th:block>
+
+            <th:block th:unless="${stats.raceCount() == 0}">
+
+                <div class="stats-row">
+                    <div class="stat-block">
+                        <span class="stat-block-value" th:text="${stats.raceCount()}">0</span>
+                        <span class="stat-block-label">Courses</span>
+                    </div>
+                    <div class="stat-block">
+                        <span class="stat-block-value" th:text="${stats.uniquePilots()}">0</span>
+                        <span class="stat-block-label">Pilotes</span>
+                    </div>
+                    <div class="stat-block">
+                        <span class="stat-block-value" th:text="${stats.categoryCount()}">0</span>
+                        <span class="stat-block-label">Catégories</span>
+                    </div>
+                    <div class="stat-block">
+                        <span class="stat-block-value" th:text="${stats.avgFieldSize()}">0</span>
+                        <span class="stat-block-label">Peloton moyen</span>
+                    </div>
+                </div>
+
+                <div class="stats-record-grid" th:if="${stats.fastestLap() != null or stats.fastestQuali() != null}">
+                    <article class="stats-record" th:if="${stats.fastestLap() != null}">
+                        <p class="stats-record-label">Meilleur tour</p>
+                        <p class="stats-record-value" th:text="${stats.fastestLap().time()}">0.000</p>
+                        <p class="stats-record-meta">
+                            <strong th:text="${stats.fastestLap().name()}">Pilote</strong>
+                            <span th:text="' · ' + ${stats.fastestLap().category()}"> · Catégorie</span>
+                            <span th:text="' · ' + ${#temporals.format(stats.fastestLap().date(), 'dd/MM/yyyy')}"> · Date</span>
+                        </p>
+                    </article>
+                    <article class="stats-record" th:if="${stats.fastestQuali() != null}">
+                        <p class="stats-record-label">Meilleure quali</p>
+                        <p class="stats-record-value" th:text="${stats.fastestQuali().time()}">0.000</p>
+                        <p class="stats-record-meta">
+                            <strong th:text="${stats.fastestQuali().name()}">Pilote</strong>
+                            <span th:text="' · ' + ${#temporals.format(stats.fastestQuali().date(), 'dd/MM/yyyy')}"> · Date</span>
+                        </p>
+                    </article>
+                </div>
+
+                <div class="stats-panels">
+                    <section class="stats-panel">
+                        <h2 class="stats-panel-title">Courses par catégorie</h2>
+                        <div class="championship-table-wrap">
+                            <table class="championship-table">
+                                <thead>
+                                    <tr>
+                                        <th>Catégorie</th>
+                                        <th>Courses</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="row : ${stats.racesByCategory()}">
+                                        <td class="pilot-name" th:text="${row.label()}">Catégorie</td>
+                                        <td>
+                                            <span th:text="${row.count()}">0</span>
+                                            <span class="stats-bar" aria-hidden="true"><span th:style="'width:' + ${row.pct()} + '%'"></span></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="stats-panel">
+                        <h2 class="stats-panel-title">Courses par année</h2>
+                        <div class="championship-table-wrap">
+                            <table class="championship-table">
+                                <thead>
+                                    <tr>
+                                        <th>Année</th>
+                                        <th>Courses</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="row : ${stats.racesByYear()}">
+                                        <td class="pilot-name" th:text="${row.label()}">2026</td>
+                                        <td>
+                                            <span th:text="${row.count()}">0</span>
+                                            <span class="stats-bar" aria-hidden="true"><span th:style="'width:' + ${row.pct()} + '%'"></span></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="stats-panels">
+                    <section class="stats-panel">
+                        <h2 class="stats-panel-title">Pilotes les plus assidus</h2>
+                        <p class="stats-panel-hint">Nombre de départs (toutes catégories).</p>
+                        <div class="championship-table-wrap">
+                            <table class="championship-table">
+                                <thead>
+                                    <tr>
+                                        <th class="position">#</th>
+                                        <th>Pilote</th>
+                                        <th>Départs</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="p, iter : ${stats.mostPresent()}">
+                                        <td class="position" th:classappend="' position-' + ${iter.count}" th:text="${iter.count}">1</td>
+                                        <td class="pilot-name" th:text="${p.name()}">Pilote</td>
+                                        <td class="total-points" th:text="${p.count()}">0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="stats-panel">
+                        <h2 class="stats-panel-title">Victoires</h2>
+                        <p class="stats-panel-hint">Première place (plus de tours) par course.</p>
+                        <div class="championship-table-wrap">
+                            <table class="championship-table">
+                                <thead>
+                                    <tr>
+                                        <th class="position">#</th>
+                                        <th>Pilote</th>
+                                        <th>Victoires</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="p, iter : ${stats.mostWins()}">
+                                        <td class="position" th:classappend="' position-' + ${iter.count}" th:text="${iter.count}">1</td>
+                                        <td class="pilot-name" th:text="${p.name()}">Pilote</td>
+                                        <td class="total-points" th:text="${p.count()}">0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="stats-panel">
+                    <h2 class="stats-panel-title">Plus gros pelotons</h2>
+                    <div class="championship-table-wrap">
+                        <table class="championship-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Catégorie</th>
+                                    <th>Pilotes</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="race : ${stats.biggestFields()}">
+                                    <td th:text="${#temporals.format(race.date(), 'dd/MM/yyyy')}">01/01/2026</td>
+                                    <td class="pilot-name" th:text="${race.category()}">Catégorie</td>
+                                    <td class="total-points" th:text="${race.pilots()}">0</td>
+                                    <td>
+                                        <a class="btn btn-outline btn-sm"
+                                           th:href="@{/processRaceDate(raceDate=${race.date()}, club=${club}, category=${race.category()})}">
+                                            Résultats
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <div class="actions-section" style="margin-top: var(--space-8);">
+                    <div class="navigation-actions cluster">
+                        <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-primary">Voir les courses</a>
+                        <a th:href="@{/championnat(club=${club})}" class="btn btn-secondary">Championnat</a>
+                    </div>
+                </div>
+
+            </th:block>
+        </div>
+    </section>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+    <script th:inline="javascript">
+        const clubCode = /*[[${club}]]*/ 'slot4000';
+        function applyYearFilter() {
+            const year = document.getElementById('year').value;
+            let url = '/statistiques/' + encodeURIComponent(clubCode);
+            if (year) {
+                url += '?year=' + encodeURIComponent(year);
+            }
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>

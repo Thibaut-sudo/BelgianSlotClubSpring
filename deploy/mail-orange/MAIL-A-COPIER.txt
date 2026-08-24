@@ -1,0 +1,35 @@
+À : phishing@orange.be
+Objet : Faux positif Orange Mobile Serenity — déblocage demandé pour belgianslotclub.com
+
+--- Copier le message ci-dessous ---
+
+Bonjour,
+
+Je vous contacte concernant un faux positif de votre filtre Orange Mobile Serenity / cyberfilter (page cyberfilter.orange.be).
+
+Mon site https://belgianslotclub.com (également www.belgianslotclub.com) est bloqué pour les abonnés Orange en 4G/5G avec le message « Site bloqué », au motif qu’il s’agirait d’un site de phishing / vol de mots de passe.
+
+Il s’agit pourtant d’un site légitime : le site officiel du Belgian Slot Club, association / club de slot racing en Belgique. Le site permet de consulter les résultats de courses, les championnats et les informations des clubs. Il ne demande aucun mot de passe bancaire ni donnée sensible à des fins frauduleuses.
+
+J’ai renforcé la configuration technique du domaine (HTTPS forcé, HSTS, CDN Cloudflare, certificat TLS valide). Malgré cela, le blocage Serenity persiste côté réseau mobile Orange.
+
+Je vous demande de bien vouloir :
+1. analyser l’URL https://belgianslotclub.com ;
+2. retirer ce domaine de votre liste de sites dangereux / phishing ;
+3. confirmer le déblocage une fois effectué, afin que tous les clients Orange puissent y accéder normalement (sans passer par « continuer malgré tout »).
+
+Pièces jointes :
+- Capture d’écran de la page de blocage Orange Mobile Serenity
+- Note technique avec preuves HTTPS / HSTS / Cloudflare
+
+Informations utiles :
+- URL : https://belgianslotclub.com
+- Contact site : contact@belgianslotclub.be
+- Filtre : Orange Mobile Serenity / cyberfilter.orange.be
+
+Je reste à votre disposition pour toute information complémentaire.
+
+Cordialement,
+[Votre nom]
+[Votre numéro de client / ligne Orange]
+[Votre adresse e-mail]

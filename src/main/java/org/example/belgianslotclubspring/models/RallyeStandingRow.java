@@ -11,8 +11,10 @@ public record RallyeStandingRow(
         String category,
         Double totalSeconds,
         Double gapToLeader,
+        Double gapToPrevious,
         String totalFormatted,
         String gapFormatted,
+        String gapToPreviousFormatted,
         int stagesCompleted,
         int stagesExpected
 ) {

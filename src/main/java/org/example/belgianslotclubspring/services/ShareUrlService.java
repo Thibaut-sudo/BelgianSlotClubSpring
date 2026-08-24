@@ -1,5 +1,6 @@
 package org.example.belgianslotclubspring.services;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -18,12 +20,30 @@ public class ShareUrlService {
     public record ShareBase(String baseUrl, String source) {
     }
 
+    private final String configuredPublicBaseUrl;
+
+    public ShareUrlService(
+            @Value("${app.share.public-base-url:}") String configuredPublicBaseUrl
+    ) {
+        this.configuredPublicBaseUrl = configuredPublicBaseUrl == null
+                ? ""
+                : configuredPublicBaseUrl.trim();
+    }
+
     /**
      * Base URL pour ouvrir le site depuis un téléphone :
-     * tunnel Cloudflare (4G) si actif, sinon IP Wi‑Fi locale.
+     * domaine public configuré / Host de la requête / tunnel Cloudflare / IP Wi‑Fi.
      */
     public ShareBase resolve(String requestScheme, String requestHost, int requestPort) {
-        if (requestHost != null && requestHost.contains("trycloudflare.com")) {
+        if (!configuredPublicBaseUrl.isBlank()) {
+            return new ShareBase(stripTrailingSlash(configuredPublicBaseUrl), "public");
+        }
+
+        if (isPublicHostname(requestHost)) {
+            return new ShareBase(buildFromHost(requestScheme, requestHost, requestPort), "public");
+        }
+
+        if (requestHost != null && requestHost.toLowerCase(Locale.ROOT).contains("trycloudflare.com")) {
             return new ShareBase(requestScheme + "://" + requestHost, "tunnel");
         }
 
@@ -34,19 +54,54 @@ public class ShareUrlService {
 
         Optional<String> lan = detectLanIpv4();
         if (lan.isPresent()) {
-            int port = requestPort > 0 ? requestPort : 8080;
-            boolean defaultPort = ("http".equals(requestScheme) && port == 80)
-                    || ("https".equals(requestScheme) && port == 443);
-            String base = requestScheme + "://" + lan.get() + (defaultPort ? "" : ":" + port);
-            return new ShareBase(base, "lan");
+            return new ShareBase(buildFromHost(requestScheme, lan.get(), requestPort > 0 ? requestPort : 8080), "lan");
         }
 
         String host = requestHost != null ? requestHost : "localhost";
         int port = requestPort > 0 ? requestPort : 8080;
-        boolean defaultPort = ("http".equals(requestScheme) && port == 80)
-                || ("https".equals(requestScheme) && port == 443);
-        String base = requestScheme + "://" + host + (defaultPort ? "" : ":" + port);
-        return new ShareBase(base, "local");
+        return new ShareBase(buildFromHost(requestScheme, host, port), "local");
+    }
+
+    private static String buildFromHost(String scheme, String host, int port) {
+        String safeScheme = (scheme == null || scheme.isBlank()) ? "http" : scheme;
+        boolean defaultPort = ("http".equals(safeScheme) && (port <= 0 || port == 80))
+                || ("https".equals(safeScheme) && (port <= 0 || port == 443));
+        return safeScheme + "://" + host + (defaultPort ? "" : ":" + port);
+    }
+
+    /** Hostname public (domaine), pas localhost / IP privée. */
+    static boolean isPublicHostname(String host) {
+        if (host == null || host.isBlank()) {
+            return false;
+        }
+        String h = host.trim().toLowerCase(Locale.ROOT);
+        if ("localhost".equals(h) || h.endsWith(".local") || h.endsWith(".localhost")) {
+            return false;
+        }
+        // IP ?
+        if (h.chars().allMatch(c -> (c >= '0' && c <= '9') || c == '.')) {
+            return !isPrivateIpv4(h);
+        }
+        // Contient un point → probablement un vrai domaine
+        return h.contains(".");
+    }
+
+    private static boolean isPrivateIpv4(String ip) {
+        try {
+            byte[] b = InetAddress.getByName(ip).getAddress();
+            if (b.length != 4) {
+                return true;
+            }
+            int a = b[0] & 0xff;
+            int c = b[1] & 0xff;
+            if (a == 10) return true;
+            if (a == 127) return true;
+            if (a == 192 && c == 168) return true;
+            if (a == 172 && c >= 16 && c <= 31) return true; // Docker + RFC1918
+            return false;
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     private Optional<String> readTunnelUrl() {
@@ -55,7 +110,6 @@ public class ShareUrlService {
         }
         Path file = Path.of(System.getProperty("user.dir"), ".cloudflared.url");
         if (!Files.isRegularFile(file)) {
-            // Essayer de récupérer l'URL depuis le log cloudflared
             return readTunnelUrlFromLog();
         }
         try {
@@ -107,19 +161,37 @@ public class ShareUrlService {
 
     private Optional<String> detectLanIpv4() {
         try {
+            String preferred = null;
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             for (NetworkInterface nif : Collections.list(interfaces)) {
                 if (!nif.isUp() || nif.isLoopback() || nif.isVirtual()) {
                     continue;
                 }
+                String name = nif.getName() == null ? "" : nif.getName().toLowerCase(Locale.ROOT);
+                // Évite Docker / bridges virtuels (souvent 172.17.0.1)
+                if (name.startsWith("docker") || name.startsWith("br-") || name.startsWith("veth")
+                        || name.startsWith("virbr") || name.equals("cni0")) {
+                    continue;
+                }
                 for (InetAddress addr : Collections.list(nif.getInetAddresses())) {
-                    if (addr instanceof Inet4Address ipv4
-                            && !ipv4.isLoopbackAddress()
-                            && ipv4.isSiteLocalAddress()) {
-                        return Optional.of(ipv4.getHostAddress());
+                    if (!(addr instanceof Inet4Address ipv4)
+                            || ipv4.isLoopbackAddress()
+                            || !ipv4.isSiteLocalAddress()) {
+                        continue;
                     }
+                    String ip = ipv4.getHostAddress();
+                    if (ip.startsWith("172.1") || ip.startsWith("172.2") || ip.startsWith("172.3")) {
+                        // Plage Docker typique — on garde seulement en dernier recours
+                        if (preferred == null) {
+                            preferred = ip;
+                        }
+                        continue;
+                    }
+                    // Préfère 192.168.x / 10.x (vrai LAN)
+                    return Optional.of(ip);
                 }
             }
+            return Optional.ofNullable(preferred);
         } catch (Exception ignored) {
             // ignore
         }

@@ -1,0 +1,21 @@
+[Unit]
+Description=Belgian Slot Club
+After=network.target
+
+[Service]
+Type=simple
+User=raspserver
+WorkingDirectory=/home/raspserver/belgianslotclub
+ExecStart=/usr/bin/java -Xms192m -Xmx384m -Xss256k -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -XX:+UseStringDeduplication -XX:+ExitOnOutOfMemoryError -jar /home/raspserver/belgianslotclub/app.jar --spring.profiles.active=prod
+Restart=always
+RestartSec=5
+TimeoutStopSec=25
+SuccessExitStatus=143
+MemoryMax=640M
+TasksMax=64
+LimitNOFILE=4096
+
+Environment=JAVA_HOME=/usr/lib/jvm/java-21-openjdk-arm64
+
+[Install]
+WantedBy=multi-user.target

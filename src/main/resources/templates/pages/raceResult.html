@@ -10,7 +10,11 @@
             <h1 class="page-hero-title">Résultats de course</h1>
             <p class="page-hero-sub">Qualifications et classement final détaillés</p>
             <div class="page-hero-meta">
-                <span>Club : <strong th:text="${club}">Club</strong></span>
+                <span>Club : <strong th:text="${clubDisplayName != null ? clubDisplayName : club}">Club</strong></span>
+                <span th:if="${raceDate != null}">Date : <strong th:text="${#temporals.format(raceDate, 'dd/MM/yyyy')}">—</strong></span>
+                <span th:if="${raceCategory != null and !#strings.isEmpty(raceCategory)}">
+                    Catégorie : <strong th:text="${raceCategory}">—</strong>
+                </span>
             </div>
         </div>
     </section>
@@ -27,9 +31,76 @@
                     <span class="stat-block-label">Pistes</span>
                 </div>
                 <div class="stat-block">
-                    <span class="stat-block-value">1er</span>
+                    <span class="stat-block-value" th:text="${winnerName != null ? winnerName : '—'}">—</span>
                     <span class="stat-block-label">Vainqueur</span>
                 </div>
+            </div>
+
+            <!-- Compte rendu narratif -->
+            <div id="compte-rendu" class="rallye-block" th:if="${recap != null and recap.hasAnything}">
+                <div class="rallye-block-header">
+                    <div>
+                        <h2 class="section-title">Compte rendu</h2>
+                        <p class="section-lead">
+                            Le récit de la journée —
+                            <span th:text="${#temporals.format(raceDate, 'dd/MM/yyyy')}">01/01/2026</span>
+                            · qualifs, scratchs et classement.
+                        </p>
+                    </div>
+                    <a class="btn btn-outline btn-sm rallye-recap-refresh"
+                       th:href="@{/processRaceDate(raceDate=${raceDate}, club=${club}, category=${raceCategory})} + '#compte-rendu'"
+                       title="Relancer l’analyse">Actualiser</a>
+                </div>
+
+                <article class="rallye-recap" th:if="${recap.hasQuali}">
+                    <header class="rallye-recap__head">
+                        <h3>Qualifications</h3>
+                        <span class="rallye-recap__badge">Grille de départ</span>
+                    </header>
+                    <ul class="rallye-recap__headlines">
+                        <li th:each="line : ${recap.qualiHeadlines}" th:text="${line}">…</li>
+                    </ul>
+                </article>
+
+                <article class="rallye-recap rallye-recap--final" th:if="${recap.hasRace}" style="margin-top:1rem">
+                    <header class="rallye-recap__head">
+                        <h3>Course</h3>
+                        <span class="rallye-recap__badge">Classement final</span>
+                    </header>
+                    <ul class="rallye-recap__headlines">
+                        <li th:each="line : ${recap.raceHeadlines}" th:text="${line}">…</li>
+                    </ul>
+                    <div class="rallye-recap__grid">
+                        <div th:if="${!#lists.isEmpty(recap.podiumLines)}">
+                            <h4>Podium</h4>
+                            <ol class="rallye-recap__podium">
+                                <li th:each="line : ${recap.podiumLines}" th:text="${line}">1. …</li>
+                            </ol>
+                        </div>
+                        <div th:if="${!#lists.isEmpty(recap.scratchLeaders)}">
+                            <h4>Scratchs (pistes)</h4>
+                            <ul class="rallye-recap__scratches">
+                                <li th:each="s : ${recap.scratchLeaders}" th:text="${s}">…</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div th:if="${!#lists.isEmpty(recap.trackScratches)}" style="margin-top:1rem">
+                        <h4>Par piste</h4>
+                        <ul class="rallye-recap__stages">
+                            <li th:each="st : ${recap.trackScratches}">
+                                <strong th:text="'Piste ' + ${st.trackNumber}">Piste 1</strong>
+                                <span th:text="' scratch ' + ${st.pilotName} + ' (' + ${st.bestLapFormatted} + ')'">
+                                    scratch …
+                                </span>
+                                <span class="rallye-recap__worst"
+                                      th:if="${st.worstPilotName != null and st.worstPilotName != st.pilotName and st.worstGapFormatted != '—'}"
+                                      th:text="' · plus lent ' + ${st.worstPilotName} + ' (' + ${st.worstGapFormatted} + ')'">
+                                    · plus lent …
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
             </div>
 
             <div class="table-container qualif-table-container">
@@ -38,13 +109,12 @@
                     <p>Classement selon le meilleur temps</p>
                 </div>
                 <div class="table-wrapper">
-                    <table class="qualif-table">
+                    <table class="qualif-table" id="qualifTable">
                         <thead>
                             <tr>
                                 <th class="position">Pos</th>
                                 <th>Pilote</th>
                                 <th>Meilleur temps</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -54,9 +124,6 @@
                                 </td>
                                 <td class="pilot-name" th:text="${quali.getPilotName()}"></td>
                                 <td class="best-time" th:text="${quali.getBestTime()}"></td>
-                                <td class="actions">
-                                    <button type="button" class="btn btn-sm btn-ghost btn-detail" title="Voir détails">Détails</button>
-                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -69,7 +136,7 @@
                     <p>Classement final avec détails par piste</p>
                 </div>
                 <div class="table-wrapper">
-                    <table class="race-results-table">
+                    <table class="race-results-table" id="raceResultsTable">
                         <thead>
                             <tr>
                                 <th class="position">Pos</th>
@@ -111,9 +178,9 @@
 
             <div class="actions-section">
                 <div class="export-actions cluster">
-                    <button type="button" class="btn btn-secondary btn-export">Exporter Excel</button>
-                    <button type="button" class="btn btn-secondary btn-export">Exporter PDF</button>
-                    <button type="button" class="btn btn-outline btn-export">Partager</button>
+                    <button type="button" class="btn btn-secondary btn-export" id="exportRaceExcel">Exporter Excel</button>
+                    <button type="button" class="btn btn-secondary btn-export" id="exportRacePdf">Exporter PDF</button>
+                    <button type="button" class="btn btn-outline btn-export" id="shareRacePage">Partager</button>
                 </div>
                 <div class="navigation-actions cluster">
                     <a th:href="@{/championnat(club=${club})}" class="btn btn-primary">Voir championnat</a>
@@ -125,19 +192,74 @@
 
     <footer th:replace="~{fragments/layout :: footer}"></footer>
     <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
-    <script>
-        document.querySelectorAll('.btn-export').forEach(btn => {
-            btn.addEventListener('click', () => {
-                alert('Fonctionnalité d\'export en cours de développement');
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+    <script src="/js/export-tables.js"></script>
+    <script th:inline="javascript">
+        (function () {
+            const raceDateLabel = /*[[${raceDate != null ? #temporals.format(raceDate, 'dd-MM-yyyy') : 'course'}]]*/ 'course';
+            const categoryLabel = /*[[${raceCategory != null ? raceCategory : ''}]]*/ '';
+            const clubLabel = /*[[${clubDisplayName != null ? clubDisplayName : club}]]*/ '';
+            const baseName = ['resultats', clubLabel, categoryLabel, raceDateLabel]
+                .filter(Boolean).join('_');
+
+            function raceMatrix() {
+                const table = document.getElementById('raceResultsTable');
+                if (!table) return [];
+                const header = ['Pos', 'Pilote', 'Total tours'];
+                for (let i = 1; i <= 6; i++) {
+                    header.push('P' + i + ' tours', 'P' + i + ' temps');
+                }
+                const rows = [header];
+                table.querySelectorAll('tbody tr').forEach(tr => {
+                    const cells = Array.from(tr.querySelectorAll('td')).map(td =>
+                        (td.textContent || '').replace(/\s+/g, ' ').trim()
+                    );
+                    if (cells.length) rows.push(cells);
+                });
+                return rows;
+            }
+
+            function sheets() {
+                return [
+                    { name: 'Qualifications', table: '#qualifTable' },
+                    { name: 'Course', rows: raceMatrix() }
+                ];
+            }
+
+            function subtitle() {
+                return [clubLabel, categoryLabel, raceDateLabel.replace(/-/g, '/')].filter(Boolean).join(' · ');
+            }
+
+            document.getElementById('exportRaceExcel')?.addEventListener('click', () => {
+                BscExport.exportToExcel(sheets(), baseName);
             });
-        });
-        document.querySelectorAll('.btn-detail').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const row = this.closest('tr');
-                const pilotName = row.querySelector('.pilot-name').textContent;
-                alert(`Détails pour ${pilotName} — en cours de développement`);
+            document.getElementById('exportRacePdf')?.addEventListener('click', () => {
+                BscExport.exportToPdf({
+                    title: 'Résultats de course',
+                    subtitle: subtitle(),
+                    filename: baseName,
+                    sheets: sheets()
+                });
             });
-        });
+            document.getElementById('shareRacePage')?.addEventListener('click', async () => {
+                const payload = {
+                    title: 'Résultats — Belgian Slot Club',
+                    text: subtitle(),
+                    url: window.location.href
+                };
+                if (navigator.share) {
+                    try { await navigator.share(payload); return; } catch (e) { /* cancel */ }
+                }
+                try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert('Lien copié dans le presse-papiers.');
+                } catch (e) {
+                    prompt('Copie ce lien :', window.location.href);
+                }
+            });
+        })();
     </script>
 </body>
 </html>

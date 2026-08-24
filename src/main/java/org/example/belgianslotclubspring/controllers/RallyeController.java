@@ -5,6 +5,7 @@ import org.example.belgianslotclubspring.entities.RallyePilot;
 import org.example.belgianslotclubspring.entities.RallyeStageTime;
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.models.RallyeStandingRow;
+import org.example.belgianslotclubspring.services.ImportAuthService;
 import org.example.belgianslotclubspring.services.RallyeService;
 import org.example.belgianslotclubspring.utils.RallyeSheetQr;
 import org.example.belgianslotclubspring.utils.RallyeTimeFormat;
@@ -24,9 +25,11 @@ import java.util.*;
 public class RallyeController {
 
     private final RallyeService rallyeService;
+    private final ImportAuthService importAuthService;
 
-    public RallyeController(RallyeService rallyeService) {
+    public RallyeController(RallyeService rallyeService, ImportAuthService importAuthService) {
         this.rallyeService = rallyeService;
+        this.importAuthService = importAuthService;
     }
 
     @GetMapping
@@ -186,23 +189,11 @@ public class RallyeController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            Map<Long, Map<Integer, String>> times = new HashMap<>();
-            for (Map.Entry<String, String> entry : allParams.entrySet()) {
-                String key = entry.getKey();
-                // time_{pilotId}_{stage}
-                if (!key.startsWith("time_")) {
-                    continue;
-                }
-                String[] parts = key.split("_");
-                if (parts.length != 3) {
-                    continue;
-                }
-                Long pilotId = Long.parseLong(parts[1]);
-                int stage = Integer.parseInt(parts[2]);
-                times.computeIfAbsent(pilotId, k -> new HashMap<>()).put(stage, entry.getValue());
-            }
-            rallyeService.saveBoucleTimes(id, boucle, times);
-            redirectAttributes.addFlashAttribute("success", "Temps de la boucle " + boucle + " enregistrés.");
+            Map<Long, Map<Integer, String>> times = parseTimeParams(allParams);
+            int n = rallyeService.patchBoucleTimes(id, boucle, times);
+            redirectAttributes.addFlashAttribute("success",
+                    n == 0 ? "Aucun temps modifié."
+                            : (n == 1 ? "1 temps enregistré." : n + " temps enregistrés."));
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
@@ -212,12 +203,104 @@ public class RallyeController {
         return "redirect:/rallye/" + id + "?boucle=" + boucle + "#saisie";
     }
 
+    /**
+     * Enregistrement partiel (AJAX) : seules les cases envoyées sont écrites.
+     * Permet à plusieurs personnes de saisir sans s’écraser.
+     */
+    @PostMapping("/{id}/api/times")
+    @ResponseBody
+    public Map<String, Object> patchTimesApi(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body
+    ) {
+        try {
+            Object boucleRaw = body.get("boucle");
+            if (boucleRaw == null) {
+                throw new IllegalArgumentException("boucle obligatoire");
+            }
+            int boucle = boucleRaw instanceof Number
+                    ? ((Number) boucleRaw).intValue()
+                    : Integer.parseInt(String.valueOf(boucleRaw));
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> rawTimes = body.get("times") instanceof Map
+                    ? (Map<String, Object>) body.get("times")
+                    : Map.of();
+
+            Map<String, String> flat = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> e : rawTimes.entrySet()) {
+                flat.put(e.getKey(), e.getValue() == null ? "" : String.valueOf(e.getValue()));
+            }
+            Map<Long, Map<Integer, String>> times = parseTimeParams(flat);
+            for (Map.Entry<String, String> e : flat.entrySet()) {
+                String key = e.getKey();
+                if (key.startsWith("time_")) {
+                    continue;
+                }
+                String[] parts = key.split("_");
+                if (parts.length != 2) {
+                    continue;
+                }
+                try {
+                    Long pilotId = Long.parseLong(parts[0]);
+                    int stage = Integer.parseInt(parts[1]);
+                    times.computeIfAbsent(pilotId, k -> new HashMap<>()).put(stage, e.getValue());
+                } catch (NumberFormatException ignored) {
+                    // ignore
+                }
+            }
+
+            int n = rallyeService.patchBoucleTimes(id, boucle, times);
+            Map<String, Object> res = new LinkedHashMap<>();
+            res.put("ok", true);
+            res.put("saved", n);
+            res.put("boucle", boucle);
+            return res;
+        } catch (Exception e) {
+            Map<String, Object> err = new LinkedHashMap<>();
+            err.put("ok", false);
+            err.put("error", e.getMessage() != null ? e.getMessage() : "Erreur");
+            return err;
+        }
+    }
+
+    private static Map<Long, Map<Integer, String>> parseTimeParams(Map<String, String> allParams) {
+        Map<Long, Map<Integer, String>> times = new HashMap<>();
+        if (allParams == null) {
+            return times;
+        }
+        for (Map.Entry<String, String> entry : allParams.entrySet()) {
+            String key = entry.getKey();
+            if (!key.startsWith("time_")) {
+                continue;
+            }
+            String[] parts = key.split("_");
+            if (parts.length != 3) {
+                continue;
+            }
+            try {
+                Long pilotId = Long.parseLong(parts[1]);
+                int stage = Integer.parseInt(parts[2]);
+                times.computeIfAbsent(pilotId, k -> new HashMap<>()).put(stage, entry.getValue());
+            } catch (NumberFormatException ignored) {
+                // ignore
+            }
+        }
+        return times;
+    }
+
     @PostMapping("/{id}/import-pilots")
     public String importPilots(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "password", required = false) String password,
             RedirectAttributes redirectAttributes
     ) {
+        if (!importAuthService.matches(password)) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Mot de passe incorrect. L'import a été refusé.");
+            return "redirect:/rallye/" + id + "#pilotes";
+        }
         if (file == null || file.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Choisissez un fichier Excel.");
             return "redirect:/rallye/" + id + "#pilotes";
@@ -225,9 +308,12 @@ public class RallyeController {
         try {
             Path temp = Files.createTempFile("rallye-import-", ".xlsx");
             file.transferTo(temp.toFile());
-            int count = rallyeService.importPilotsFromExcel(id, temp.toString());
+            var result = rallyeService.importPilotsFromExcel(id, temp.toString());
             Files.deleteIfExists(temp);
-            redirectAttributes.addFlashAttribute("success", count + " pilote(s) importé(s) depuis Excel.");
+            redirectAttributes.addFlashAttribute("success", result.successMessage());
+            if (result.timesImported() > 0) {
+                return "redirect:/rallye/" + id + "#classement";
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
@@ -305,6 +391,18 @@ public class RallyeController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/rallye/" + id + "#saisie";
         }
+    }
+
+    @PostMapping("/{id}/finish")
+    public String finish(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            rallyeService.finish(id);
+            redirectAttributes.addFlashAttribute("success",
+                    "Rallye terminé. Les informations ne peuvent plus être modifiées.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/rallye/" + id;
     }
 
     @PostMapping("/{id}/delete")

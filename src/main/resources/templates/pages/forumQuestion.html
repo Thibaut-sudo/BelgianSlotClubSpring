@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title=${question.title} + ' — Forum — Belgian Slot Club')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(active='forum', club=${club})}"></header>
+
+<section class="page-hero page-hero--club"
+         th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+    <div class="page-hero-content container">
+        <p class="page-hero-eyebrow">
+            <a th:href="@{/forum/theme/{id}(id=${theme.id})}" class="page-hero-back"
+               th:text="'← ' + ${theme.title}">← Thème</a>
+        </p>
+        <h1 class="page-hero-title" th:text="${question.title}">Question</h1>
+        <div class="page-hero-meta">
+            <span th:text="${question.author}">Auteur</span>
+            <span th:text="${#temporals.format(question.createdAt, 'dd/MM/yyyy HH:mm')}">date</span>
+            <span th:text="${clubDisplayName}">Club</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container forum-thread">
+        <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
+        <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
+
+        <article class="forum-post forum-post--question">
+            <header class="forum-post__meta">
+                <strong th:text="${question.author}">Auteur</strong>
+                <span th:text="${#temporals.format(question.createdAt, 'dd/MM/yyyy HH:mm')}">date</span>
+            </header>
+            <p class="forum-post__body" th:text="${question.body}">Corps</p>
+            <form id="forumDeleteQuestionForm"
+                  th:action="@{/forum/question/{id}/delete(id=${question.id})}"
+                  method="post"
+                  class="forum-mod-form"
+                  onsubmit="return confirm('Supprimer cette question et ses réponses ?');">
+                <button type="submit" class="btn btn-ghost btn-sm">Supprimer la question</button>
+            </form>
+        </article>
+
+        <h2 class="section-title">Réponses</h2>
+        <div th:if="${#lists.isEmpty(question.replies)}" class="empty-state">
+            <p>Aucune réponse pour l’instant. Soyez le premier à aider.</p>
+        </div>
+        <ul class="forum-reply-list" th:unless="${#lists.isEmpty(question.replies)}">
+            <li th:each="reply : ${question.replies}" class="forum-post">
+                <header class="forum-post__meta">
+                    <strong th:text="${reply.author}">Auteur</strong>
+                    <span th:text="${#temporals.format(reply.createdAt, 'dd/MM/yyyy HH:mm')}">date</span>
+                </header>
+                <p class="forum-post__body" th:text="${reply.body}">Réponse</p>
+                <form th:id="${'forumDeleteReply-' + reply.id}"
+                      th:action="@{/forum/reply/{id}/delete(id=${reply.id})}"
+                      method="post"
+                      class="forum-mod-form js-forum-mod-form"
+                      onsubmit="return confirm('Supprimer cette réponse ?');">
+                    <button type="submit" class="btn btn-ghost btn-sm">Supprimer</button>
+                </form>
+            </li>
+        </ul>
+
+        <div class="filters-panel forum-reply-form">
+            <h2 class="filters-panel-title">Répondre</h2>
+            <form th:action="@{/forum/question/{id}/replies(id=${question.id})}" method="post" class="stack-form">
+                <div class="form-group">
+                    <label class="form-label" for="author">Votre nom</label>
+                    <input class="form-input" type="text" id="author" name="author"
+                           maxlength="40" required placeholder="Prénom">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="body">Réponse</label>
+                    <textarea class="form-textarea" id="body" name="body" rows="5" maxlength="4000"
+                              required placeholder="Votre réponse…"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Publier la réponse</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    if (typeof protectImportForm === 'function') {
+        protectImportForm(document.getElementById('forumDeleteQuestionForm'));
+        document.querySelectorAll('.js-forum-mod-form').forEach(protectImportForm);
+    }
+</script>
+</body>
+</html>

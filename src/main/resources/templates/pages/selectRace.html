@@ -7,8 +7,9 @@
 
     <!-- Hidden upload form -->
     <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" style="display: none;">
-        <input type="file" id="fileInput" name="file" accept=".xls,.xlsx">
+        <input type="file" id="fileInput" name="files" accept=".xls,.xlsx" multiple>
         <input type="hidden" id="clubInput" name="club" th:value="${club}">
+        <input type="hidden" id="uploadPassword" name="password">
     </form>
 
     <!-- Page hero -->
@@ -33,12 +34,21 @@
             <div class="page-hero-actions cluster">
                 <button type="button" id="uploadButton" class="btn btn-secondary">Importer Excel</button>
                 <a th:href="@{/championnat(club=${club})}" class="btn btn-primary">Voir Championnat</a>
+                <a th:href="@{/statistiques/{club}(club=${club})}" class="btn btn-secondary">Statistiques</a>
                 <a th:href="@{/rallye(club=${club})}" class="btn btn-secondary">Rallye</a>
+                <a th:href="@{/forum(club=${club})}" class="btn btn-secondary">Forum</a>
+                <a th:href="@{/marketplace(club=${club})}" class="btn btn-secondary">Marketplace</a>
                 <a th:href="@{/prochain-evenement(club=${club})}" class="btn btn-outline">Calendrier</a>
                 <a href="/reglement" class="btn btn-outline">Règlement</a>
             </div>
         </div>
     </section>
+
+    <!-- Flash messages -->
+    <div class="container" th:if="${success != null or error != null}" style="margin-top: var(--space-4);">
+        <div th:if="${success != null}" class="alert alert-success" th:text="${success}" role="status"></div>
+        <div th:if="${error != null}" class="alert alert-error" th:text="${error}" role="alert"></div>
+    </div>
 
     <!-- Next event -->
     <section class="section section--alt" th:if="${club == 'slot4000' or club == 'srcs'}">
@@ -67,6 +77,11 @@
                 <div class="next-event-actions cluster">
                     <a th:href="@{/prochain-evenement(club=${club})}" class="btn btn-primary">Voir le calendrier</a>
                     <a th:href="@{/championnat(club=${club})}" class="btn btn-secondary">Championnat</a>
+                    <a th:href="@{/calendrier/{club}/google(club=${club})}"
+                       class="btn btn-outline"
+                       target="_blank"
+                       rel="noopener">Google Agenda</a>
+                    <a th:href="@{/statistiques/{club}(club=${club})}" class="btn btn-outline">Statistiques</a>
                 </div>
             </article>
         </div>
@@ -121,7 +136,6 @@
                         </div>
 
                         <div class="filters-panel-actions stack-sm">
-                            <button type="button" onclick="applyFilters()" class="btn btn-primary filter-btn">Appliquer</button>
                             <button type="button" onclick="resetFilters()" class="btn btn-secondary filter-btn">Réinitialiser</button>
                             <button type="button" onclick="exportFilteredRaces()" class="btn btn-outline filter-btn">Exporter la liste</button>
                         </div>
@@ -165,27 +179,42 @@
 
                     <div class="race-grid grid-view" id="raceContainer">
                         <th:block th:if="${raceSummaries != null and not #lists.isEmpty(raceSummaries)}">
-                            <form th:each="race : ${raceSummaries}"
-                                  th:action="@{/processRaceDate}"
-                                  method="post"
-                                  class="race-form">
-                                <button type="submit"
-                                        class="race-card race-tile"
-                                        th:attr="data-club=${club}, data-category=${race.category()}, data-date=${race.date()}">
-                                    <div class="race-tile-header">
-                                        <span class="race-tile-title race-date" th:text="${race.date()}"></span>
-                                        <span class="race-category" th:text="${race.category()}"></span>
-                                    </div>
-                                    <span class="race-text">Voir les résultats</span>
-                                    <div class="race-tile-meta">
-                                        <span class="race-year" th:text="${race.date().year}"></span>
-                                        <span class="race-status" th:text="${clubDisplayName}">Club</span>
-                                    </div>
+                            <div class="race-item"
+                                 th:each="race : ${raceSummaries}"
+                                 th:attr="data-club=${club}, data-category=${race.category()}, data-date=${race.date()}">
+                                <form th:action="@{/processRaceDate}"
+                                      method="post"
+                                      class="race-form">
+                                    <button type="submit"
+                                            class="race-card race-tile"
+                                            th:attr="data-club=${club}, data-category=${race.category()}, data-date=${race.date()}">
+                                        <div class="race-tile-header">
+                                            <span class="race-tile-title race-date" th:text="${race.date()}"></span>
+                                            <span class="race-category" th:text="${race.category()}"></span>
+                                        </div>
+                                        <span class="race-text">Voir les résultats</span>
+                                        <div class="race-tile-meta">
+                                            <span class="race-year" th:text="${race.date().year}"></span>
+                                            <span class="race-status" th:text="${clubDisplayName}">Club</span>
+                                        </div>
+                                        <input type="hidden" name="raceDate" th:value="${race.date()}">
+                                        <input type="hidden" name="club" th:value="${club}">
+                                        <input type="hidden" name="category" th:value="${race.category()}">
+                                        <span class="race-arrow" aria-hidden="true">→</span>
+                                    </button>
+                                </form>
+                                <form th:action="@{/selectRace/{club}/delete(club=${club})}"
+                                      method="post"
+                                      class="race-delete-form"
+                                      onsubmit="return confirm('Supprimer la course ' + this.dataset.label + ' ? Cette action est définitive.');"
+                                      th:attr="data-label=${race.category() + ' — ' + race.date()}">
                                     <input type="hidden" name="raceDate" th:value="${race.date()}">
-                                    <input type="hidden" name="club" th:value="${club}">
-                                    <span class="race-arrow" aria-hidden="true">→</span>
-                                </button>
-                            </form>
+                                    <input type="hidden" name="category" th:value="${race.category()}">
+                                    <button type="submit" class="btn btn-ghost btn-sm race-delete-btn" title="Supprimer la course">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
                         </th:block>
 
                         <div class="no-races" th:if="${raceSummaries == null or #lists.isEmpty(raceSummaries)}">
@@ -215,7 +244,7 @@
     <div id="uploadModal" class="modal" style="display: none;" role="dialog" aria-labelledby="uploadModalTitle" aria-modal="true">
         <div class="modal-panel">
             <div class="modal-header">
-                <h3 id="uploadModalTitle">Ajouter une course</h3>
+                <h3 id="uploadModalTitle">Importer des courses</h3>
                 <button type="button" class="modal-close" onclick="hideUploadModal()" aria-label="Fermer">&times;</button>
             </div>
             <div class="modal-body">
@@ -223,20 +252,17 @@
                     <h4>Instructions d'import</h4>
                     <ul>
                         <li>Format accepté : Excel (.xls, .xlsx)</li>
-                        <li>Colonnes attendues : Pilote, Temps, Tours</li>
-                        <li>Taille maximale : 10 Mo</li>
+                        <li>Vous pouvez sélectionner plusieurs fichiers d’un coup</li>
+                        <li>Taille maximale : 10 Mo par fichier</li>
                     </ul>
                 </div>
                 <div class="file-upload-area" id="fileUploadArea">
-                    <p>Glissez-déposez votre fichier ici ou cliquez pour sélectionner</p>
-                    <input type="file" id="modalFileInput" accept=".xls,.xlsx" class="file-input">
+                    <p>Glissez-déposez vos fichiers ici ou cliquez pour sélectionner</p>
+                    <input type="file" id="modalFileInput" accept=".xls,.xlsx" class="file-input" multiple>
                 </div>
                 <div class="upload-preview" id="uploadPreview" style="display: none;">
-                    <h4>Fichier sélectionné</h4>
-                    <div class="file-info">
-                        <span id="fileName"></span>
-                        <span id="fileSize"></span>
-                    </div>
+                    <h4 id="uploadPreviewTitle">Fichiers sélectionnés</h4>
+                    <ul class="upload-file-list" id="uploadFileList"></ul>
                 </div>
             </div>
             <div class="modal-actions">
@@ -366,7 +392,8 @@
         .event-slot-it .next-event-header { background: linear-gradient(135deg, #6b4fa0, #553d80); }
         .event-gr5 .next-event-header { background: linear-gradient(135deg, #3d3d42, #2b2b2e); }
         .event-proto24 .next-event-header { background: linear-gradient(135deg, #e8650a, #c55408); }
-        .event-gt24 .next-event-header { background: linear-gradient(135deg, #7c3aed, #6429c7); }
+        .event-gt24 .next-event-header,
+        .event-gt24proto24 .next-event-header { background: linear-gradient(135deg, #7c3aed, #6429c7); }
         .event-1000kms .next-event-header { background: linear-gradient(135deg, #0d7377, #0a585b); }
         .event-scaleauto .next-event-header { background: linear-gradient(135deg, #b8860b, #96700a); }
         .event-revoslot .next-event-header { background: linear-gradient(135deg, #c0392b, #962d22); }
@@ -376,6 +403,11 @@
         .event-revo .next-event-header { background: linear-gradient(135deg, #9b2c2c, #742020); }
         .event-dephtone .next-event-header { background: linear-gradient(135deg, #4a5568, #374151); }
         .event-chall .next-event-header { background: linear-gradient(135deg, #d69e2e, #b8860b); }
+        .event-tcrall .next-event-header { background: linear-gradient(135deg, #0f766e, #0d9488); }
+        .event-soiree .next-event-header { background: linear-gradient(135deg, #be185d, #9d174d); }
+        .event-soirevab .next-event-header { background: linear-gradient(135deg, #be185d, #9d174d); }
+        .event-soirefun .next-event-header { background: linear-gradient(135deg, #be185d, #9d174d); }
+        .event-slotit .next-event-header { background: linear-gradient(135deg, #6b4fa0, #553d80); }
         .event-ds-c-a .next-event-header { background: linear-gradient(135deg, #4a5568, #374151); }
         .event-chimay .next-event-header { background: linear-gradient(135deg, #14b8a6, #0d9488); }
         .event-s4all .next-event-header { background: linear-gradient(135deg, #e8650a, #c55408); }
@@ -550,9 +582,42 @@
         }
 
         /* Race cards */
+        .race-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .race-item.is-hidden {
+            display: none !important;
+        }
+
         .race-form {
             display: flex;
             min-width: 0;
+            flex: 1;
+        }
+
+        .race-form.is-hidden {
+            display: none !important;
+        }
+
+        .race-delete-form {
+            margin-top: 0.35rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .race-delete-btn {
+            padding: 0.25rem 0.55rem;
+            font-size: 0.75rem;
+            line-height: 1.2;
+            color: var(--color-muted);
+        }
+
+        .race-delete-btn:hover {
+            color: #8a0b1f;
         }
 
         .race-card {
@@ -630,7 +695,7 @@
             grid-template-columns: 1fr;
         }
 
-        .list-view .race-form {
+        .list-view .race-item {
             width: 100%;
         }
 
@@ -790,6 +855,33 @@
             letter-spacing: 0;
         }
 
+        .upload-file-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 0.45rem;
+            max-height: 12rem;
+            overflow: auto;
+        }
+
+        .upload-file-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-2);
+            font-size: 0.8125rem;
+            color: var(--color-muted);
+            padding: 0.35rem 0.5rem;
+            background: #fff;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+        }
+
+        .upload-file-list li.is-invalid {
+            border-color: #c8102e;
+            color: #8a0b1f;
+        }
+
         .file-info {
             display: flex;
             flex-wrap: wrap;
@@ -797,6 +889,25 @@
             gap: var(--space-2);
             font-size: 0.8125rem;
             color: var(--color-muted);
+        }
+
+        .alert {
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            margin-bottom: var(--space-3);
+        }
+
+        .alert-success {
+            background: color-mix(in srgb, var(--color-success, #1a7f4b) 12%, white);
+            border: 1px solid color-mix(in srgb, var(--color-success, #1a7f4b) 35%, white);
+            color: #145c37;
+        }
+
+        .alert-error {
+            background: color-mix(in srgb, #c8102e 10%, white);
+            border: 1px solid color-mix(in srgb, #c8102e 35%, white);
+            color: #8a0b1f;
         }
 
         .confirm-modal {
@@ -826,12 +937,24 @@
             showUploadModal();
         });
 
-        function showUploadModal() {
+        async function showUploadModal() {
+            if (typeof promptImportPassword !== 'function') {
+                alert('Impossible de vérifier le mot de passe. Rechargez la page.');
+                return;
+            }
+            const password = await promptImportPassword();
+            if (!password) return;
+
+            const passwordInput = document.getElementById('uploadPassword');
+            if (passwordInput) passwordInput.value = password;
+
             const modalInput = document.getElementById('modalFileInput');
             const uploadPreview = document.getElementById('uploadPreview');
             const uploadBtn = document.getElementById('uploadBtn');
+            const fileList = document.getElementById('uploadFileList');
 
             if (modalInput) modalInput.value = '';
+            if (fileList) fileList.innerHTML = '';
             if (uploadPreview) uploadPreview.style.display = 'none';
             if (uploadBtn) {
                 uploadBtn.disabled = true;
@@ -845,10 +968,15 @@
             document.getElementById('uploadModal').style.display = 'none';
         }
 
-        function setFileInputFiles(input, file) {
+        function setFileInputFiles(input, fileList) {
             const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
+            Array.from(fileList || []).forEach(file => dataTransfer.items.add(file));
             input.files = dataTransfer.files;
+        }
+
+        function isExcelFile(file) {
+            const name = (file.name || '').toLowerCase();
+            return name.endsWith('.xls') || name.endsWith('.xlsx');
         }
 
         function uploadFile() {
@@ -856,9 +984,10 @@
             const formInput = document.getElementById('fileInput');
             const uploadBtn = document.getElementById('uploadBtn');
             const clubInput = document.getElementById('clubInput');
+            const passwordInput = document.getElementById('uploadPassword');
 
             if (!modalInput.files || modalInput.files.length === 0) {
-                alert('Veuillez sélectionner un fichier');
+                alert('Veuillez sélectionner au moins un fichier');
                 return;
             }
 
@@ -867,57 +996,131 @@
                 return;
             }
 
-            const file = modalInput.files[0];
-            setFileInputFiles(formInput, file);
+            if (!passwordInput || !passwordInput.value) {
+                alert('Mot de passe requis pour importer.');
+                return;
+            }
+
+            const files = Array.from(modalInput.files).filter(isExcelFile);
+            if (files.length === 0) {
+                alert('Aucun fichier Excel valide (.xls / .xlsx).');
+                return;
+            }
+
+            const tooBig = files.find(f => f.size > 10 * 1024 * 1024);
+            if (tooBig) {
+                alert('« ' + tooBig.name + ' » dépasse 10 Mo.');
+                return;
+            }
+
+            setFileInputFiles(formInput, files);
 
             if (!formInput.files || formInput.files.length === 0) {
-                alert('Impossible de préparer le fichier pour l\'envoi. Réessayez.');
+                alert('Impossible de préparer les fichiers pour l\'envoi. Réessayez.');
                 return;
             }
 
             if (uploadBtn) {
                 uploadBtn.disabled = true;
-                uploadBtn.textContent = 'Import en cours…';
+                uploadBtn.textContent = files.length > 1
+                    ? 'Import de ' + files.length + ' fichiers…'
+                    : 'Import en cours…';
             }
 
             document.getElementById('uploadForm').submit();
         }
 
-        // Application des filtres
+        // Application des filtres + tri (regroupe les cartes visibles dans la grille)
+        function getRaceItems() {
+            return Array.from(document.querySelectorAll("#raceContainer .race-item"));
+        }
+
+        function getCardFromItem(item) {
+            return item.querySelector(".race-card");
+        }
+
+        function isFilterMatched(item) {
+            return item.dataset.filterMatch === "1";
+        }
+
         function applyFilters() {
-            let categoryFilter = document.getElementById("categoryFilter").value.toLowerCase();
-            let yearFilter = document.getElementById("yearFilter").value;
-            let searchFilter = document.getElementById("searchFilter").value.toLowerCase();
-            let sortFilter = document.getElementById("sortFilter").value;
+            const categoryFilter = document.getElementById("categoryFilter").value.toLowerCase();
+            const yearFilter = document.getElementById("yearFilter").value;
+            const searchFilter = document.getElementById("searchFilter").value.toLowerCase().trim();
+            const sortFilter = document.getElementById("sortFilter").value;
 
-            let raceCards = document.querySelectorAll(".race-card");
+            const items = getRaceItems();
+            const matched = [];
 
-            raceCards.forEach(card => {
-                let cardCategory = card.getAttribute("data-category").toLowerCase();
-                let cardDate = card.getAttribute("data-date");
-                let cardYear = cardDate.split("-")[0];
-                let cardInfo = card.querySelector(".race-text").textContent.toLowerCase();
+            items.forEach(item => {
+                const card = getCardFromItem(item);
+                if (!card) {
+                    item.dataset.filterMatch = "0";
+                    return;
+                }
 
-                let showCard = true;
+                const cardCategory = (item.getAttribute("data-category") || card.getAttribute("data-category") || "").toLowerCase();
+                const cardDate = item.getAttribute("data-date") || card.getAttribute("data-date") || "";
+                const cardYear = cardDate.split("-")[0];
+                const haystack = [
+                    cardCategory,
+                    cardDate,
+                    cardYear,
+                    card.textContent || ""
+                ].join(" ").toLowerCase();
 
+                let show = true;
                 if (categoryFilter && !cardCategory.includes(categoryFilter)) {
-                    showCard = false;
+                    show = false;
                 }
-
                 if (yearFilter && cardYear !== yearFilter) {
-                    showCard = false;
+                    show = false;
+                }
+                if (searchFilter && !haystack.includes(searchFilter)) {
+                    show = false;
                 }
 
-                if (searchFilter && !cardInfo.includes(searchFilter)) {
-                    showCard = false;
+                item.dataset.filterMatch = show ? "1" : "0";
+                card.style.removeProperty("display");
+                if (show) {
+                    matched.push(item);
                 }
-
-                card.style.display = showCard ? "block" : "none";
             });
 
-            updateRaceCount();
+            sortRaceItems(matched, sortFilter);
+            reorderVisibleItems(matched);
+
+            currentPage = 1;
             updatePagination();
             updateActiveFilters();
+        }
+
+        function sortRaceItems(items, sortFilter) {
+            items.sort((a, b) => {
+                const dateA = a.getAttribute("data-date") || "";
+                const dateB = b.getAttribute("data-date") || "";
+                const catA = (a.getAttribute("data-category") || "").toLowerCase();
+                const catB = (b.getAttribute("data-category") || "").toLowerCase();
+
+                if (sortFilter === "date-asc") {
+                    return dateA.localeCompare(dateB);
+                }
+                if (sortFilter === "category") {
+                    const byCat = catA.localeCompare(catB, "fr", { sensitivity: "base" });
+                    return byCat !== 0 ? byCat : dateB.localeCompare(dateA);
+                }
+                return dateB.localeCompare(dateA);
+            });
+        }
+
+        function reorderVisibleItems(orderedVisible) {
+            const container = document.getElementById("raceContainer");
+            if (!container) return;
+
+            orderedVisible.forEach(item => container.appendChild(item));
+            getRaceItems()
+                .filter(item => !isFilterMatched(item))
+                .forEach(item => container.appendChild(item));
         }
 
         function resetFilters() {
@@ -925,22 +1128,14 @@
             document.getElementById("yearFilter").value = "";
             document.getElementById("searchFilter").value = "";
             document.getElementById("sortFilter").value = "date-desc";
-
-            let raceCards = document.querySelectorAll(".race-card");
-            raceCards.forEach(card => {
-                card.style.display = "block";
-            });
-
-            updateRaceCount();
-            updatePagination();
-            updateActiveFilters();
+            currentPage = 1;
+            applyFilters();
         }
 
-        function updateRaceCount() {
-            let visibleCards = document.querySelectorAll(".race-card[style='display: block'], .race-card:not([style])");
-            let countElement = document.querySelector(".count-number");
+        function updateRaceCount(count) {
+            const countElement = document.querySelector(".count-number");
             if (countElement) {
-                countElement.textContent = visibleCards.length;
+                countElement.textContent = String(count);
             }
         }
 
@@ -948,7 +1143,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeViewControls();
             initializeDragAndDrop();
-            updateActiveFilters();
+            applyFilters();
         });
 
         function initializeViewControls() {
@@ -977,35 +1172,49 @@
             uploadArea.addEventListener('drop', (e) => {
                 e.preventDefault();
                 uploadArea.classList.remove('dragover');
-                const files = e.dataTransfer.files;
+                const files = Array.from(e.dataTransfer.files || []);
                 if (files.length > 0) {
-                    setFileInputFiles(fileInput, files[0]);
-                    handleFileSelection(files[0]);
+                    setFileInputFiles(fileInput, files);
+                    handleFileSelection(fileInput.files);
                 }
             });
 
             fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleFileSelection(e.target.files[0]);
-                }
+                handleFileSelection(e.target.files);
             });
         }
 
-        function handleFileSelection(file) {
+        function handleFileSelection(fileList) {
             const uploadPreview = document.getElementById('uploadPreview');
-            const fileName = document.getElementById('fileName');
-            const fileSize = document.getElementById('fileSize');
+            const previewTitle = document.getElementById('uploadPreviewTitle');
+            const list = document.getElementById('uploadFileList');
             const uploadBtn = document.getElementById('uploadBtn');
+            const files = Array.from(fileList || []);
 
-            fileName.textContent = file.name;
-            fileSize.textContent = formatFileSize(file.size);
-            uploadPreview.style.display = 'block';
-            uploadBtn.disabled = false;
+            list.innerHTML = '';
 
-            if (file.size > 10 * 1024 * 1024) {
-                alert('Le fichier est trop volumineux. Taille maximale : 10 MB');
+            if (files.length === 0) {
+                uploadPreview.style.display = 'none';
                 uploadBtn.disabled = true;
+                return;
             }
+
+            let validCount = 0;
+            files.forEach(file => {
+                const li = document.createElement('li');
+                const ok = isExcelFile(file) && file.size <= 10 * 1024 * 1024;
+                if (ok) validCount++;
+                if (!ok) li.classList.add('is-invalid');
+                li.innerHTML = '<span>' + file.name + '</span><span>' + formatFileSize(file.size) + '</span>';
+                list.appendChild(li);
+            });
+
+            previewTitle.textContent = files.length === 1
+                ? 'Fichier sélectionné'
+                : files.length + ' fichiers sélectionnés';
+            uploadPreview.style.display = 'block';
+            uploadBtn.disabled = validCount === 0;
+            uploadBtn.textContent = validCount > 1 ? 'Importer (' + validCount + ')' : 'Importer';
         }
 
         function formatFileSize(bytes) {
@@ -1050,29 +1259,37 @@
         let totalItems = 0;
 
         function updatePagination() {
-            const visibleCards = document.querySelectorAll(".race-card[style='display: block'], .race-card:not([style])");
-            totalItems = visibleCards.length;
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const matched = getRaceItems().filter(isFilterMatched);
+            totalItems = matched.length;
+            const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage) || 1);
 
-            document.getElementById('totalPages').textContent = totalPages;
-            document.getElementById('currentPage').textContent = currentPage;
-
-            if (totalPages > 1) {
-                document.getElementById('pagination').style.display = 'flex';
-            } else {
-                document.getElementById('pagination').style.display = 'none';
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
             }
+            if (currentPage < 1) {
+                currentPage = 1;
+            }
+
+            document.getElementById('totalPages').textContent = String(totalPages);
+            document.getElementById('currentPage').textContent = String(currentPage);
+
+            const showPager = totalItems > itemsPerPage;
+            document.getElementById('pagination').style.display = showPager ? 'flex' : 'none';
 
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
 
-            visibleCards.forEach((card, index) => {
-                if (index >= startIndex && index < endIndex) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
+            getRaceItems().forEach(item => {
+                if (!isFilterMatched(item)) {
+                    item.classList.add("is-hidden");
+                    return;
                 }
+                const index = matched.indexOf(item);
+                const onPage = !showPager || (index >= startIndex && index < endIndex);
+                item.classList.toggle("is-hidden", !onPage);
             });
+
+            updateRaceCount(totalItems);
         }
 
         function previousPage() {
@@ -1181,12 +1398,6 @@
             document.getElementById("yearFilter").value = "";
             document.getElementById("searchFilter").value = "";
             document.getElementById("sortFilter").value = "date-desc";
-
-            const raceCards = document.querySelectorAll(".race-card");
-            raceCards.forEach(card => {
-                card.style.display = "block";
-            });
-
             currentPage = 1;
             applyFilters();
         }
@@ -1215,9 +1426,9 @@
             hideConfirmModal();
         }
 
-        document.getElementById('sortFilter').addEventListener('change', function() {
-            applyFilters();
-        });
+        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+        document.getElementById('yearFilter').addEventListener('change', applyFilters);
+        document.getElementById('sortFilter').addEventListener('change', applyFilters);
 
         document.getElementById('searchFilter').addEventListener('input', function() {
             setTimeout(applyFilters, 300);

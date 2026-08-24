@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Règlement 2025 — Slot 4000 — Belgian Slot Club')}"></head>
+<head th:replace="~{fragments/layout :: head(title='Règlement 2026 — Slot 4000 — Belgian Slot Club')}"></head>
 <body>
     <header th:replace="~{fragments/layout :: nav(active='reglement', club=${club})}"></header>
 
@@ -8,17 +8,17 @@
         <div class="page-hero-content container">
             <div class="reglement-hero-layout">
                 <div>
-                    <h1 class="page-hero-title">Règlement 2025 — Slot 4000</h1>
-                    <p class="page-hero-sub">Catégories 1/32 &amp; 1/24 — Version du 22 novembre 2024</p>
+                    <h1 class="page-hero-title">Règlement 2026 — Slot 4000</h1>
+                    <p class="page-hero-sub">Catégories 1/32 — Version du 27 décembre 2025 (V1)</p>
                     <div class="page-hero-meta">
                         <span>Club : Slot 4000</span>
-                        <span>Saison 2025</span>
-                        <span>Échelles 1/32 &amp; 1/24</span>
+                        <span>Saison 2026</span>
+                        <span>Échelle 1/32</span>
                     </div>
                 </div>
                 <div class="cluster reglement-hero-actions">
                     <button type="button" class="btn btn-secondary" onclick="printReglement()">Imprimer</button>
-                    <button type="button" class="btn btn-primary" onclick="downloadPDF()">Télécharger PDF</button>
+                    <a class="btn btn-primary" href="/docs/Reglement_slot_4000_2026_V1.pdf" download>Télécharger PDF</a>
                 </div>
             </div>
         </div>
@@ -48,17 +48,17 @@
                             <li><a href="#general">1. Général</a></li>
                             <li><a href="#proto32">2. PROTO 32</a></li>
                             <li><a href="#gt32">3. GT32</a></li>
-                            <li><a href="#gt24">4. GT 24</a></li>
-                            <li><a href="#proto24">5. Proto 24</a></li>
-                            <li><a href="#groupe5">6. Groupe 5 Sideways</a></li>
-                            <li><a href="#slotit">7. Slot.it</a></li>
-                            <li><a href="#penalites">8. Tableau des pénalités</a></li>
+                            <li><a href="#groupe5">4. Groupe 5 Sideways</a></li>
+                            <li><a href="#slotit">5. Slot.it</a></li>
+                            <li><a href="#penalites">6. Tableau des pénalités</a></li>
+                            <li><a href="#gt24">7. GT 24 (1/24)</a></li>
+                            <li><a href="#proto24">8. Proto 24 (1/24)</a></li>
                         </ul>
                     </div>
                     <div class="toc-category">
                         <h3>Annexes</h3>
                         <ul class="toc-list">
-                            <li><a href="#annexe-gt3">Annexe 1 : Voitures GT3 acceptées</a></li>
+                            <li><a href="#annexe-gt3">Annexe 1 : Voitures GT3 / GTE</a></li>
                             <li><a href="#annexe-contact">Annexe 2 : Contacts et informations</a></li>
                             <li><a href="#annexe-materiel">Annexe 3 : Matériel autorisé</a></li>
                         </ul>
@@ -89,9 +89,7 @@
                 <div class="reglement-article" id="intersegment">
                     <h3>2. Intersegment</h3>
                     <ul class="reglement-list">
-                        <li>Si vous perdez votre aileron, vous devez le remettre durant l'intersegment suivant.</li>
-                        <li>Le changement de piste est effectué par les <strong>ramasseurs</strong>. Une fois le courant coupé, déplacez simplement votre poignée pour changer de piste.</li>
-                        <li>Les ramasseurs sont responsables du changement de piste des voitures et du remplacement des stickers. Vous ne devez pas intervenir, même si le pilote vous le demande.</li>
+                        <li>Le changement de piste est effectué par les <strong>ramasseurs</strong>. Une fois le courant coupé, déplacez simplement votre poignée pour changer de piste. Les ramasseurs sont responsables du changement de piste des voitures et du remplacement des stickers. Vous ne devez pas intervenir, même si le pilote vous le demande.</li>
                         <li>Les ramasseurs doivent empiler les stickers les uns sur les autres.</li>
                     </ul>
                 </div>
@@ -181,7 +179,7 @@
                 <div class="reglement-article" id="general">
                     <h3>1. Général</h3>
                     <ul class="reglement-list">
-                        <li>Si un compétiteur ne respecte pas les règles énoncées dans ce document, il sera tenu de remettre sa voiture en conformité.</li>
+                        <li>Si un compétiteur ne respecte pas les règles énoncées dans ce document, il sera tenu de remettre sa voiture en conformité. Si cela est impossible, en fonction de la gravité de l'infraction, le compétiteur pourrait recevoir un avertissement, une pénalité en tours, ou être disqualifié de la course.</li>
                         <li>En cas de doute sur un point de règlement, n'hésitez pas à contacter <strong>Martin Salpetier</strong> (contact pour règlement 1/32).</li>
                         <li>Le contrôle technique s'effectuera voiture ouverte.</li>
                         <li>Tout type d'aimant est interdit.</li>
@@ -198,15 +196,17 @@
                     <div class="category-details">
                         <h5>Carrosseries</h5>
                         <ul class="reglement-list">
-                            <li>Tous les prototypes ayant participé aux 24h du Mans de 1995 à aujourd'hui, c'est-à-dire de la McLaren F1 à la Peugeot 9X8</li>
-                            <li>Il s'agit donc des voitures des catégories : GT1 (1995 à 2004), LMP2, WSC, LMP1, LMP, LMGTP, LMP900, LMP675, LMH, LMDH ou garage 56</li>
+                            <li>Tous les prototypes ayant participé aux 24h du Mans de 1998 à aujourd'hui, c'est-à-dire de la BMW V12 à la Peugeot 9X8</li>
+                            <li>Il s'agit donc des voitures des catégories : GT1 (1995 à 2004), LMP1, LMP, LMGTP, LMP2 (après 2004), LMP900, LMP675, LMH, LMDH ou garage 56. Une simple recherche Google vous aidera à savoir si votre voiture est conforme.</li>
                             <li>Les voitures de la catégorie DPI (IMSA) seront également acceptées</li>
-                            <li>Intérieur en lexan peint avec pilote 3D et tableau de bord autorisé</li>
-                            <li>Vitres en lexan également autorisées</li>
+                            <li>Intérieur en lexan peint avec pilote 3D et tableau de bord autorisés. Vitres en lexan également autorisées.</li>
                             <li>Les intérieurs ne peuvent pas être allégés par découpe</li>
-                            <li>Matériaux acceptés : Polymère par injection, Impression 3D, Résine</li>
+                            <li>Matériaux et méthodes de fabrication acceptés : polymère par injection, impression 3D, résine</li>
                             <li>La carrosserie doit avoir une épaisseur uniforme, sauf pour les voitures dépassant la limite de 15g</li>
                             <li>Aucune pièce mécanique ne doit être visible de l'extérieur, sauf les roues (pièces visibles à travers une grille autorisées)</li>
+                            <li>Décoration libre, mais dans un style de course (numéro et sponsor)</li>
+                            <li>Emplacement et dimensions réalistes de l'aileron demandés</li>
+                            <li>Éclairages autorisés, mais la puce doit être placée au-dessus de la ligne imaginaire des axes</li>
                         </ul>
                         
                         <h5>Montage de la carrosserie</h5>
@@ -224,8 +224,9 @@
                         
                         <h5>Moteur</h5>
                         <ul class="reglement-list">
-                            <li>Slot.it Flat6R</li>
-                            <li>Slot.it Flat6</li>
+                            <li>Moteur long can : Scaleauto Sprinter jr2</li>
+                            <li>Moteur Flat : Slot.it Flat6, Flat 6R, Flat 6 S</li>
+                            <li>Moteur short cage : Slot.it MX16</li>
                             <li>Un élément doit permettre l'identification du moteur</li>
                         </ul>
                         
@@ -249,7 +250,7 @@
                             <li>Pneus libres, mais doivent être en caoutchouc noir, recouvrir toute la jante et peuvent être recouverts de vernis ou de colle</li>
                             <li>Dimensions des roues : Largeur minimum 8mm, Diamètre extérieur minimum 17,3mm, Diamètre intérieur minimum 12mm</li>
                             <li>Les jantes de type A doivent être équipées d'inserts 3D réalistes. Les jantes de type B réalistes sont également acceptées</li>
-                            <li>Largeur max 63mm, inserts compris</li>
+                            <li>Largeur max 64,5mm, inserts compris</li>
                         </ul>
                         
                         <h5>Axe arrière</h5>
@@ -289,7 +290,7 @@
 
                     <h4>2.2 LMP2</h4>
                     <div class="category-details">
-                        <p><em>Ici, on ne se prend pas la tête. Vous prenez une Oreca 07 de marque Slot.it, vous mettez des P6 à l'arrière et du vernis sur les roues avant, et la voiture est prête. N'oubliez pas de changer l'orientation du moteur et de mettre votre carrosserie au poids minimal de 20g.</em></p>
+                        <p><em>Ici, on ne se prend pas la tête. Vous prenez une Oreca 07 de marque Slot.it, vous mettez des P6 à l'arrière et du vernis sur les roues avant, et la voiture est prête. N'oubliez pas de mettre votre carrosserie au poids minimal de 20g.</em></p>
                         
                         <h5>Carrosseries</h5>
                         <ul class="reglement-list">
@@ -390,7 +391,7 @@
                     <div class="category-details">
                         <h5>Carrosseries</h5>
                         <ul class="reglement-list">
-                            <li>Voitures ayant participé dans les catégories du Championnat du Monde GT3, GTE ou au WEC (la liste des voitures acceptées est en annexe)</li>
+                            <li>Voitures ayant participé aux catégories du Championnat du Monde GT3, GTE ou au WEC</li>
                             <li>Il est autorisé de mettre un intérieur en lexan peint avec pilote 3D et tableau de bord. Les vitres en lexan sont également autorisées</li>
                             <li>Les intérieurs ne peuvent pas être recoupés dans l'objectif de les alléger</li>
                             <li>Matériaux et méthodes de fabrication acceptés pour la carrosserie : Polymère par injection, Impression 3D, Résine</li>
@@ -479,17 +480,15 @@
                     <div class="category-details">
                         <p><em>Ici, on ne se prend pas la tête. Vous prenez une GT de marque Sideways, vous mettez des P6 à l'arrière, du vernis sur les roues avant, et la voiture est prête.</em></p>
                         
-                        <h5>Carrosseries acceptées</h5>
+                        <h5>Carrosseries</h5>
                         <ul class="reglement-list">
-                            <li>Toutes les GT3 de la marque Sideways sont acceptées :</li>
-                            <li>Ford GT, Aston Martin Vantage, Bentley GT3 Continental</li>
-                            <li>Lamborghini Huracan, BMW M6, Lexus GT3</li>
-                            <li>McLaren 720S, BMW M4, Ferrari, Ford Mustang</li>
+                            <li>Toutes les GT3 de la marque Sideways sont acceptées</li>
                             <li>La carrosserie doit être d'épaisseur uniforme, il est donc interdit de la retravailler pour l'alléger</li>
                             <li>Aucune pièce mécanique ne doit être visible de l'extérieur lorsque la voiture est posée sur la piste, à l'exception des roues</li>
                             <li>Décoration libre, mais de style course (numéro et sponsor)</li>
                             <li>L'aileron doit être monté comme à l'origine. Il est autorisé de monter un aileron souple de chez Sideways, mais pas d'une autre marque ou en version personnalisée</li>
                             <li>Intérieur et vitres d'origine. Les vitres transparentes d'origine doivent le rester</li>
+                            <li>Poids de la carrosserie : minimum 23g (sans les vis). Le lest doit être fixé au-dessus de la ligne imaginaire des axes</li>
                         </ul>
                         
                         <h5>Châssis</h5>
@@ -524,7 +523,7 @@
                             <li>Roues avant d'origine</li>
                             <li>Buselures et roulements interdits</li>
                             <li>L'axe peut être bridé, mais ne doit pas dépasser de la carrosserie (les inserts d'origine Sideways peuvent dépasser de la carrosserie)</li>
-                            <li>Pneus d'origine. Ils peuvent être recouverts de vernis transparent ou de colle</li>
+                            <li>Pneus d'origine ou Z0. Ils peuvent être recouverts de vernis transparent ou de colle</li>
                             <li>Les jantes doivent être équipées d'inserts en 3D réalistes</li>
                         </ul>
                         
@@ -551,7 +550,7 @@
                         
                         <h5>Lest</h5>
                         <ul class="reglement-list">
-                            <li>Maximum deux lests SP23 placés aux endroits prévus à cet effet</li>
+                            <li>Maximum deux lests SP23 placés aux endroits prévus à cet effet. Le SP23 peut être remplacé par un plomb de même taille</li>
                         </ul>
                         
                         <h5>Autres</h5>
@@ -563,8 +562,347 @@
                     </div>
                 </div>
 
-                <div class="reglement-article" id="gt24">
-                    <h3>4. GT 24</h3>
+                <div class="reglement-article" id="groupe5">
+                    <h3>4. Groupe 5 Sideways</h3>
+                    <p><em>Pour ajouter du fun, toutes les courses de cette catégorie seront organisées de nuit, donc pensez à vos éclairages. Pour les personnes ayant des difficultés de nuit, un groupe de jour sera organisé.</em></p>
+                    
+                    <div class="category-details">
+                        <h5>Carrosserie</h5>
+                        <ul class="reglement-list">
+                            <li>Voitures de la catégorie Groupe 5 de la marque Sideways</li>
+                            <li>L'intérieur et les vitres doivent être d'origine</li>
+                            <li>Les intérieurs ne peuvent pas être découpés dans l'objectif de les alléger</li>
+                            <li>La carrosserie doit être de la marque Sideways</li>
+                            <li>La carrosserie doit être d'épaisseur uniforme. Il est donc interdit de la retravailler pour gagner du poids</li>
+                            <li>Aucune pièce mécanique ne doit être visible de l'extérieur lorsque la voiture est posée sur la piste, excepté les roues</li>
+                            <li>La carrosserie doit être montée sur le châssis grâce aux puits de vis d'origine</li>
+                            <li>Décoration libre, mais de style course (numéro et sponsor)</li>
+                            <li>Un effort est demandé pour que l'emplacement et les dimensions de l'aileron soient réalistes</li>
+                            <li>Poids minimal : 22 grammes sans les vis. Le poids doit être fixé au-dessus de la ligne imaginaire des axes</li>
+                        </ul>
+                        
+                        <h5>Châssis</h5>
+                        <ul class="reglement-list">
+                            <li>Châssis de la marque Sideways, prévu pour le modèle</li>
+                        </ul>
+                        
+                        <h5>Moteur</h5>
+                        <ul class="reglement-list">
+                            <li>Moteur imposé : Slot.it Flat 6 (Jaune)</li>
+                            <li>Un élément doit permettre l'identification du moteur</li>
+                        </ul>
+                        
+                        <h5>Rapports</h5>
+                        <ul class="reglement-list">
+                            <li>Anglewinder : 11/26-30</li>
+                        </ul>
+                        
+                        <h5>Suspensions</h5>
+                        <ul class="reglement-list">
+                            <li>Deux modèles possibles : Slot.it Référence CH47b ou Slot.it Référence CH09</li>
+                            <li>Seules les vis de ces systèmes de montage sont libres</li>
+                            <li>Ces systèmes doivent être utilisés comme prévu par Slot.it. Il est interdit de les modifier ou de les combiner avec d'autres pièces d'origine Slot.it qui ne font pas partie du kit de suspension de base</li>
+                        </ul>
+                        
+                        <h5>Axe avant</h5>
+                        <ul class="reglement-list">
+                            <li>Roues indépendantes interdites</li>
+                            <li>Axe acier plein obligatoire</li>
+                            <li>Roulements interdits</li>
+                            <li>Le diamètre de l'axe doit être de 2,38 mm sur toute la longueur</li>
+                            <li>L'axe peut être bridé, mais ne doit pas dépasser de la carrosserie</li>
+                            <li>Pneus : Slot.it Z0 (PT15). Ils peuvent être recouverts de vernis transparent ou de colle</li>
+                            <li>Jantes d'origine ou de diamètre de 15,8 mm de marque Slot.it en aluminium (W1508215A et W1508225A) ou en plastique (W1508215P et W1508225P)</li>
+                            <li>Les jantes doivent être équipées d'inserts en 3D réalistes</li>
+                        </ul>
+                        
+                        <h5>Axe arrière</h5>
+                        <ul class="reglement-list">
+                            <li>Le diamètre de l'axe doit être de 2,38 mm sur toute la longueur</li>
+                            <li>Roulements interdits</li>
+                            <li>Axe acier plein obligatoire</li>
+                            <li>Jantes : Slot.it Référence PA18als</li>
+                            <li>Pneus arrière : Slot.it P6 (19x10/20x11)</li>
+                            <li>La largeur de l'axe doit respecter les dimensions de la carrosserie</li>
+                            <li>Les jantes doivent être équipées d'inserts en 3D réalistes</li>
+                        </ul>
+                        
+                        <h5>Guide</h5>
+                        <ul class="reglement-list">
+                            <li>D'origine ou Slot.it CH66 ou CH10</li>
+                            <li>Aucune rondelle entre le châssis et le guide n'est autorisée</li>
+                            <li>La forme du guide ne peut pas être modifiée, sauf pour l'avant du CH66 qui peut être légèrement biseauté afin d'éviter les casses</li>
+                            <li>Les tresses ne doivent pas être plus longues que la lame du guide</li>
+                        </ul>
+                        
+                        <h5>Berceau</h5>
+                        <ul class="reglement-list">
+                            <li>Offset 0 Slot.it (Références : CH29, CH61, CH76)</li>
+                            <li>Offset 0,5 mm Slot.it (Références : CH60b, CH75)</li>
+                            <li>Offset 1 mm Slot.it (Références : CH82b, CH74)</li>
+                            <li>Berceau Sideways origine en offset 0, 0,5 mm ou 1 mm (Référence : SWM/AW)</li>
+                            <li>Berceau Sideways Evo en offset 0, 0,5 mm ou 1 mm (Référence : SWM/AW-evo)</li>
+                            <li>Buselures sphériques Slot.it ou similaires</li>
+                        </ul>
+                        
+                        <h5>Éclairage</h5>
+                        <ul class="reglement-list">
+                            <li>Obligatoire</li>
+                            <li>La puce doit être montée dans la carrosserie et au-dessus de la ligne imaginaire des axes</li>
+                            <li>Les éclairages doivent rester allumés avec une intensité équivalente lorsque la voiture décélère</li>
+                            <li>Pendant toute la durée de la course, au minimum un point lumineux à l'avant et à l'arrière est obligatoire</li>
+                            <li>Feux arrière de couleur rouge</li>
+                            <li>Feux avant blancs, légèrement bleutés ou jaunes</li>
+                            <li>Maximum 2 LEDs additionnelles de couleur sont autorisées</li>
+                        </ul>
+                        
+                        <h5>Autres</h5>
+                        <ul class="reglement-list">
+                            <li>Il est autorisé de lester le châssis avec du plomb ou du tungstène (pas d'aimant démagnétisé)</li>
+                            <li>4x4 interdit</li>
+                            <li>Il est interdit de modifier le châssis de quelque manière que ce soit, seul un léger ponçage au niveau des points de frottement est autorisé</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="reglement-article" id="slotit">
+                    <h3>5. Slot.it</h3>
+                    <p>La catégorie Slot.it est divisée en deux classes : <strong>Endurance</strong> et <strong>DTM</strong>. À la fin de la course, il y aura un classement général et un classement DTM.</p>
+                    <p><em>Ici, on ne se prend pas la tête. Vous prenez une Groupe C, une classique ou une DTM de marque Slot.it, vous mettez des P6 à l'arrière et du vernis sur les roues avant, et la voiture est prête. Pour retrouver les pièces d'origine d'une voiture, rendez-vous sur les sites de Slot.it et Policars ; elles sont répertoriées pour chaque modèle.</em></p>
+                    
+                    <h4>5.1 Endurance</h4>
+                    <div class="category-details">
+                        <h5>Carrosseries</h5>
+                        <ul class="reglement-list">
+                            <li>Les voitures classiques et Groupe C de Slot.it ainsi que les Policars classique sport (attention, pas la Ferrari F40)</li>
+                            <li>L'intérieur doit être d'origine</li>
+                            <li>Les vitres en lexan sont interdites pour toutes les voitures</li>
+                            <li>Les intérieurs ne peuvent pas être recoupés dans l'objectif de les alléger</li>
+                            <li>La carrosserie doit être d'épaisseur uniforme, il est donc interdit de la retravailler pour l'alléger</li>
+                            <li>Aucune pièce mécanique ne doit être visible de l'extérieur lorsque la voiture est posée sur la piste, excepté les roues</li>
+                            <li>La carrosserie doit être montée sur le châssis grâce aux puits de vis d'origine</li>
+                            <li>Décoration libre, mais de style course (numéro et sponsor)</li>
+                            <li>Un effort est demandé pour que l'emplacement et les dimensions de l'aileron soient réalistes</li>
+                            <li>Poids de la carrosserie : minimum 20g (sans les vis). Le lest doit être fixé au-dessus de la ligne imaginaire des axes</li>
+                        </ul>
+                        
+                        <h5>Châssis</h5>
+                        <ul class="reglement-list">
+                            <li>Slot.it d'origine</li>
+                        </ul>
+                        
+                        <h5>Berceau moteur</h5>
+                        <ul class="reglement-list">
+                            <li>Groupe C : Slot.it Réf. CH70 (origine), CH110, CH13c</li>
+                            <li>Classique et Classique Sport : Slot.it Réf. CH67 (origine) ou CH70 (inline), CH110, CH13c</li>
+                        </ul>
+                        
+                        <h5>Moteur</h5>
+                        <ul class="reglement-list">
+                            <li>Moteur imposé : Slot.it MX16</li>
+                            <li>Un élément doit permettre l'identification du moteur</li>
+                        </ul>
+                        
+                        <h5>Rapports</h5>
+                        <ul class="reglement-list">
+                            <li>Inline : 9/10-28</li>
+                            <li>Sidewinder : 11-31/34</li>
+                            <li>De marque Slot.it</li>
+                            <li>En inline, les couronnes modulaires sont interdites</li>
+                        </ul>
+                        
+                        <h5>Suspension</h5>
+                        <ul class="reglement-list">
+                            <li>Interdites</li>
+                        </ul>
+                        
+                        <h5>Visserie</h5>
+                        <ul class="reglement-list">
+                            <li>Vis titane interdites</li>
+                        </ul>
+                        
+                        <h5>Axe avant</h5>
+                        <ul class="reglement-list">
+                            <li>Axe acier Slot.it plein d'origine</li>
+                            <li>Roulements interdits</li>
+                            <li>L'axe peut être bridé mais ne doit pas dépasser de la carrosserie</li>
+                            <li>Pneus d'origine ou Z0, recouverts de vernis transparent ou de colle (non recoupés)</li>
+                            <li>Jantes d'origine</li>
+                            <li>La largeur de l'axe doit respecter les dimensions de la carrosserie</li>
+                            <li>Inserts obligatoires</li>
+                            <li>Réglage du train avant grâce à des vis autorisé</li>
+                        </ul>
+                        
+                        <h5>Axe arrière</h5>
+                        <ul class="reglement-list">
+                            <li>Axe acier Slot.it plein d'origine</li>
+                            <li>Roulements interdits</li>
+                            <li>L'axe peut être bridé mais ne doit pas dépasser de la carrosserie</li>
+                            <li>Pneus arrière Slot.it P6 (19x10/20x11)</li>
+                            <li>Inserts obligatoires</li>
+                            <li>Jantes Slot.it Réf. W15808215a ou W16508215a</li>
+                            <li>La largeur de l'axe doit respecter les dimensions de la carrosserie</li>
+                            <li>Pour la Jaguar XJR10, les carénages de roue ne sont pas obligatoires, mais la largeur du train arrière doit être configurée comme si les carénages étaient présents (contrôlé lors du contrôle technique)</li>
+                        </ul>
+                        
+                        <h5>Guide</h5>
+                        <ul class="reglement-list">
+                            <li>D'origine</li>
+                            <li>Les tresses ne doivent pas dépasser la longueur de la lame du guide</li>
+                        </ul>
+                        
+                        <h5>Lest</h5>
+                        <ul class="reglement-list">
+                            <li>Groupe C : maximum de deux lest SP23 placés aux endroits prévus à cet effet</li>
+                            <li>Classique (sauf Matra) : maximum de deux lest SP23 placés aux endroits prévus à cet effet, plus un maximum de 5 grammes de plomb libre près de l'axe avant</li>
+                            <li>Matra : maximum de deux lest SP23 placés aux endroits prévus à cet effet, sans plomb supplémentaire</li>
+                            <li>Les SP23 peuvent être remplacés par un plomb de même taille</li>
+                        </ul>
+                        
+                        <h5>Autres</h5>
+                        <ul class="reglement-list">
+                            <li>Il est interdit de modifier le châssis de quelque manière que ce soit, seul un léger ponçage au niveau des points de frottement est autorisé</li>
+                            <li>Buselures sphériques Slot.it ou similaires</li>
+                        </ul>
+                    </div>
+
+                    <h4>5.2 DTM</h4>
+                    <div class="category-details">
+                        <h5>Carrosseries acceptées</h5>
+                        <ul class="reglement-list">
+                            <li>Toutes les DTM/TC de la marque Slot.it :</li>
+                            <li>Alfa Romeo 155, Mercedes 190E, Mercedes C-Class</li>
+                            <li>Opel Calibra, Nissan Skyline GT</li>
+                            <li>Intérieur et vitres d'origine</li>
+                            <li>Les intérieurs ne peuvent pas être recoupés dans l'objectif de les alléger</li>
+                            <li>Carrosserie de la marque Slot.it</li>
+                            <li>La carrosserie doit être d'épaisseur uniforme, il est donc interdit de la retravailler pour l'alléger</li>
+                            <li>Aucune pièce mécanique ne doit être visible de l'extérieur lorsque la voiture est posée sur la piste, excepté les roues</li>
+                            <li>La carrosserie doit être montée sur le châssis grâce aux puits de vis d'origine</li>
+                            <li>Décoration libre, mais de style course (numéro et sponsor)</li>
+                            <li>Un effort est demandé pour que l'emplacement et les dimensions de l'aileron soient réalistes</li>
+                        </ul>
+                        
+                        <h5>Châssis</h5>
+                        <ul class="reglement-list">
+                            <li>Slot.it d'origine</li>
+                        </ul>
+                        
+                        <h5>Visserie</h5>
+                        <ul class="reglement-list">
+                            <li>Vis titane interdites</li>
+                        </ul>
+                        
+                        <h5>Moteur</h5>
+                        <ul class="reglement-list">
+                            <li>Moteur d'origine (Slot.it MX15)</li>
+                            <li>Un élément doit permettre l'identification du moteur</li>
+                        </ul>
+                        
+                        <h5>Rapports</h5>
+                        <ul class="reglement-list">
+                            <li>D'origine, avec couronne et pignon conformes à l'origine (couronne en bronze, aluminium interdit)</li>
+                        </ul>
+                        
+                        <h5>Suspension</h5>
+                        <ul class="reglement-list">
+                            <li>Interdites</li>
+                        </ul>
+                        
+                        <h5>Axe avant</h5>
+                        <ul class="reglement-list">
+                            <li>Axe acier Slot.it d'origine</li>
+                            <li>Buselures et roulements interdits</li>
+                            <li>L'axe peut être bridé mais ne doit pas dépasser de la carrosserie</li>
+                            <li>Pneus d'origine ou Z0, recouverts de vernis transparent ou de colle</li>
+                            <li>Jantes d'origine</li>
+                            <li>La largeur de l'axe doit respecter les dimensions de la carrosserie</li>
+                            <li>Inserts obligatoires</li>
+                            <li>Réglage du train avant grâce à des vis autorisé</li>
+                        </ul>
+                        
+                        <h5>Axe arrière</h5>
+                        <ul class="reglement-list">
+                            <li>Axe acier Slot.it d'origine</li>
+                            <li>Jantes d'origine</li>
+                            <li>Les jantes doivent être équipées d'inserts en 3D réalistes</li>
+                            <li>Pneus arrière Slot.it P6 (19x10/20x11)</li>
+                            <li>La largeur de l'axe doit respecter les dimensions de la carrosserie</li>
+                        </ul>
+                        
+                        <h5>Guide</h5>
+                        <ul class="reglement-list">
+                            <li>D'origine</li>
+                            <li>Les tresses ne doivent pas être plus longues que la lame du guide</li>
+                        </ul>
+                        
+                        <h5>Lest</h5>
+                        <ul class="reglement-list">
+                            <li>Maximum deux lest SP23 placés aux endroits prévus à cet effet. Le SP23 peut être remplacé par un plomb de même taille</li>
+                        </ul>
+                        
+                        <h5>Autres</h5>
+                        <ul class="reglement-list">
+                            <li>Le système 4x4 est interdit</li>
+                            <li>Il est interdit de modifier le châssis de quelque manière que ce soit, seul un léger ponçage au niveau des points de frottement est autorisé</li>
+                            <li>Buselures sphériques Slot.it ou similaires</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="reglement-article" id="penalites">
+                    <h3>6. Tableau des pénalités</h3>
+                    <div class="penalties-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Infraction</th>
+                                    <th>Pénalité</th>
+                                    <th>Remarques</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Retard au contrôle technique</td>
+                                    <td>5 tours</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Non-respect du parc fermé</td>
+                                    <td>5 tours</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Ramassage non sérieux</td>
+                                    <td>5 tours</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Intervention sur la voiture lors de l'intersegment</td>
+                                    <td>10 tours</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Légère infraction au contrôle technique ne pouvant pas être résolue</td>
+                                    <td>1 tour</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Infraction au contrôle technique ne pouvant pas être résolue</td>
+                                    <td>Jugée par le contrôleur technique</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h2 class="section-title" id="echelle-24">Catégories 1/24</h2>
+                <p class="section-lead" style="margin-bottom: var(--space-6);">Ces catégories ne figurent pas dans le PDF 1/32 2026 ; le texte 1/24 déjà en vigueur est conservé.</p>
+
+            <!-- Annexes -->
+            <div class="reglement-article" id="gt24">
+                    <h3>7. GT 24</h3>
                     <p>Voitures ayant participées dans la catégorie du Championnat du Monde GT3, GTE ou au WEC.</p>
                     
                     <div class="category-details">
@@ -626,7 +964,7 @@
                 </div>
 
                 <div class="reglement-article" id="proto24">
-                    <h3>5. Proto 24</h3>
+                    <h3>8. Proto 24</h3>
                     <p>Voitures ayant participées dans la catégorie reine du Championnat du Monde Sport Prototype ou WEC depuis les années 1970.</p>
                     
                     <div class="category-details">
@@ -697,367 +1035,16 @@
                         </ul>
                     </div>
                 </div>
-
-                <div class="reglement-article" id="groupe5">
-                    <h3>6. Groupe 5 Sideways</h3>
-                    <p><em>Pour rajouter du fun, toutes les courses de cette catégorie seront organisées de nuit, donc pensez à vos éclairages.</em></p>
-                    
-                    <div class="category-details">
-                        <h5>Carrosserie</h5>
-                        <ul class="reglement-list">
-                            <li>Voitures de la catégorie Groupe 5 de la marque Sideways</li>
-                            <li>L'intérieur et les vitres doivent être d'origine</li>
-                            <li>Les intérieurs ne peuvent pas être découpés dans l'objectif de les alléger</li>
-                            <li>La carrosserie doit être de la marque Sideways</li>
-                            <li>La carrosserie doit être d'épaisseur uniforme. Il est donc interdit de la retravailler pour gagner du poids</li>
-                            <li>Aucune pièce mécanique ne doit être visible de l'extérieur lorsque la voiture est posée sur la piste, excepté les roues</li>
-                            <li>La carrosserie doit être montée sur le châssis grâce aux puits de vis d'origine</li>
-                            <li>Décoration libre, mais de style course (numéro et sponsor)</li>
-                            <li>Un effort est demandé pour que l'emplacement et les dimensions de l'aileron soient réalistes</li>
-                            <li>Poids minimal : 22 grammes sans les vis. Le poids doit être fixé au-dessus de la ligne imaginaire des axes</li>
-                            <li>Si la voiture n'est pas équipée d'un kit d'éclairage, le poids minimal de la carrosserie doit être de 24 grammes. Les 2 grammes supplémentaires doivent être ajoutés au-dessus des axes, répartis de manière équilibrée entre l'avant et l'arrière</li>
-                        </ul>
-                        
-                        <h5>Châssis</h5>
-                        <ul class="reglement-list">
-                            <li>Châssis de la marque Sideways, prévu pour le modèle</li>
-                        </ul>
-                        
-                        <h5>Moteur</h5>
-                        <ul class="reglement-list">
-                            <li>Moteur imposé : Slot.it Flat 6 (Jaune)</li>
-                            <li>Un élément doit permettre l'identification du moteur</li>
-                        </ul>
-                        
-                        <h5>Rapports</h5>
-                        <ul class="reglement-list">
-                            <li>Anglewinder : 11/26-30</li>
-                        </ul>
-                        
-                        <h5>Suspensions</h5>
-                        <ul class="reglement-list">
-                            <li>Deux modèles possibles : Slot.it Référence CH47b ou Slot.it Référence CH09</li>
-                            <li>Seules les vis de ces systèmes de montage sont libres</li>
-                        </ul>
-                        
-                        <h5>Axe avant</h5>
-                        <ul class="reglement-list">
-                            <li>Roues indépendantes interdites</li>
-                            <li>Axe acier plein obligatoire</li>
-                            <li>Roulements interdits</li>
-                            <li>Le diamètre de l'axe doit être de 2,38 mm sur toute la longueur</li>
-                            <li>L'axe peut être bridé, mais ne doit pas dépasser de la carrosserie</li>
-                            <li>Pneus : Slot.it Z0 (PT15). Ils peuvent être recouverts de vernis transparent ou de colle</li>
-                            <li>Jantes d'origine ou de diamètre de 15,8 mm de marque Slot.it en aluminium ou en plastique</li>
-                            <li>Les jantes doivent être équipées d'inserts en 3D réalistes</li>
-                        </ul>
-                        
-                        <h5>Axe arrière</h5>
-                        <ul class="reglement-list">
-                            <li>Le diamètre de l'axe doit être de 2,38 mm sur toute la longueur</li>
-                            <li>Roulements interdits</li>
-                            <li>Axe acier plein obligatoire</li>
-                            <li>Jantes : Slot.it Référence PA18als</li>
-                            <li>Pneus arrière : Slot.it P6 (19x10/20x11)</li>
-                            <li>La largeur de l'axe doit respecter les dimensions de la carrosserie</li>
-                            <li>Les jantes doivent être équipées d'inserts en 3D réalistes</li>
-                        </ul>
-                        
-                        <h5>Guide</h5>
-                        <ul class="reglement-list">
-                            <li>D'origine ou Slot.it CH66 ou CH10</li>
-                            <li>Aucune rondelle entre le châssis et le guide n'est autorisée</li>
-                            <li>La forme du guide ne peut pas être modifiée, sauf pour l'avant du CH66 qui peut être légèrement biseauté afin d'éviter les casses</li>
-                            <li>Les tresses ne doivent pas être plus longues que la lame du guide</li>
-                        </ul>
-                        
-                        <h5>Berceau</h5>
-                        <ul class="reglement-list">
-                            <li>Offset 0 Slot.it (Références : CH29, CH61, CH76)</li>
-                            <li>Offset 0,5 mm Slot.it (Références : CH60b, CH75)</li>
-                            <li>Offset 1 mm Slot.it (Références : CH82, CH74)</li>
-                            <li>Berceau Sideways origine en offset 0, 0,5 mm ou 1 mm (Référence : SWM/AW)</li>
-                            <li>Berceau Sideways Evo en offset 0, 0,5 mm ou 1 mm (Référence : SWM/AW-evo)</li>
-                            <li>Buselures sphériques Slot.it ou similaires</li>
-                        </ul>
-                        
-                        <h5>Éclairage</h5>
-                        <ul class="reglement-list">
-                            <li>Obligatoire pour les courses de nuit, conseillé pour les courses de jour</li>
-                            <li>La puce doit être montée dans la carrosserie et au-dessus de la ligne imaginaire des axes</li>
-                            <li>Les éclairages doivent rester allumés avec une intensité équivalente lorsque la voiture décélère</li>
-                            <li>Pendant toute la durée de la course, au minimum un point lumineux à l'avant et à l'arrière est obligatoire</li>
-                            <li>Feux arrière de couleur rouge</li>
-                            <li>Feux avant blancs, légèrement bleutés ou jaunes</li>
-                            <li>Maximum 2 LEDs additionnelles de couleur sont autorisées</li>
-                        </ul>
-                        
-                        <h5>Autres</h5>
-                        <ul class="reglement-list">
-                            <li>Il est autorisé de lester le châssis avec du plomb ou du tungstène (pas d'aimant démagnétisé)</li>
-                            <li>4x4 interdit</li>
-                            <li>Il est interdit de modifier le châssis de quelque manière que ce soit, seul un léger ponçage au niveau des points de frottement est autorisé</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="reglement-article" id="slotit">
-                    <h3>7. Slot.it</h3>
-                    <p>La catégorie Slot.it est divisée en deux classes : <strong>Endurance</strong> et <strong>DTM</strong>. À la fin de la course, il y aura un classement général et un classement DTM.</p>
-                    <p><em>Ici, on ne se prend pas la tête. Vous prenez une Groupe C, une classique ou une DTM de marque Slot.it, vous mettez des P6 à l'arrière et du vernis sur les roues avant, et la voiture est prête. Pour retrouver les pièces d'origine d'une voiture, rendez-vous sur les sites de Slot.it et Policars ; elles sont répertoriées pour chaque modèle.</em></p>
-                    
-                    <h4>7.1 Endurance</h4>
-                    <div class="category-details">
-                        <h5>Carrosseries</h5>
-                        <ul class="reglement-list">
-                            <li>Les voitures classiques et Groupe C de Slot.it ainsi que les Policars classique sport (attention, pas la Ferrari F40)</li>
-                            <li>L'intérieur doit être d'origine</li>
-                            <li>Les vitres en lexan sont interdites pour toutes les voitures</li>
-                            <li>Les intérieurs ne peuvent pas être recoupés dans l'objectif de les alléger</li>
-                            <li>La carrosserie doit être d'épaisseur uniforme, il est donc interdit de la retravailler pour l'alléger</li>
-                            <li>Aucune pièce mécanique ne doit être visible de l'extérieur lorsque la voiture est posée sur la piste, excepté les roues</li>
-                            <li>La carrosserie doit être montée sur le châssis grâce aux puits de vis d'origine</li>
-                            <li>Décoration libre, mais de style course (numéro et sponsor)</li>
-                            <li>Un effort est demandé pour que l'emplacement et les dimensions de l'aileron soient réalistes</li>
-                        </ul>
-                        
-                        <h5>Châssis</h5>
-                        <ul class="reglement-list">
-                            <li>Slot.it d'origine</li>
-                        </ul>
-                        
-                        <h5>Berceau moteur</h5>
-                        <ul class="reglement-list">
-                            <li>Groupe C : Slot.it Réf. CH70 (origine), CH110, CH13c</li>
-                            <li>Classique et Classique Sport : Slot.it Réf. CH67 (origine) ou CH70 (inline), CH110, CH13c</li>
-                        </ul>
-                        
-                        <h5>Moteur</h5>
-                        <ul class="reglement-list">
-                            <li>Moteur imposé : Slot.it MX16</li>
-                            <li>Un élément doit permettre l'identification du moteur</li>
-                        </ul>
-                        
-                        <h5>Rapports</h5>
-                        <ul class="reglement-list">
-                            <li>Inline : 9/10-28</li>
-                            <li>Sidewinder : 11-31/34</li>
-                            <li>De marque Slot.it</li>
-                            <li>En inline, les couronnes modulaires sont interdites</li>
-                        </ul>
-                        
-                        <h5>Suspension</h5>
-                        <ul class="reglement-list">
-                            <li>Interdites</li>
-                        </ul>
-                        
-                        <h5>Visserie</h5>
-                        <ul class="reglement-list">
-                            <li>Vis titane interdites</li>
-                        </ul>
-                        
-                        <h5>Axe avant</h5>
-                        <ul class="reglement-list">
-                            <li>Axe acier Slot.it plein d'origine</li>
-                            <li>Roulements interdits</li>
-                            <li>L'axe peut être bridé mais ne doit pas dépasser de la carrosserie</li>
-                            <li>Pneus d'origine ou Z0, recouverts de vernis transparent ou de colle (non recoupés)</li>
-                            <li>Jantes d'origine</li>
-                            <li>La largeur de l'axe doit respecter les dimensions de la carrosserie</li>
-                            <li>Inserts obligatoires</li>
-                            <li>Réglage du train avant grâce à des vis autorisé</li>
-                        </ul>
-                        
-                        <h5>Axe arrière</h5>
-                        <ul class="reglement-list">
-                            <li>Axe acier Slot.it d'origine</li>
-                            <li>Jantes d'origine</li>
-                            <li>Les jantes doivent être équipées d'inserts en 3D réalistes</li>
-                            <li>Pneus arrière Slot.it P6 (19x10/20x11)</li>
-                            <li>La largeur de l'axe doit respecter les dimensions de la carrosserie</li>
-                        </ul>
-                        
-                        <h5>Guide</h5>
-                        <ul class="reglement-list">
-                            <li>D'origine</li>
-                            <li>Les tresses ne doivent pas être plus longues que la lame du guide</li>
-                        </ul>
-                        
-                        <h5>Lest</h5>
-                        <ul class="reglement-list">
-                            <li>Groupe C : maximum deux lest SP23 placés aux endroits prévus à cet effet</li>
-                            <li>Classique (sauf Matra) : maximum deux lest SP23 placés aux endroits prévus à cet effet, plus un maximum de 5 grammes de plomb libre près de l'axe avant</li>
-                            <li>Matra : maximum deux lest SP23 placés aux endroits prévus à cet effet, sans plomb supplémentaire</li>
-                        </ul>
-                        
-                        <h5>Autres</h5>
-                        <ul class="reglement-list">
-                            <li>Le système 4x4 est interdit</li>
-                            <li>Il est interdit de modifier le châssis de quelque manière que ce soit, seul un léger ponçage au niveau des points de frottement est autorisé</li>
-                            <li>Buselures sphériques Slot.it ou similaires</li>
-                        </ul>
-                    </div>
-
-                    <h4>7.2 DTM</h4>
-                    <div class="category-details">
-                        <h5>Carrosseries acceptées</h5>
-                        <ul class="reglement-list">
-                            <li>Toutes les DTM/TC de la marque Slot.it :</li>
-                            <li>Alfa Romeo 155, Mercedes 190E, Mercedes C-Class</li>
-                            <li>Opel Calibra, Nissan Skyline GT</li>
-                            <li>Intérieur et vitres d'origine</li>
-                            <li>Les intérieurs ne peuvent pas être recoupés dans l'objectif de les alléger</li>
-                            <li>Carrosserie de la marque Slot.it</li>
-                            <li>La carrosserie doit être d'épaisseur uniforme, il est donc interdit de la retravailler pour l'alléger</li>
-                            <li>Aucune pièce mécanique ne doit être visible de l'extérieur lorsque la voiture est posée sur la piste, excepté les roues</li>
-                            <li>La carrosserie doit être montée sur le châssis grâce aux puits de vis d'origine</li>
-                            <li>Décoration libre, mais de style course (numéro et sponsor)</li>
-                            <li>Un effort est demandé pour que l'emplacement et les dimensions de l'aileron soient réalistes</li>
-                        </ul>
-                        
-                        <h5>Châssis</h5>
-                        <ul class="reglement-list">
-                            <li>Slot.it d'origine</li>
-                        </ul>
-                        
-                        <h5>Visserie</h5>
-                        <ul class="reglement-list">
-                            <li>Vis titane interdites</li>
-                        </ul>
-                        
-                        <h5>Moteur</h5>
-                        <ul class="reglement-list">
-                            <li>Moteur d'origine (Slot.it MX15)</li>
-                            <li>Un élément doit permettre l'identification du moteur</li>
-                        </ul>
-                        
-                        <h5>Rapports</h5>
-                        <ul class="reglement-list">
-                            <li>D'origine, avec couronne et pignon conformes à l'origine (couronne en bronze, aluminium interdit)</li>
-                        </ul>
-                        
-                        <h5>Suspension</h5>
-                        <ul class="reglement-list">
-                            <li>Interdites</li>
-                        </ul>
-                        
-                        <h5>Axe avant</h5>
-                        <ul class="reglement-list">
-                            <li>Axe acier Slot.it d'origine</li>
-                            <li>Buselures et roulements interdits</li>
-                            <li>L'axe peut être bridé mais ne doit pas dépasser de la carrosserie</li>
-                            <li>Pneus d'origine, recouverts de vernis transparent ou de colle</li>
-                            <li>Jantes d'origine</li>
-                            <li>La largeur de l'axe doit respecter les dimensions de la carrosserie</li>
-                            <li>Inserts obligatoires</li>
-                            <li>Réglage du train avant grâce à des vis autorisé</li>
-                        </ul>
-                        
-                        <h5>Axe arrière</h5>
-                        <ul class="reglement-list">
-                            <li>Axe acier Slot.it d'origine</li>
-                            <li>Jantes d'origine</li>
-                            <li>Les jantes doivent être équipées d'inserts en 3D réalistes</li>
-                            <li>Pneus arrière Slot.it P6 (19x10/20x11)</li>
-                            <li>La largeur de l'axe doit respecter les dimensions de la carrosserie</li>
-                        </ul>
-                        
-                        <h5>Guide</h5>
-                        <ul class="reglement-list">
-                            <li>D'origine</li>
-                            <li>Les tresses ne doivent pas être plus longues que la lame du guide</li>
-                        </ul>
-                        
-                        <h5>Lest</h5>
-                        <ul class="reglement-list">
-                            <li>Maximum deux lest SP23 placés aux endroits prévus à cet effet</li>
-                        </ul>
-                        
-                        <h5>Autres</h5>
-                        <ul class="reglement-list">
-                            <li>Le système 4x4 est interdit</li>
-                            <li>Il est interdit de modifier le châssis de quelque manière que ce soit, seul un léger ponçage au niveau des points de frottement est autorisé</li>
-                            <li>Buselures sphériques Slot.it ou similaires</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="reglement-article" id="penalites">
-                    <h3>8. Tableau des pénalités</h3>
-                    <div class="penalties-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Infraction</th>
-                                    <th>Pénalité</th>
-                                    <th>Remarques</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Contrôle technique après 20h00</td>
-                                    <td>5 tours</td>
-                                    <td>Par voiture en retard</td>
-                                </tr>
-                                <tr>
-                                    <td>Voiture ramenée au bac après contrôle</td>
-                                    <td>5 tours</td>
-                                    <td>Parc fermé non respecté</td>
-                                </tr>
-                                <tr>
-                                    <td>Pneus non secs au contrôle</td>
-                                    <td>5 tours</td>
-                                    <td>Produit détecté</td>
-                                </tr>
-                                <tr>
-                                    <td>Non-respect du ramassage</td>
-                                    <td>5 tours</td>
-                                    <td>Par manquement</td>
-                                </tr>
-                                <tr>
-                                    <td>Intervention pendant l'intersegment</td>
-                                    <td>5 tours</td>
-                                    <td>Sauf autorisation ramasseur</td>
-                                </tr>
-                                <tr>
-                                    <td>Carrosserie non conforme</td>
-                                    <td>Exclusion</td>
-                                    <td>Règlement technique</td>
-                                </tr>
-                                <tr>
-                                    <td>Moteur non conforme</td>
-                                    <td>Exclusion</td>
-                                    <td>Règlement technique</td>
-                                </tr>
-                                <tr>
-                                    <td>Poids non conforme</td>
-                                    <td>Exclusion</td>
-                                    <td>Règlement technique</td>
-                                </tr>
-                                <tr>
-                                    <td>Éclairage défaillant (Groupe 5)</td>
-                                    <td>5 tours</td>
-                                    <td>Courses de nuit</td>
-                                </tr>
-                                <tr>
-                                    <td>Comportement antisportif</td>
-                                    <td>Exclusion</td>
-                                    <td>À la discrétion du directeur</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
 
-            <!-- Annexes -->
             <div class="reglement-section" id="annexes">
                 <h2 class="section-title">Annexes</h2>
                 
                 <div class="reglement-article" id="annexe-gt3">
-                    <h3>Annexe 1 : Liste des voitures GT3 acceptées</h3>
+                    <h3>Annexe 1 : Voitures GT3 / GTE</h3>
                     <div class="category-details">
-                        <h5>Voitures GT3 autorisées en GT PRO</h5>
+                        <p>Le règlement 2026 n'impose plus de liste fermée. Sont acceptées en GT PRO les voitures ayant participé aux catégories du Championnat du Monde GT3, GTE ou au WEC.</p>
+                        <h5>Exemples de GT3</h5>
                         <ul class="reglement-list">
                             <li><strong>Aston Martin</strong> : Vantage GT3, Vantage AMR GT3</li>
                             <li><strong>Audi</strong> : R8 LMS, R8 LMS GT3 Evo, R8 LMS GT3 Evo II</li>
@@ -1114,9 +1101,9 @@
                     <div class="category-details">
                         <h5>Moteurs autorisés par catégorie</h5>
                         <ul class="reglement-list">
-                            <li><strong>PROTO LMP1</strong> : Slot.it Flat6R, Slot.it Flat6</li>
+                            <li><strong>PROTO LMP1</strong> : Scaleauto Sprinter jr2, Slot.it Flat6 / Flat 6R / Flat 6 S, Slot.it MX16</li>
                             <li><strong>PROTO LMP2</strong> : Slot.it Flat6 (d'origine)</li>
-                            <li><strong>GT PRO</strong> : Tous moteurs ≤ 21 500 rpm et ≤ 350gr aimantation</li>
+                            <li><strong>GT PRO</strong> : Tous moteurs ≤ 21 500 rpm et ≤ 350 g d'aimantation, Slot.it MX16</li>
                             <li><strong>GT AM</strong> : Baby Raptor (d'origine)</li>
                             <li><strong>Groupe 5</strong> : Slot.it Flat6 (Jaune)</li>
                             <li><strong>Slot.it Endurance</strong> : Slot.it MX16</li>
@@ -1132,7 +1119,7 @@
                         
                         <h5>Berceaux autorisés</h5>
                         <ul class="reglement-list">
-                            <li><strong>Groupe 5</strong> : CH47b, CH09, CH29, CH60b, CH75, CH82, CH74, CH61, CH76</li>
+                            <li><strong>Groupe 5</strong> : CH47b, CH09, CH29, CH60b, CH75, CH82b, CH74, CH61, CH76</li>
                             <li><strong>Slot.it Endurance</strong> : CH70, CH110, CH13c, CH67</li>
                             <li><strong>Sideways</strong> : SWM/AW, SWM/AW-evo (offsets 0, 0.5, 1mm)</li>
                         </ul>
@@ -1328,11 +1315,6 @@
         // Fonction pour imprimer le règlement
         function printReglement() {
             window.print();
-        }
-
-        // Fonction pour télécharger en PDF (placeholder)
-        function downloadPDF() {
-            alert('Fonctionnalité de téléchargement PDF en cours de développement');
         }
 
         // Navigation fluide pour les ancres

@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 /**
  * Parse / format des temps rallye.
- * Accepte : {@code 12.345}, {@code 1:23.45}, {@code 1:02:03.4}, virgule ou point.
+ * Accepte : {@code 12.345}, {@code 12,345}, {@code 1:23.45}, {@code 1:02:03.4}.
  */
 public final class RallyeTimeFormat {
 
@@ -24,8 +24,8 @@ public final class RallyeTimeFormat {
         if (raw == null) {
             return null;
         }
-        String value = raw.trim().replace(',', '.');
-        if (value.isEmpty() || "-".equals(value)) {
+        String value = normalize(raw);
+        if (value.isEmpty() || "-".equals(value) || "—".equals(value) || "–".equals(value)) {
             return null;
         }
 
@@ -46,7 +46,22 @@ public final class RallyeTimeFormat {
             return minutes * 60 + seconds + frac;
         }
 
+        // Secondes décimales : 72,784 / 72.784
+        if (!value.matches("\\d+(\\.\\d+)?")) {
+            throw new NumberFormatException("Temps invalide: " + raw);
+        }
         return Double.parseDouble(value);
+    }
+
+    /** Normalise espaces et virgule décimale française vers un point. */
+    static String normalize(String raw) {
+        return raw.trim()
+                .replace('\u00A0', ' ')   // espace insécable
+                .replace('\u202F', ' ')   // espace fine
+                .replace(" ", "")
+                .replace('，', ',')       // virgule pleine largeur
+                .replace('‚', ',')
+                .replace(',', '.');
     }
 
     public static String format(Double seconds) {

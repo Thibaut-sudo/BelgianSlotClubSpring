@@ -1,0 +1,7 @@
+[Unit]
+Description=Sauvegarde quotidienne H2 Belgian Slot Club
+
+[Service]
+Type=oneshot
+User=raspserver
+ExecStart=/home/raspserver/belgianslotclub/bin/h2-backup.sh

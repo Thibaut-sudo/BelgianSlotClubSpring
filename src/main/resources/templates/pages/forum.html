@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Forum — ' + ${clubDisplayName} + ' — Belgian Slot Club')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(active='forum', club=${club})}"></header>
+
+<section class="page-hero page-hero--club"
+         th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+    <div class="page-hero-content container">
+        <h1 class="page-hero-title">Forum</h1>
+        <p class="page-hero-sub">Posez vos questions par thème : règlement, technique, organisation…</p>
+        <div class="page-hero-meta">
+            <span>Club : <strong th:text="${clubDisplayName}">Club</strong></span>
+            <span th:text="${#lists.size(themes)} + ' thème(s)'">0 thème(s)</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
+        <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
+
+        <div class="forum-layout">
+            <div class="forum-main">
+                <h2 class="section-title">Thèmes</h2>
+                <p class="section-lead">Choisissez un thème pour lire les questions ou en poser une nouvelle.</p>
+
+                <div th:if="${#lists.isEmpty(themes)}" class="empty-state">
+                    <p>Aucun thème pour le moment.</p>
+                </div>
+
+                <ul class="forum-theme-list" th:unless="${#lists.isEmpty(themes)}">
+                    <li th:each="card : ${themes}">
+                        <a class="forum-theme-card" th:href="@{/forum/theme/{id}(id=${card.theme.id})}">
+                            <span class="forum-theme-card__title" th:text="${card.theme.title}">Thème</span>
+                            <span class="forum-theme-card__desc" th:text="${card.theme.description}">Description</span>
+                            <span class="forum-theme-card__meta">
+                                <span th:text="${card.questionCount} == 1 ? '1 question' : ${card.questionCount} + ' questions'">0 questions</span>
+                                <span th:if="${card.lastActivity != null}"
+                                      th:text="' · Dernière : ' + ${#temporals.format(card.lastActivity, 'dd/MM/yyyy')}"> · Dernière</span>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <aside class="forum-side">
+                <div class="filters-panel">
+                    <h2 class="filters-panel-title">Nouveau thème</h2>
+                    <p class="filters-panel-lead">Réservé aux organisateurs (mot de passe d’import).</p>
+                    <form id="forumCreateThemeForm" th:action="@{/forum/themes}" method="post" class="stack-form">
+                        <input type="hidden" name="club" th:value="${club}">
+                        <div class="form-group">
+                            <label class="form-label" for="themeTitle">Nom du thème</label>
+                            <input class="form-input" type="text" id="themeTitle" name="title"
+                                   maxlength="80" required placeholder="Ex. Éclairage">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="themeDescription">Description</label>
+                            <input class="form-input" type="text" id="themeDescription" name="description"
+                                   maxlength="240" placeholder="De quoi parle ce thème ?">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Ajouter le thème</button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    if (typeof protectImportForm === 'function') {
+        protectImportForm(document.getElementById('forumCreateThemeForm'));
+    }
+</script>
+</body>
+</html>

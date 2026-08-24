@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title=${listing.title} + ' — Marketplace — Belgian Slot Club')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(active='marketplace', club=${club})}"></header>
+
+<section class="page-hero">
+    <div class="page-hero-content container">
+        <p class="page-hero-eyebrow">
+            <a th:href="@{/marketplace(club=${club})}" class="page-hero-back">← Marketplace</a>
+        </p>
+        <h1 class="page-hero-title" th:text="${listing.title}">Annonce</h1>
+        <div class="page-hero-meta">
+            <span th:text="${listing.category}">Catégorie</span>
+            <span th:text="${#strings.isEmpty(listing.price) ? 'À discuter' : listing.price}">Prix</span>
+            <span th:if="${listing.sold}">Vendu</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container forum-thread">
+        <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
+        <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
+
+        <article class="forum-post forum-post--question"
+                 th:classappend="${listing.sold} ? ' marketplace-card--sold'">
+            <header class="forum-post__meta">
+                <strong th:text="${listing.sellerName}">Vendeur</strong>
+                <span th:if="${!#strings.isEmpty(sellerClubName)}" th:text="${sellerClubName}">Club</span>
+                <span th:text="${#temporals.format(listing.createdAt, 'dd/MM/yyyy HH:mm')}">date</span>
+            </header>
+            <div class="marketplace-gallery" th:if="${listing.photos != null and !#lists.isEmpty(listing.photos)}">
+                <img id="marketplaceMainPhoto"
+                     class="marketplace-gallery__main"
+                     th:src="${listing.photos[0].url}"
+                     th:alt="${listing.title}">
+                <div class="marketplace-thumbs" th:if="${#lists.size(listing.photos) > 1}">
+                    <button type="button"
+                            class="marketplace-thumb"
+                            th:each="photo, iter : ${listing.photos}"
+                            th:classappend="${iter.first} ? ' is-active'"
+                            th:data-src="${photo.url}"
+                            th:aria-label="'Photo ' + ${iter.count}">
+                        <img th:src="${photo.url}" alt="" loading="lazy">
+                    </button>
+                </div>
+            </div>
+            <p class="marketplace-detail__price"
+               th:text="${#strings.isEmpty(listing.price) ? 'À discuter' : listing.price}">Prix</p>
+            <p class="forum-post__body" th:text="${listing.description}">Description</p>
+            <p class="marketplace-detail__contact">
+                Contact : <strong th:text="${listing.contact}">contact</strong>
+            </p>
+        </article>
+
+        <div class="cluster">
+            <form id="marketplaceSoldForm"
+                  th:action="@{/marketplace/{id}/sold(id=${listing.id})}"
+                  method="post"
+                  class="forum-mod-form"
+                  th:if="${!listing.sold}"
+                  onsubmit="return confirm('Marquer cette annonce comme vendue ?');">
+                <input type="hidden" name="club" th:value="${club}">
+                <button type="submit" class="btn btn-secondary btn-sm">Marquer vendu</button>
+            </form>
+            <form id="marketplaceDeleteForm"
+                  th:action="@{/marketplace/{id}/delete(id=${listing.id})}"
+                  method="post"
+                  class="forum-mod-form"
+                  onsubmit="return confirm('Supprimer cette annonce ?');">
+                <input type="hidden" name="club" th:value="${club}">
+                <button type="submit" class="btn btn-ghost btn-sm">Supprimer</button>
+            </form>
+        </div>
+        <p class="section-lead">Marquer vendu ou supprimer : mot de passe d’import (organisateurs).</p>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    if (typeof protectImportForm === 'function') {
+        protectImportForm(document.getElementById('marketplaceSoldForm'));
+        protectImportForm(document.getElementById('marketplaceDeleteForm'));
+    }
+    (function () {
+        var main = document.getElementById('marketplaceMainPhoto');
+        if (!main) return;
+        document.querySelectorAll('.marketplace-thumb').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var src = btn.getAttribute('data-src');
+                if (!src) return;
+                main.src = src;
+                document.querySelectorAll('.marketplace-thumb').forEach(function (other) {
+                    other.classList.toggle('is-active', other === btn);
+                });
+            });
+        });
+    })();
+</script>
+</body>
+</html>

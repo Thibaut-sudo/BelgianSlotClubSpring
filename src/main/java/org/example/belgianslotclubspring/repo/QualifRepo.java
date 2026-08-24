@@ -21,6 +21,18 @@ public interface QualifRepo extends JpaRepository<Qualif, Integer> {
             """)
     List<Qualif> getQualifByDateAndClub(@Param("date") LocalDate date, @Param("club") String club);
 
+    @Query("""
+            SELECT q FROM Qualif q
+            WHERE q.date = :date AND lower(q.clubName) = lower(:club)
+            """)
+    List<Qualif> findAllByDateAndClub(@Param("date") LocalDate date, @Param("club") String club);
+
+    @Query("""
+            SELECT q FROM Qualif q
+            WHERE lower(q.clubName) = lower(:club)
+            """)
+    List<Qualif> findAllByClub(@Param("club") String club);
+
     /** @deprecated utiliser getQualifByDateAndClub — ne filtre pas par club */
     @Deprecated
     List<Qualif> getQualifByDate(LocalDate selectedDate);

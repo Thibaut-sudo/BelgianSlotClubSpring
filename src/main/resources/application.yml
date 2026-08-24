@@ -33,8 +33,18 @@ spring:
     mode: HTML
     encoding: UTF-8
     cache: false
+
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 80MB
+
 server:
   port: 8080
+
+app:
+  import:
+    password: "Test1234="
 
 
 

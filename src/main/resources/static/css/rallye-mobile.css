@@ -342,7 +342,7 @@
 
   .rallye-pilot-card {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 0.5rem;
     padding: 0.75rem 0.85rem;
@@ -353,9 +353,28 @@
 
   .rallye-pilot-card__main {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.65rem;
     min-width: 0;
+    flex: 1;
+  }
+
+  .rallye-pilot-edit-mobile {
+    display: grid;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .rallye-pilot-edit-mobile .form-input {
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .rallye-pilot-edit-mobile__actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.15rem;
   }
 
   .rallye-pilot-card__num {
@@ -453,6 +472,11 @@
   .rallye-standing-card__gap {
     font-size: 0.78rem;
     color: var(--color-muted, #666);
+  }
+
+  .rallye-standing-card__gap-sep {
+    margin: 0 0.15rem;
+    opacity: 0.5;
   }
 
   .rallye-standing-card__es {

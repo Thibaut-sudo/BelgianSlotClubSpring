@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Marketplace — Belgian Slot Club')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(active='marketplace', club=${club})}"></header>
+
+<section class="page-hero">
+    <div class="page-hero-content container">
+        <h1 class="page-hero-title">Marketplace</h1>
+        <p class="page-hero-sub">Petites annonces communes à tous les clubs : vendez ou cherchez du matériel de slot.</p>
+        <div class="page-hero-meta">
+            <span th:text="${#lists.size(listings)} + ' annonce(s)'">0 annonce(s)</span>
+            <span>Tous les clubs</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
+        <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
+
+        <div class="forum-layout">
+            <div class="forum-main">
+                <h2 class="section-title">Annonces</h2>
+                <p class="section-lead">Visible par Slot 4000, SRCS et les autres clubs. Contactez le vendeur directement.</p>
+
+                <nav class="marketplace-cats" aria-label="Catégories">
+                    <a class="marketplace-cat"
+                       th:href="@{/marketplace(club=${club})}"
+                       th:classappend="${#strings.isEmpty(selectedCategory)} ? ' is-active'">Toutes</a>
+                    <a class="marketplace-cat"
+                       th:each="cat : ${categories}"
+                       th:href="@{/marketplace(category=${cat}, club=${club})}"
+                       th:classappend="${selectedCategory == cat} ? ' is-active'"
+                       th:text="${cat}">Catégorie</a>
+                </nav>
+
+                <div th:if="${#lists.isEmpty(listings)}" class="empty-state">
+                    <p>Aucune annonce pour le moment. Publiez la première à droite.</p>
+                </div>
+
+                <ul class="marketplace-list" th:unless="${#lists.isEmpty(listings)}">
+                    <li th:each="card : ${listings}">
+                        <a class="marketplace-card"
+                           th:classappend="${(card.listing.sold ? ' marketplace-card--sold' : '') + (!#strings.isEmpty(card.coverUrl) ? ' marketplace-card--photo' : '')}"
+                           th:href="@{/marketplace/{id}(id=${card.listing.id}, club=${club})}">
+                            <span class="marketplace-card__photo" th:if="${!#strings.isEmpty(card.coverUrl)}">
+                                <img th:src="${card.coverUrl}" alt="" loading="lazy" decoding="async">
+                                <span class="marketplace-card__count" th:if="${card.photoCount > 1}"
+                                      th:text="${card.photoCount} + ' photos'">2 photos</span>
+                            </span>
+                            <span class="marketplace-card__body">
+                                <span class="marketplace-card__top">
+                                    <span class="marketplace-card__category" th:text="${card.listing.category}">Catégorie</span>
+                                    <span class="marketplace-card__badge" th:if="${card.listing.sold}">Vendu</span>
+                                </span>
+                                <span class="marketplace-card__title" th:text="${card.listing.title}">Titre</span>
+                                <span class="marketplace-card__price"
+                                      th:text="${#strings.isEmpty(card.listing.price) ? 'À discuter' : card.listing.price}">Prix</span>
+                                <span class="marketplace-card__meta">
+                                    <span th:text="${card.listing.sellerName}">Vendeur</span>
+                                    <span th:if="${!#strings.isEmpty(card.sellerClubLabel)}"
+                                          th:text="' · ' + ${card.sellerClubLabel}"> · Club</span>
+                                    <span th:text="' · ' + ${#temporals.format(card.listing.createdAt, 'dd/MM/yyyy')}"> · date</span>
+                                </span>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <aside class="forum-side">
+                <div class="filters-panel">
+                    <h2 class="filters-panel-title">Déposer une annonce</h2>
+                    <p class="filters-panel-lead">Ouvert à tous les clubs. Indiquez un moyen de contact (téléphone, e-mail ou Facebook).</p>
+                    <form th:action="@{/marketplace}" method="post" class="stack-form" enctype="multipart/form-data">
+                        <input type="hidden" name="club" th:value="${club}">
+                        <div class="form-group">
+                            <label class="form-label" for="title">Titre</label>
+                            <input class="form-input" type="text" id="title" name="title"
+                                   maxlength="120" required placeholder="Ex. Slot.it LMP1 complète">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="category">Catégorie</label>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="" disabled selected>Choisir…</option>
+                                <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}">Catégorie</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="price">Prix</label>
+                            <input class="form-input" type="text" id="price" name="price"
+                                   maxlength="40" placeholder="25 € ou À discuter">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="description">Description</label>
+                            <textarea class="form-textarea" id="description" name="description" rows="5"
+                                      maxlength="4000" required placeholder="État, échelle, ce qui est inclus…"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="photos">Photos</label>
+                            <input class="form-input" type="file" id="photos" name="photos"
+                                   accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
+                                   multiple>
+                            <p class="form-hint">Jusqu’à 6 photos, 5 Mo chacune (JPG, PNG, WebP ou GIF).</p>
+                            <div id="photoPreview" class="marketplace-photo-preview" hidden></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sellerName">Votre nom</label>
+                            <input class="form-input" type="text" id="sellerName" name="sellerName"
+                                   maxlength="40" required placeholder="Prénom">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="contact">Contact</label>
+                            <input class="form-input" type="text" id="contact" name="contact"
+                                   maxlength="120" required placeholder="Téléphone, e-mail ou Facebook">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sellerClub">Votre club</label>
+                            <select class="form-select" id="sellerClub" name="sellerClub">
+                                <option value="">Non précisé</option>
+                                <option th:each="c : ${clubs}"
+                                        th:value="${c.code}"
+                                        th:text="${c.displayName}"
+                                        th:selected="${club == c.code}">Club</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Publier l’annonce</button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    (function () {
+        var input = document.getElementById('photos');
+        var box = document.getElementById('photoPreview');
+        if (!input || !box) return;
+        input.addEventListener('change', function () {
+            box.replaceChildren();
+            var files = Array.prototype.slice.call(input.files || [], 0, 6);
+            if (!files.length) {
+                box.hidden = true;
+                return;
+            }
+            box.hidden = false;
+            files.forEach(function (file) {
+                var img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.alt = file.name;
+                box.appendChild(img);
+            });
+        });
+    })();
+</script>
+</body>
+</html>

@@ -31,37 +31,53 @@ public class ExcelReader {
      * @return Liste des résultats de course
      */
     public ExcelFilleResult readRaceResults(String filePath) {
-
+        qualifs.clear();
+        raceResults.clear();
 
         System.out.println("Fichier sélectionné : " + filePath);
 
         try (FileInputStream fis = new FileInputStream(filePath);
-             Workbook workbook = WorkbookFactory.create(fis)) {  // Supporte XLS et XLSX
+             Workbook workbook = WorkbookFactory.create(fis)) {
 
-            Sheet sheet = workbook.getSheetAt(0); // Prend la première feuille
+            FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+            Sheet sheet = workbook.getSheetAt(0);
+            Row header = sheet.getRow(0);
+            if (header == null) {
+                throw new IllegalArgumentException("Fichier Excel vide (pas d’en-tête).");
+            }
 
+            String date = readRaceDate(header.getCell(6), evaluator);
+            String categoryName = CategoryNames.canonical(getStringCellValue(header.getCell(0), evaluator));
 
-            String date = String.valueOf(sheet.getRow(0).getCell(6));
-
-
-            for (int i = 3; i <= sheet.getLastRowNum(); i++) { // Ignore la première ligne (en-têtes)
+            for (int i = 3; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
-                if (row == null) continue; // Ignore les lignes vides
+                if (row == null) {
+                    continue;
+                }
 
+                String qualifName = getStringCellValue(row.getCell(1), evaluator);
+                String qualiTime = getStringCellValue(row.getCell(2), evaluator);
 
-                String QualifName = getStringCellValue(row.getCell(1));
-                String QualiTime = getStringCellValue(row.getCell(2));
+                if (qualifName.isEmpty() || qualiTime.isEmpty()) {
+                    continue;
+                }
 
-
-                if (QualifName.isEmpty() || QualiTime.isEmpty()) continue;
-
-                Qualif qualif = new Qualif(QualifName, QualiTime, date);
+                Qualif qualif = new Qualif(qualifName, qualiTime, date);
                 qualifs.add(qualif);
 
+                String raceNameRaw = getStringCellValue(row.getCell(4), evaluator);
+                if (raceNameRaw.isEmpty() || looksLikeFormula(raceNameRaw)) {
+                    raceNameRaw = PilotNames.baseName(qualifName);
+                }
+                boolean bis = PilotNames.isBis(qualifName) || PilotNames.isBis(raceNameRaw);
+                String raceName = PilotNames.withBisMarker(raceNameRaw, bis);
 
-                RaceResult pilot = new RaceResult(row.getCell(4).getStringCellValue(), getDoubleCellValue(row.getCell(5)),String.valueOf(sheet.getRow(0).getCell(6)),sheet.getRow(0).getCell(0).getStringCellValue());
-
-
+                RaceResult pilot = new RaceResult(
+                        raceName,
+                        getDoubleCellValue(row.getCell(5)),
+                        String.valueOf(date),
+                        categoryName
+                );
 
                 pilot.addTrackPerformance(1, getIntCellValue(row.getCell(6)), getDoubleCellValue(row.getCell(7)));
                 pilot.addTrackPerformance(2, getIntCellValue(row.getCell(8)), getDoubleCellValue(row.getCell(9)));
@@ -71,45 +87,123 @@ public class ExcelReader {
                 pilot.addTrackPerformance(6, getIntCellValue(row.getCell(16)), getDoubleCellValue(row.getCell(17)));
 
                 raceResults.add(pilot);
-
-
             }
             excelFilleResult.setQualifs(qualifs);
             excelFilleResult.setRaceResults(raceResults);
+            excelFilleResult.setCategoriseName(categoryName);
 
-            excelFilleResult.setCategoriseName(sheet.getRow(0).getCell(0).getStringCellValue());
-
-
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (IOException e) {
-            System.err.println("Erreur de lecture du fichier Excel : " + e.getMessage());
+            throw new IllegalArgumentException("Impossible de lire le fichier Excel : " + e.getMessage(), e);
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("Fichier Excel illisible : " + e.getMessage(), e);
         }
 
         return excelFilleResult;
     }
 
+    private String readRaceDate(Cell cell, FormulaEvaluator evaluator) {
+        if (cell == null) {
+            throw new IllegalArgumentException("Date de course manquante (cellule G1).");
+        }
+        CellType type = cell.getCellType();
+        if (type == CellType.FORMULA) {
+            type = cell.getCachedFormulaResultType();
+        }
+        if (type == CellType.NUMERIC) {
+            try {
+                if (DateUtil.isCellDateFormatted(cell) || DateUtil.isValidExcelDate(cell.getNumericCellValue())) {
+                    return cell.getLocalDateTimeCellValue().toLocalDate().toString();
+                }
+            } catch (Exception ignored) {
+                // fallback texte / série ci-dessous
+            }
+            return String.valueOf(cell.getNumericCellValue());
+        }
+        String text = getStringCellValue(cell, evaluator);
+        if (text.isBlank()) {
+            throw new IllegalArgumentException("Date de course vide (cellule G1).");
+        }
+        return text;
+    }
 
-    private String getStringCellValue(Cell cell) {
-        if (cell == null) return "";
+    private static boolean looksLikeFormula(String value) {
+        return value.contains("!") || value.startsWith("=") || value.contains("$");
+    }
+
+    private String getStringCellValue(Cell cell, FormulaEvaluator evaluator) {
+        if (cell == null) {
+            return "";
+        }
         return switch (cell.getCellType()) {
             case STRING -> cell.getStringCellValue().trim();
             case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+            case FORMULA -> {
+                try {
+                    if (cell.getCachedFormulaResultType() == CellType.STRING) {
+                        yield cell.getRichStringCellValue().getString().trim();
+                    }
+                    if (cell.getCachedFormulaResultType() == CellType.NUMERIC) {
+                        yield String.valueOf(cell.getNumericCellValue());
+                    }
+                    CellValue evaluated = evaluator.evaluate(cell);
+                    if (evaluated == null) {
+                        yield "";
+                    }
+                    yield switch (evaluated.getCellType()) {
+                        case STRING -> evaluated.getStringValue() == null ? "" : evaluated.getStringValue().trim();
+                        case NUMERIC -> String.valueOf(evaluated.getNumberValue());
+                        default -> "";
+                    };
+                } catch (Exception e) {
+                    yield "";
+                }
+            }
             default -> "";
         };
     }
 
     private int getIntCellValue(Cell cell) {
-        if (cell == null) return 0;
-        return (int) cell.getNumericCellValue();
+        return (int) Math.round(getDoubleCellValue(cell));
     }
 
     private double getDoubleCellValue(Cell cell) {
-        if (cell == null) return 0;
-        return cell.getNumericCellValue();
+        if (cell == null) {
+            return 0;
+        }
+        try {
+            return switch (cell.getCellType()) {
+                case NUMERIC -> cell.getNumericCellValue();
+                case FORMULA -> {
+                    if (cell.getCachedFormulaResultType() == CellType.NUMERIC) {
+                        yield cell.getNumericCellValue();
+                    }
+                    if (cell.getCachedFormulaResultType() == CellType.STRING) {
+                        yield parseLooseDouble(cell.getRichStringCellValue().getString());
+                    }
+                    yield 0;
+                }
+                case STRING -> parseLooseDouble(cell.getStringCellValue());
+                default -> 0;
+            };
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
-
+    private static double parseLooseDouble(String raw) {
+        if (raw == null) {
+            return 0;
+        }
+        String value = raw.trim().replace(',', '.');
+        if (value.isEmpty() || "-".equals(value) || "—".equals(value)) {
+            return 0;
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
 }
-
-
-
-

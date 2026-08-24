@@ -2,6 +2,7 @@ package org.example.belgianslotclubspring.controllers;
 
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.services.RaceResultService;
+import org.example.belgianslotclubspring.utils.CategoryNames;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,18 +49,20 @@ public class ChampionnatController {
         }
         model.addAttribute("selectedYear", year);
 
-        List<String> categories = raceResultService.getAllCategoriesClub(clubCode);
+        List<String> categories = raceResultService.getAllCategoriesClub(clubCode, year);
         model.addAttribute("categories", categories);
 
-        if (category == null && !categories.isEmpty()) {
-            category = categories.getFirst();
-        }
-        model.addAttribute("selectedCategory", category);
+        String requestedCategory = category;
+        String selectedCategory = categories.stream()
+                .filter(c -> CategoryNames.same(c, requestedCategory))
+                .findFirst()
+                .orElse(categories.isEmpty() ? null : categories.getFirst());
+        model.addAttribute("selectedCategory", selectedCategory);
 
         Map<LocalDate, Map<String, Double>> raceResults =
-                (category == null)
+                (selectedCategory == null)
                         ? Map.of()
-                        : raceResultService.getChampionshipResults(category, clubCode, year);
+                        : raceResultService.getChampionshipResults(selectedCategory, clubCode, year);
         model.addAttribute("raceResults", raceResults);
 
         return "pages/championnat";

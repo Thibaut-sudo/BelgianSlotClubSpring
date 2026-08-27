@@ -5,7 +5,7 @@
 <header th:replace="~{fragments/layout :: nav(active='forum', club=${club})}"></header>
 
 <section class="page-hero page-hero--club"
-         th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+         th:style="${club == 'srcs'} ? '--club-banner: url(/images/srcs-logo.jpg?v=3)' : '--club-banner: url(/images/slot4000-logo.jpg?v=3)'">
     <div class="page-hero-content container">
         <p class="page-hero-eyebrow">
             <a th:href="@{/forum/theme/{id}(id=${theme.id})}" class="page-hero-back"
@@ -31,6 +31,25 @@
                 <span th:text="${#temporals.format(question.createdAt, 'dd/MM/yyyy HH:mm')}">date</span>
             </header>
             <p class="forum-post__body" th:text="${question.body}">Corps</p>
+            <div class="forum-attachments"
+                 th:if="${question.attachments != null and !#lists.isEmpty(question.attachments)}">
+                <div class="forum-attachments__images">
+                    <a th:each="file : ${question.attachments}"
+                       th:if="${file.image}"
+                       th:href="${file.url}"
+                       target="_blank"
+                       rel="noopener"
+                       th:title="${file.originalName}">
+                        <img th:src="${file.url}" th:alt="${file.originalName}" loading="lazy">
+                    </a>
+                </div>
+                <ul class="forum-attachments__files">
+                    <li th:each="file : ${question.attachments}" th:unless="${file.image}">
+                        <a th:href="${file.url}" target="_blank" rel="noopener"
+                           th:text="${file.originalName} + ' (' + ${file.displaySize} + ')'">fichier.pdf</a>
+                    </li>
+                </ul>
+            </div>
             <form id="forumDeleteQuestionForm"
                   th:action="@{/forum/question/{id}/delete(id=${question.id})}"
                   method="post"
@@ -51,6 +70,25 @@
                     <span th:text="${#temporals.format(reply.createdAt, 'dd/MM/yyyy HH:mm')}">date</span>
                 </header>
                 <p class="forum-post__body" th:text="${reply.body}">Réponse</p>
+                <div class="forum-attachments"
+                     th:if="${reply.attachments != null and !#lists.isEmpty(reply.attachments)}">
+                    <div class="forum-attachments__images">
+                        <a th:each="file : ${reply.attachments}"
+                           th:if="${file.image}"
+                           th:href="${file.url}"
+                           target="_blank"
+                           rel="noopener"
+                           th:title="${file.originalName}">
+                            <img th:src="${file.url}" th:alt="${file.originalName}" loading="lazy">
+                        </a>
+                    </div>
+                    <ul class="forum-attachments__files">
+                        <li th:each="file : ${reply.attachments}" th:unless="${file.image}">
+                            <a th:href="${file.url}" target="_blank" rel="noopener"
+                               th:text="${file.originalName} + ' (' + ${file.displaySize} + ')'">fichier.pdf</a>
+                        </li>
+                    </ul>
+                </div>
                 <form th:id="${'forumDeleteReply-' + reply.id}"
                       th:action="@{/forum/reply/{id}/delete(id=${reply.id})}"
                       method="post"
@@ -63,7 +101,8 @@
 
         <div class="filters-panel forum-reply-form">
             <h2 class="filters-panel-title">Répondre</h2>
-            <form th:action="@{/forum/question/{id}/replies(id=${question.id})}" method="post" class="stack-form">
+            <form th:action="@{/forum/question/{id}/replies(id=${question.id})}" method="post"
+                  class="stack-form" enctype="multipart/form-data">
                 <div class="form-group">
                     <label class="form-label" for="author">Votre nom</label>
                     <input class="form-input" type="text" id="author" name="author"
@@ -73,6 +112,13 @@
                     <label class="form-label" for="body">Réponse</label>
                     <textarea class="form-textarea" id="body" name="body" rows="5" maxlength="4000"
                               required placeholder="Votre réponse…"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="reply-attachments">Pièces jointes</label>
+                    <input class="form-input" type="file" id="reply-attachments" name="attachments"
+                           accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.jpg,.jpeg,.png,.webp,.gif,.pdf"
+                           multiple>
+                    <p class="form-hint">Jusqu’à 5 fichiers, 8 Mo chacun (JPG, PNG, WebP, GIF ou PDF).</p>
                 </div>
                 <button type="submit" class="btn btn-primary">Publier la réponse</button>
             </form>

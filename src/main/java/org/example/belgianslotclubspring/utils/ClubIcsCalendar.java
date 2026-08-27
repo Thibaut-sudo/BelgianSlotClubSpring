@@ -6,7 +6,6 @@ import org.example.belgianslotclubspring.models.ClubCalendar;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -20,16 +19,27 @@ public final class ClubIcsCalendar {
     public static final LocalTime START = LocalTime.of(18, 0);
     public static final LocalTime END = LocalTime.of(22, 0);
 
+    /**
+     * À incrémenter quand les titres ou dates changent.
+     * Google Agenda ignore souvent un ICS identique (même URL, mêmes UID).
+     */
+    public static final int FEED_REVISION = 2;
+    static final String REVISION_UTC = "20260824T213000Z";
+
     private static final DateTimeFormatter LOCAL = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-    private static final DateTimeFormatter UTC = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'");
 
     private ClubIcsCalendar() {
     }
 
     public static String build(Club club) {
+        return build(club, ClubCalendar.eventsFor(club));
+    }
+
+    public static String build(Club club, Map<String, String> events) {
         if (club == null) {
             throw new IllegalArgumentException("Club obligatoire");
         }
+        Map<String, String> eventMap = events == null ? ClubCalendar.eventsFor(club) : events;
         StringBuilder ics = new StringBuilder(8_192);
         line(ics, "BEGIN:VCALENDAR");
         line(ics, "VERSION:2.0");
@@ -39,10 +49,11 @@ public final class ClubIcsCalendar {
         line(ics, "X-WR-CALNAME:" + escape(calendarName(club)));
         line(ics, "X-WR-CALDESC:" + escape(calendarDescription(club)));
         line(ics, "X-WR-TIMEZONE:Europe/Brussels");
+        line(ics, "REFRESH-INTERVAL;VALUE=DURATION:PT1H");
         line(ics, "X-PUBLISHED-TTL:PT1H");
         appendVTimezone(ics);
 
-        for (Map.Entry<String, String> entry : ClubCalendar.eventsFor(club).entrySet()) {
+        for (Map.Entry<String, String> entry : eventMap.entrySet()) {
             appendEvent(ics, club, LocalDate.parse(entry.getKey()), entry.getValue());
         }
 
@@ -54,8 +65,13 @@ public final class ClubIcsCalendar {
         return "calendrier-" + club.getCode() + ".ics";
     }
 
+    /** URL jamais vue par Google / Cloudflare, pour forcer un nouvel abonnement. */
+    public static String publicFeedPath(Club club) {
+        return "/calendrier/" + club.getCode() + "/v" + FEED_REVISION + ".ics";
+    }
+
     static String calendarName(Club club) {
-        return club.getDisplayName() + " — Belgian Slot Club";
+        return club.getDisplayName() + " 2026-2027 — Belgian Slot Club";
     }
 
     private static String calendarDescription(Club club) {
@@ -77,14 +93,16 @@ public final class ClubIcsCalendar {
     private static void appendEvent(StringBuilder ics, Club club, LocalDate date, String name) {
         ZonedDateTime start = date.atTime(START).atZone(ZONE);
         ZonedDateTime end = date.atTime(END).atZone(ZONE);
-        String uid = date + "-" + club.getCode() + "@belgianslotclub.com";
+        String uid = date + "-" + club.getCode() + "-v" + FEED_REVISION + "@belgianslotclub.com";
         String summary = club.getDisplayName() + " — " + name;
         String description = name + ". " + eveningHint(club)
                 + " Détails : https://belgianslotclub.com/prochain-evenement?club=" + club.getCode();
 
         line(ics, "BEGIN:VEVENT");
         line(ics, "UID:" + uid);
-        line(ics, "DTSTAMP:" + UTC.format(start.withZoneSameInstant(ZoneOffset.UTC)));
+        line(ics, "DTSTAMP:" + REVISION_UTC);
+        line(ics, "LAST-MODIFIED:" + REVISION_UTC);
+        line(ics, "SEQUENCE:" + FEED_REVISION);
         line(ics, "DTSTART;TZID=Europe/Brussels:" + LOCAL.format(start));
         line(ics, "DTEND;TZID=Europe/Brussels:" + LOCAL.format(end));
         line(ics, "SUMMARY:" + escape(summary));

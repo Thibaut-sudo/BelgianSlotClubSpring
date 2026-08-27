@@ -16,12 +16,12 @@ class ClubCalendarTest {
     @Test
     void srcsTuesdaySeasonStartsFirstWeekOfSeptember() {
         Map<String, String> events = ClubCalendar.eventsFor(Club.SRCS);
-        assertEquals("GT24 / Proto 24", events.get("2026-09-01"));
-        assertEquals("Scaleauto", events.get("2026-09-08"));
+        assertEquals("Scaleauto", events.get("2026-09-01"));
+        assertEquals("GT24 / Proto 24", events.get("2026-09-08"));
         assertEquals("BPC", events.get("2026-09-15"));
         assertEquals("Revoslot", events.get("2026-09-22"));
         assertEquals("BRM", events.get("2026-09-29"));
-        assertEquals("GT24 / Proto 24", events.get("2026-10-06"));
+        assertEquals("Scaleauto", events.get("2026-10-06"));
         assertEquals(DayOfWeek.TUESDAY, LocalDate.parse("2026-09-01").getDayOfWeek());
     }
 
@@ -30,9 +30,9 @@ class ClubCalendarTest {
         Map<String, String> events = ClubCalendar.eventsFor(Club.SRCS);
         assertNull(events.get("2026-12-22"));
         assertNull(events.get("2026-12-29"));
-        assertEquals("GT24 / Proto 24", events.get("2026-12-15"));
-        assertEquals("Scaleauto", events.get("2027-01-05"));
-        assertEquals("Scaleauto", events.get("2027-06-29"));
+        assertEquals("Scaleauto", events.get("2026-12-15"));
+        assertEquals("GT24 / Proto 24", events.get("2027-01-05"));
+        assertEquals("GT24 / Proto 24", events.get("2027-06-29"));
     }
 
     @Test

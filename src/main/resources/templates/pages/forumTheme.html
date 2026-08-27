@@ -5,7 +5,7 @@
 <header th:replace="~{fragments/layout :: nav(active='forum', club=${club})}"></header>
 
 <section class="page-hero page-hero--club"
-         th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+         th:style="${club == 'srcs'} ? '--club-banner: url(/images/srcs-logo.jpg?v=3)' : '--club-banner: url(/images/slot4000-logo.jpg?v=3)'">
     <div class="page-hero-content container">
         <p class="page-hero-eyebrow">
             <a th:href="@{/forum(club=${club})}" class="page-hero-back">← Forum</a>
@@ -38,6 +38,8 @@
                                 <span th:text="${card.question.author}">Auteur</span>
                                 <span th:text="' · ' + ${#temporals.format(card.question.createdAt, 'dd/MM/yyyy HH:mm')}"> · date</span>
                                 <span th:text="${card.replyCount} == 1 ? ' · 1 réponse' : ' · ' + ${card.replyCount} + ' réponses'"> · 0 réponses</span>
+                                <span th:if="${card.attachmentCount > 0}"
+                                      th:text="${card.attachmentCount} == 1 ? ' · 1 pièce jointe' : ' · ' + ${card.attachmentCount} + ' pièces jointes'"> · 1 pièce jointe</span>
                             </span>
                         </a>
                     </li>
@@ -48,7 +50,8 @@
                 <div class="filters-panel">
                     <h2 class="filters-panel-title">Poser une question</h2>
                     <p class="filters-panel-lead">Pas besoin de compte : indiquez votre nom et votre question.</p>
-                    <form th:action="@{/forum/theme/{id}/questions(id=${theme.id})}" method="post" class="stack-form">
+                    <form th:action="@{/forum/theme/{id}/questions(id=${theme.id})}" method="post"
+                          class="stack-form" enctype="multipart/form-data">
                         <div class="form-group">
                             <label class="form-label" for="author">Votre nom</label>
                             <input class="form-input" type="text" id="author" name="author"
@@ -63,6 +66,13 @@
                             <label class="form-label" for="body">Question</label>
                             <textarea class="form-textarea" id="body" name="body" rows="5" maxlength="4000"
                                       required placeholder="Décrivez votre question…"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="question-attachments">Pièces jointes</label>
+                            <input class="form-input" type="file" id="question-attachments" name="attachments"
+                                   accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.jpg,.jpeg,.png,.webp,.gif,.pdf"
+                                   multiple>
+                            <p class="form-hint">Jusqu’à 5 fichiers, 8 Mo chacun (JPG, PNG, WebP, GIF ou PDF).</p>
                         </div>
                         <button type="submit" class="btn btn-primary">Publier</button>
                     </form>

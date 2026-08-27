@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css?v=28">
+    <link rel="stylesheet" href="/css/main.css?v=34">
     <link rel="icon" type="image/png" href="/images/favicon.png">
 </head>
 
@@ -49,46 +49,47 @@
                        th:classappend="${active == 'home'} ? ' active' : ''"
                        th:attr="aria-current=${active == 'home'} ? 'page' : null">Accueil</a>
                 </li>
+                <th:block th:if="${club != null and !#strings.isEmpty(club)}">
+                    <li>
+                        <a class="nav-link"
+                           th:href="@{/selectRace/{club}(club=${club})}"
+                           th:classappend="${active == 'courses'} ? ' active' : ''"
+                           th:attr="aria-current=${active == 'courses'} ? 'page' : null">Courses</a>
+                    </li>
+                    <li>
+                        <a class="nav-link"
+                           th:href="@{/championnat(club=${club})}"
+                           th:classappend="${active == 'championnat'} ? ' active' : ''"
+                           th:attr="aria-current=${active == 'championnat'} ? 'page' : null">Championnat</a>
+                    </li>
+                    <li>
+                        <a class="nav-link"
+                           th:href="@{/rallye(club=${club})}"
+                           th:classappend="${active == 'rallye'} ? ' active' : ''"
+                           th:attr="aria-current=${active == 'rallye'} ? 'page' : null">Rallye</a>
+                    </li>
+                    <li>
+                        <a class="nav-link"
+                           th:href="@{/forum(club=${club})}"
+                           th:classappend="${active == 'forum'} ? ' active' : ''"
+                           th:attr="aria-current=${active == 'forum'} ? 'page' : null">Forum</a>
+                    </li>
+                    <li>
+                        <a class="nav-link"
+                           th:href="@{/prochain-evenement(club=${club})}"
+                           th:classappend="${active == 'calendrier'} ? ' active' : ''"
+                           th:attr="aria-current=${active == 'calendrier'} ? 'page' : null">Calendrier</a>
+                    </li>
+                    <li th:if="${club == 'slot4000'}">
+                        <a href="/reglement" class="nav-link"
+                           th:classappend="${active == 'reglement'} ? ' active' : ''"
+                           th:attr="aria-current=${active == 'reglement'} ? 'page' : null">Règlement</a>
+                    </li>
+                </th:block>
                 <li>
-                    <a class="nav-link"
-                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/selectRace/{club}(club=${club})} : '/?goto=courses#clubs'"
-                       th:classappend="${active == 'courses'} ? ' active' : ''"
-                       th:attr="aria-current=${active == 'courses'} ? 'page' : null">Courses</a>
-                </li>
-                <li>
-                    <a class="nav-link"
-                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/championnat(club=${club})} : '/?goto=championnat#clubs'"
-                       th:classappend="${active == 'championnat'} ? ' active' : ''"
-                       th:attr="aria-current=${active == 'championnat'} ? 'page' : null">Championnat</a>
-                </li>
-                <li>
-                    <a class="nav-link"
-                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/rallye(club=${club})} : '/?goto=rallye#clubs'"
-                       th:classappend="${active == 'rallye'} ? ' active' : ''"
-                       th:attr="aria-current=${active == 'rallye'} ? 'page' : null">Rallye</a>
-                </li>
-                <li>
-                    <a class="nav-link"
-                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/forum(club=${club})} : '/?goto=forum#clubs'"
-                       th:classappend="${active == 'forum'} ? ' active' : ''"
-                       th:attr="aria-current=${active == 'forum'} ? 'page' : null">Forum</a>
-                </li>
-                <li>
-                    <a class="nav-link"
-                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/marketplace(club=${club})} : '/marketplace'"
+                    <a href="/marketplace" class="nav-link"
                        th:classappend="${active == 'marketplace'} ? ' active' : ''"
                        th:attr="aria-current=${active == 'marketplace'} ? 'page' : null">Marketplace</a>
-                </li>
-                <li>
-                    <a class="nav-link"
-                       th:href="${club != null and !#strings.isEmpty(club)} ? @{/prochain-evenement(club=${club})} : '/?goto=calendrier#clubs'"
-                       th:classappend="${active == 'calendrier'} ? ' active' : ''"
-                       th:attr="aria-current=${active == 'calendrier'} ? 'page' : null">Calendrier</a>
-                </li>
-                <li>
-                    <a href="/reglement" class="nav-link"
-                       th:classappend="${active == 'reglement'} ? ' active' : ''"
-                       th:attr="aria-current=${active == 'reglement'} ? 'page' : null">Règlement</a>
                 </li>
                 <li>
                     <a href="/contact" class="nav-link"
@@ -114,12 +115,12 @@
                 <li><a href="/contact">Contact</a></li>
                 <li><a href="/?goto=forum#clubs">Forum</a></li>
                 <li><a href="/marketplace">Marketplace</a></li>
-                <li><a href="/reglement">Règlement</a></li>
                 <li><a href="/selectRace/slot4000">Slot4000</a></li>
+                <li><a href="/reglement">Règlement Slot 4000</a></li>
                 <li><a href="/selectRace/srcs">SRCS</a></li>
             </ul>
         </nav>
-        <p class="footer-copyright">&copy; 2026 Belgian Slot Club. Tous droits réservés.</p>
+        <p class="footer-copyright">&copy; 2026 Belgian Slot Club. Tous droits réservés. — Thibaut Lenertz</p>
     </div>
 </footer>
 

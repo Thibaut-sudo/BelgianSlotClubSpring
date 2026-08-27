@@ -1,16 +1,19 @@
 package org.example.belgianslotclubspring.services;
 
+import org.example.belgianslotclubspring.entities.ForumAttachment;
 import org.example.belgianslotclubspring.entities.ForumQuestion;
 import org.example.belgianslotclubspring.entities.ForumReply;
 import org.example.belgianslotclubspring.entities.ForumTheme;
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.models.ForumQuestionCard;
 import org.example.belgianslotclubspring.models.ForumThemeCard;
+import org.example.belgianslotclubspring.repo.ForumAttachmentRepo;
 import org.example.belgianslotclubspring.repo.ForumQuestionRepo;
 import org.example.belgianslotclubspring.repo.ForumReplyRepo;
 import org.example.belgianslotclubspring.repo.ForumThemeRepo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,13 +39,19 @@ public class ForumService {
     private final ForumThemeRepo themeRepo;
     private final ForumQuestionRepo questionRepo;
     private final ForumReplyRepo replyRepo;
+    private final ForumAttachmentRepo attachmentRepo;
+    private final ForumAttachmentStorage attachmentStorage;
 
     public ForumService(ForumThemeRepo themeRepo,
                         ForumQuestionRepo questionRepo,
-                        ForumReplyRepo replyRepo) {
+                        ForumReplyRepo replyRepo,
+                        ForumAttachmentRepo attachmentRepo,
+                        ForumAttachmentStorage attachmentStorage) {
         this.themeRepo = themeRepo;
         this.questionRepo = questionRepo;
         this.replyRepo = replyRepo;
+        this.attachmentRepo = attachmentRepo;
+        this.attachmentStorage = attachmentStorage;
     }
 
     @Transactional
@@ -71,40 +80,68 @@ public class ForumService {
         requireTheme(themeId);
         List<ForumQuestionCard> cards = new ArrayList<>();
         for (ForumQuestion question : questionRepo.findByThemeIdOrderByCreatedAtDesc(themeId)) {
-            cards.add(new ForumQuestionCard(question, replyRepo.countByQuestionId(question.getId())));
+            cards.add(new ForumQuestionCard(
+                    question,
+                    replyRepo.countByQuestionId(question.getId()),
+                    attachmentRepo.countByQuestionId(question.getId())));
         }
         return cards;
     }
 
     @Transactional
     public ForumQuestion requireQuestion(Long id) {
-        return questionRepo.findDetailedById(id)
+        ForumQuestion question = questionRepo.findDetailedById(id)
                 .or(() -> questionRepo.findById(id))
                 .orElseThrow(() -> new IllegalArgumentException("Question introuvable."));
+        question.getAttachments().size();
+        for (ForumReply reply : question.getReplies()) {
+            reply.getAttachments().size();
+        }
+        return question;
     }
 
     @Transactional
-    public ForumQuestion ask(Long themeId, String author, String title, String body) {
-        ForumTheme theme = requireTheme(themeId);
-        ForumQuestion question = new ForumQuestion();
-        question.setTheme(theme);
-        question.setAuthor(cleanLine(author, AUTHOR_MAX, "un nom"));
-        question.setTitle(cleanLine(title, TITLE_MAX, "un titre"));
-        question.setBody(cleanBody(body, BODY_MAX, "une question"));
-        question.setCreatedAt(LocalDateTime.now());
-        return questionRepo.save(question);
+    public ForumAttachment requireAttachment(Long id) {
+        return attachmentRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Pièce jointe introuvable."));
     }
 
     @Transactional
-    public ForumReply reply(Long questionId, String author, String body) {
-        ForumQuestion question = requireQuestion(questionId);
-        ForumReply reply = new ForumReply();
-        reply.setQuestion(question);
-        reply.setAuthor(cleanLine(author, AUTHOR_MAX, "un nom"));
-        reply.setBody(cleanBody(body, BODY_MAX, "une réponse"));
-        reply.setCreatedAt(LocalDateTime.now());
-        question.getReplies().add(reply);
-        return replyRepo.save(reply);
+    public ForumQuestion ask(Long themeId, String author, String title, String body, List<MultipartFile> files) {
+        List<ForumAttachmentStorage.StoredFile> stored = attachmentStorage.saveAll(files);
+        try {
+            ForumTheme theme = requireTheme(themeId);
+            ForumQuestion question = new ForumQuestion();
+            question.setTheme(theme);
+            question.setAuthor(cleanLine(author, AUTHOR_MAX, "un nom"));
+            question.setTitle(cleanLine(title, TITLE_MAX, "un titre"));
+            question.setBody(cleanBody(body, BODY_MAX, "une question"));
+            question.setCreatedAt(LocalDateTime.now());
+            addAttachments(question, null, stored);
+            return questionRepo.save(question);
+        } catch (RuntimeException e) {
+            stored.forEach(file -> attachmentStorage.deleteQuietly(file.storedName()));
+            throw e;
+        }
+    }
+
+    @Transactional
+    public ForumReply reply(Long questionId, String author, String body, List<MultipartFile> files) {
+        List<ForumAttachmentStorage.StoredFile> stored = attachmentStorage.saveAll(files);
+        try {
+            ForumQuestion question = requireQuestion(questionId);
+            ForumReply reply = new ForumReply();
+            reply.setQuestion(question);
+            reply.setAuthor(cleanLine(author, AUTHOR_MAX, "un nom"));
+            reply.setBody(cleanBody(body, BODY_MAX, "une réponse"));
+            reply.setCreatedAt(LocalDateTime.now());
+            addAttachments(null, reply, stored);
+            question.getReplies().add(reply);
+            return replyRepo.save(reply);
+        } catch (RuntimeException e) {
+            stored.forEach(file -> attachmentStorage.deleteQuietly(file.storedName()));
+            throw e;
+        }
     }
 
     @Transactional
@@ -133,18 +170,23 @@ public class ForumService {
     public String deleteTheme(Long themeId) {
         ForumTheme theme = requireTheme(themeId);
         String club = theme.getClubName();
+        List<String> files = new ArrayList<>();
         for (ForumQuestion question : questionRepo.findByThemeIdOrderByCreatedAtDesc(themeId)) {
+            files.addAll(storedNames(requireQuestion(question.getId())));
             questionRepo.delete(question);
         }
         themeRepo.delete(theme);
+        files.forEach(attachmentStorage::deleteQuietly);
         return club;
     }
 
     @Transactional
     public ForumTheme deleteQuestion(Long questionId) {
         ForumQuestion question = requireQuestion(questionId);
+        List<String> files = storedNames(question);
         ForumTheme theme = question.getTheme();
         questionRepo.delete(question);
+        files.forEach(attachmentStorage::deleteQuietly);
         return theme;
     }
 
@@ -157,10 +199,42 @@ public class ForumService {
     @Transactional
     public ForumQuestion deleteReply(Long replyId) {
         ForumReply reply = requireReply(replyId);
+        reply.getAttachments().size();
+        List<String> files = new ArrayList<>();
+        reply.getAttachments().forEach(attachment -> files.add(attachment.getStoredName()));
         ForumQuestion question = reply.getQuestion();
         question.getReplies().remove(reply);
         replyRepo.delete(reply);
+        files.forEach(attachmentStorage::deleteQuietly);
         return question;
+    }
+
+    private static void addAttachments(ForumQuestion question,
+                                       ForumReply reply,
+                                       List<ForumAttachmentStorage.StoredFile> stored) {
+        int order = 0;
+        for (ForumAttachmentStorage.StoredFile file : stored) {
+            ForumAttachment attachment = new ForumAttachment();
+            attachment.setStoredName(file.storedName());
+            attachment.setOriginalName(file.originalName());
+            attachment.setContentType(file.contentType());
+            attachment.setSizeBytes(file.sizeBytes());
+            attachment.setSortOrder(order++);
+            if (reply != null) {
+                reply.addAttachment(attachment);
+            } else {
+                question.addAttachment(attachment);
+            }
+        }
+    }
+
+    private static List<String> storedNames(ForumQuestion question) {
+        List<String> names = new ArrayList<>();
+        question.getAttachments().forEach(attachment -> names.add(attachment.getStoredName()));
+        for (ForumReply reply : question.getReplies()) {
+            reply.getAttachments().forEach(attachment -> names.add(attachment.getStoredName()));
+        }
+        return names;
     }
 
     private void ensureDefaultThemes(String clubCode) {

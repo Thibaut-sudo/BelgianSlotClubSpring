@@ -5,7 +5,7 @@
     <header th:replace="~{fragments/layout :: nav(active='calendrier', club=${club})}"></header>
 
     <section class="page-hero page-hero--club" th:data-club="${club}"
-             th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+             th:style="${club == 'srcs'} ? '--club-banner: url(/images/srcs-logo.jpg?v=3)' : '--club-banner: url(/images/slot4000-logo.jpg?v=3)'">
         <div class="page-hero-content container">
             <div class="calendar-hero-layout">
                 <div>
@@ -96,7 +96,7 @@
                     <a class="btn btn-secondary"
                        th:href="@{/calendrier/{club}/apple(club=${club})}">Apple Calendar</a>
                     <a class="btn btn-outline"
-                       th:href="|/calendrier/${club}.ics|"
+                       th:href="|/calendrier/${club}/v2.ics|"
                        th:download="${club == 'slot4000' ? 'calendrier-slot4000.ics' : 'calendrier-srcs.ics'}">
                         Fichier .ics (Outlook)
                     </a>
@@ -112,6 +112,7 @@
                                 <span id="calendarYearLabel">2025</span>
                             </h2>
                             <p class="section-lead" th:text="'Tous les événements de la saison ' + ${club == 'slot4000' ? 'SLOT4000' : 'SRCS'}">Tous les événements de la saison</p>
+                            <p class="section-lead calendar-admin-hint">Organisateurs : cliquez un jour pour ajouter un événement, ou ajoutez une catégorie dans la légende (mot de passe requis).</p>
                         </div>
                         <div class="year-nav" role="group" aria-label="Changer d'année">
                             <button type="button" class="year-nav-btn" id="prevYearBtn" aria-label="Année précédente">‹</button>
@@ -175,12 +176,12 @@
                 </div>
                 <div class="legend-grid" th:if="${club == 'srcs'}">
                     <div class="legend-item">
-                        <div class="legend-color event-gt24proto24"></div>
-                        <span>GT24 / Proto 24</span>
-                    </div>
-                    <div class="legend-item">
                         <div class="legend-color event-scaleauto"></div>
                         <span>Scaleauto</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color event-gt24proto24"></div>
+                        <span>GT24 / Proto 24</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color event-bpc"></div>
@@ -211,9 +212,85 @@
                         <span>Chall. E.Pirotte</span>
                     </div>
                 </div>
+                <div class="legend-grid" th:if="${customCategories != null and !#lists.isEmpty(customCategories)}"
+                     style="margin-top: var(--space-3);">
+                    <div class="legend-item" th:each="cat : ${customCategories}">
+                        <div class="legend-color" th:style="'background-color:' + ${cat.color}"></div>
+                        <span th:text="${cat.name}">Catégorie</span>
+                    </div>
+                </div>
+                <p class="calendar-admin-hint" style="margin-top: var(--space-4);">
+                    <button type="button" class="btn btn-outline" id="addCategoryBtn">Ajouter une catégorie</button>
+                </p>
             </section>
         </div>
     </main>
+
+    <div id="calendarEventModal" class="modal" style="display: none;" role="dialog"
+         aria-labelledby="calendarEventTitle" aria-modal="true">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3 id="calendarEventTitle">Ajouter un événement</h3>
+            </div>
+            <form id="calendarEventForm">
+                <div class="modal-body">
+                    <p class="section-lead" id="calendarEventLead">Réservé aux organisateurs.</p>
+                    <p id="calendarEventDateRow">
+                        <label class="form-label" for="calendarEventDateLabel">Date</label>
+                        <input class="form-input" id="calendarEventDateLabel" type="text" readonly>
+                    </p>
+                    <p>
+                        <label class="form-label" id="calendarEventNameLabel" for="calendarEventName">Événement</label>
+                        <input class="form-input" id="calendarEventName" name="name" type="text"
+                               maxlength="80" required placeholder="Ex. BEL-LMS, Scaleauto…"
+                               list="calendarEventSuggestions" autocomplete="off">
+                        <datalist id="calendarEventSuggestions">
+                            <th:block th:if="${club == 'srcs'}">
+                                <option value="Scaleauto"></option>
+                                <option value="GT24 / Proto 24"></option>
+                                <option value="BPC"></option>
+                                <option value="Revoslot"></option>
+                                <option value="BRM"></option>
+                                <option value="BEL-LMS"></option>
+                                <option value="Revo (interclubs)"></option>
+                                <option value="Deph'one F1"></option>
+                                <option value="Chall. E.Pirotte"></option>
+                            </th:block>
+                            <th:block th:if="${club == 'slot4000'}">
+                                <option value="PROTO32"></option>
+                                <option value="GT32"></option>
+                                <option value="TCR-SCALE"></option>
+                                <option value="SLOT.IT"></option>
+                                <option value="GR5"></option>
+                                <option value="PROTO24"></option>
+                                <option value="GT24"></option>
+                                <option value="TCR ALL"></option>
+                                <option value="Soirée Fun"></option>
+                            </th:block>
+                            <option th:each="cat : ${customCategories}" th:value="${cat.name}"></option>
+                        </datalist>
+                    </p>
+                    <p id="calendarEventColorRow">
+                        <label class="form-label" for="calendarEventColor">Couleur de la catégorie</label>
+                        <input id="calendarEventColor" name="color" type="color" value="#0f766e"
+                               style="width: 3.5rem; height: 2.5rem; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius); cursor: pointer;">
+                    </p>
+                    <p>
+                        <label class="form-label" for="calendarEventPassword">Mot de passe organisateur</label>
+                        <input class="form-input" id="calendarEventPassword" name="password" type="password"
+                               autocomplete="current-password" required>
+                    </p>
+                    <p id="calendarEventError" class="import-password-error" hidden></p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="calendarEventDelete" hidden
+                            style="margin-right: auto;">Supprimer</button>
+                    <button type="button" class="btn btn-secondary" id="calendarEventCancel">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="calendarEventSave">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <footer th:replace="~{fragments/layout :: footer}"></footer>
     <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
@@ -463,6 +540,11 @@
             gap: 1px;
         }
 
+        .calendar-admin-hint {
+            margin-top: var(--space-2);
+            font-size: 0.875rem;
+        }
+
         .calendar-day {
             position: relative;
             display: flex;
@@ -474,8 +556,24 @@
             line-height: 1.1;
             text-align: center;
             border-radius: var(--radius-sm);
-            cursor: default;
+            cursor: pointer;
             transition: transform var(--transition);
+        }
+
+        .calendar-day:not(.has-event):hover {
+            background: rgb(26 122 76 / 0.12);
+            box-shadow: inset 0 0 0 1px var(--color-success);
+        }
+
+        .calendar-day.is-custom::after {
+            content: '';
+            position: absolute;
+            right: 3px;
+            top: 3px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--color-amber, #f5c518);
         }
 
         .calendar-day .day-letter {
@@ -603,11 +701,179 @@
         const clubElement = document.querySelector('[data-club]');
         const club = clubElement ? clubElement.getAttribute('data-club') : 'slot4000';
         const events2025 = /*[[${allEvents}]]*/ {};
+        const customDates = new Set(/*[[${customDates}]]*/ []);
+        const customCategories = /*[[${customCategories}]]*/ [];
+        const YEAR_STORAGE_KEY = 'calendarYear-' + club;
 
         const MIN_YEAR = 2024;
-        const MAX_YEAR = 2027;
+        const MAX_YEAR = 2032;
         const nowYear = new Date().getFullYear();
-        let selectedYear = (nowYear >= MIN_YEAR && nowYear <= MAX_YEAR) ? nowYear : 2025;
+        const storedYear = parseInt(sessionStorage.getItem(YEAR_STORAGE_KEY) || '', 10);
+        let selectedYear = (storedYear >= MIN_YEAR && storedYear <= MAX_YEAR)
+            ? storedYear
+            : ((nowYear >= MIN_YEAR && nowYear <= MAX_YEAR) ? nowYear : 2025);
+
+        const monthNamesFr = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+            'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+        function formatDateFr(iso) {
+            const [year, month, day] = iso.split('-').map(Number);
+            return String(day).padStart(2, '0') + ' ' + monthNamesFr[month - 1] + ' ' + year;
+        }
+
+        function setEventError(message) {
+            const errorEl = document.getElementById('calendarEventError');
+            if (!errorEl) return;
+            if (message) {
+                errorEl.textContent = message;
+                errorEl.hidden = false;
+            } else {
+                errorEl.textContent = '';
+                errorEl.hidden = true;
+            }
+        }
+
+        function closeEventModal() {
+            const modal = document.getElementById('calendarEventModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function categoryColor(name) {
+            if (!name || !Array.isArray(customCategories)) return '';
+            const first = name.split(',')[0].trim().toLowerCase();
+            const found = customCategories.find(function (cat) {
+                return String(cat.name || '').toLowerCase() === first;
+            });
+            return found && found.color ? found.color : '';
+        }
+
+        function setModalMode(mode) {
+            const modal = document.getElementById('calendarEventModal');
+            const dateRow = document.getElementById('calendarEventDateRow');
+            const nameLabel = document.getElementById('calendarEventNameLabel');
+            const colorRow = document.getElementById('calendarEventColorRow');
+            if (modal) modal.dataset.mode = mode;
+            if (dateRow) dateRow.hidden = mode === 'category';
+            if (nameLabel) {
+                nameLabel.textContent = mode === 'category' ? 'Nom de la catégorie' : 'Événement';
+            }
+            if (colorRow) colorRow.hidden = false;
+        }
+
+        function openEventModal(isoDate) {
+            const modal = document.getElementById('calendarEventModal');
+            const title = document.getElementById('calendarEventTitle');
+            const dateLabel = document.getElementById('calendarEventDateLabel');
+            const nameInput = document.getElementById('calendarEventName');
+            const colorInput = document.getElementById('calendarEventColor');
+            const passwordInput = document.getElementById('calendarEventPassword');
+            const deleteBtn = document.getElementById('calendarEventDelete');
+            const existing = events2025[isoDate] || '';
+            const isCustom = customDates.has(isoDate);
+
+            if (!modal || !nameInput) return;
+
+            setModalMode('event');
+            modal.dataset.date = isoDate;
+            if (title) {
+                title.textContent = existing ? 'Modifier l’événement' : 'Ajouter un événement';
+            }
+            if (dateLabel) dateLabel.value = formatDateFr(isoDate);
+            nameInput.value = existing;
+            if (colorInput) {
+                colorInput.value = categoryColor(existing) || '#0f766e';
+            }
+            if (passwordInput && !passwordInput.value) passwordInput.value = '';
+            if (deleteBtn) {
+                deleteBtn.hidden = !isCustom;
+            }
+            setEventError('');
+            modal.style.display = 'flex';
+            setTimeout(function () { nameInput.focus(); }, 50);
+        }
+
+        function openCategoryModal() {
+            const modal = document.getElementById('calendarEventModal');
+            const title = document.getElementById('calendarEventTitle');
+            const nameInput = document.getElementById('calendarEventName');
+            const colorInput = document.getElementById('calendarEventColor');
+            const passwordInput = document.getElementById('calendarEventPassword');
+            const deleteBtn = document.getElementById('calendarEventDelete');
+            if (!modal || !nameInput) return;
+
+            setModalMode('category');
+            modal.dataset.date = '';
+            if (title) title.textContent = 'Ajouter une catégorie';
+            nameInput.value = '';
+            if (colorInput) colorInput.value = '#0f766e';
+            if (passwordInput && !passwordInput.value) passwordInput.value = '';
+            if (deleteBtn) deleteBtn.hidden = true;
+            setEventError('');
+            modal.style.display = 'flex';
+            setTimeout(function () { nameInput.focus(); }, 50);
+        }
+
+        async function submitCalendarEvent(action) {
+            const modal = document.getElementById('calendarEventModal');
+            const nameInput = document.getElementById('calendarEventName');
+            const colorInput = document.getElementById('calendarEventColor');
+            const passwordInput = document.getElementById('calendarEventPassword');
+            const saveBtn = document.getElementById('calendarEventSave');
+            const deleteBtn = document.getElementById('calendarEventDelete');
+            const mode = modal ? (modal.dataset.mode || 'event') : 'event';
+            const date = modal ? modal.dataset.date : '';
+            const password = passwordInput ? passwordInput.value : '';
+            const name = nameInput ? nameInput.value.trim() : '';
+            const color = colorInput ? colorInput.value : '';
+
+            if (!password) {
+                setEventError('Saisis le mot de passe organisateur.');
+                passwordInput?.focus();
+                return;
+            }
+            if (action === 'save' && !name) {
+                setEventError(mode === 'category' ? 'Indique le nom de la catégorie.' : 'Indique le nom de l’événement.');
+                nameInput?.focus();
+                return;
+            }
+            if (mode === 'event' && action !== 'delete' && !date) return;
+
+            setEventError('');
+            if (saveBtn) saveBtn.disabled = true;
+            if (deleteBtn) deleteBtn.disabled = true;
+            try {
+                let url;
+                let payload;
+                if (mode === 'category' || (action === 'save' && !date)) {
+                    url = '/api/calendrier/' + encodeURIComponent(club) + '/categories';
+                    payload = { password: password, name: name, color: color };
+                } else if (action === 'delete') {
+                    url = '/api/calendrier/' + encodeURIComponent(club) + '/events/delete';
+                    payload = { password: password, date: date };
+                } else {
+                    url = '/api/calendrier/' + encodeURIComponent(club) + '/events';
+                    payload = { password: password, date: date, name: name, color: color };
+                }
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json().catch(function () { return {}; });
+                if (!res.ok || data.success === false) {
+                    setEventError(data.error || 'Impossible d’enregistrer.');
+                    if (res.status === 401) passwordInput?.select();
+                    return;
+                }
+                sessionStorage.setItem(YEAR_STORAGE_KEY, String(selectedYear));
+                window.location.reload();
+            } catch (err) {
+                setEventError('Impossible de contacter le serveur.');
+            } finally {
+                if (saveBtn) saveBtn.disabled = false;
+                if (deleteBtn) deleteBtn.disabled = false;
+            }
+        }
 
         function updateYearControls() {
             const yearLabel = document.getElementById('calendarYearLabel');
@@ -670,10 +936,18 @@
 
                     dayDiv.appendChild(letterSpan);
                     dayDiv.appendChild(contentSpan);
-                    dayDiv.setAttribute('title', dayNames[weekday]);
+                    dayDiv.setAttribute('title', dayNames[weekday] + ' — cliquer pour ajouter');
 
                     const eventKey = `${year}-${(monthIndex + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                     const event = events2025[eventKey];
+                    dayDiv.dataset.date = eventKey;
+                    dayDiv.addEventListener('click', function () {
+                        openEventModal(eventKey);
+                    });
+
+                    if (customDates.has(eventKey)) {
+                        dayDiv.classList.add('is-custom');
+                    }
 
                     if (event) {
                         dayDiv.classList.add('has-event');
@@ -722,6 +996,12 @@
 
                         dayDiv.classList.add(`event-${eventClass}`);
 
+                        const customColor = categoryColor(event);
+                        if (customColor) {
+                            dayDiv.style.backgroundColor = customColor;
+                            dayDiv.style.color = '#fff';
+                        }
+
                         if (eventTypes.length > 1) {
                             contentSpan.textContent = day.toString();
                             contentSpan.style.fontWeight = 'bold';
@@ -760,12 +1040,44 @@
             document.getElementById('prevYearBtn')?.addEventListener('click', function() {
                 if (selectedYear > MIN_YEAR) {
                     initializeFullCalendar(selectedYear - 1);
+                    sessionStorage.setItem(YEAR_STORAGE_KEY, String(selectedYear));
                 }
             });
 
             document.getElementById('nextYearBtn')?.addEventListener('click', function() {
                 if (selectedYear < MAX_YEAR) {
                     initializeFullCalendar(selectedYear + 1);
+                    sessionStorage.setItem(YEAR_STORAGE_KEY, String(selectedYear));
+                }
+            });
+
+            document.getElementById('addCategoryBtn')?.addEventListener('click', function (e) {
+                e.preventDefault();
+                openCategoryModal();
+            });
+
+            const modal = document.getElementById('calendarEventModal');
+            const form = document.getElementById('calendarEventForm');
+            document.getElementById('calendarEventCancel')?.addEventListener('click', function (e) {
+                e.preventDefault();
+                closeEventModal();
+            });
+            document.getElementById('calendarEventDelete')?.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (window.confirm('Supprimer cet événement ajouté ? Le calendrier officiel du jour reviendra s’il existe.')) {
+                    submitCalendarEvent('delete');
+                }
+            });
+            form?.addEventListener('submit', function (e) {
+                e.preventDefault();
+                submitCalendarEvent('save');
+            });
+            modal?.addEventListener('click', function (e) {
+                if (e.target === modal) closeEventModal();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+                    closeEventModal();
                 }
             });
         });

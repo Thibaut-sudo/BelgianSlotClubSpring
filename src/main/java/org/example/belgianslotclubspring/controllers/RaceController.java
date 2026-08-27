@@ -1,8 +1,8 @@
 package org.example.belgianslotclubspring.controllers;
 
 import org.example.belgianslotclubspring.models.Club;
-import org.example.belgianslotclubspring.models.ClubCalendar;
 import org.example.belgianslotclubspring.models.RaceSummary;
+import org.example.belgianslotclubspring.services.ClubCalendarService;
 import org.example.belgianslotclubspring.services.RaceResultService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,14 +23,11 @@ import java.util.Map;
 public class RaceController {
 
     private final RaceResultService raceResultService;
+    private final ClubCalendarService clubCalendarService;
 
-    /**
-     * Constructeur injectant le service de gestion des résultats de courses.
-     *
-     * @param raceResultService Service permettant la récupération des résultats des courses.
-     */
-    public RaceController(RaceResultService raceResultService) {
+    public RaceController(RaceResultService raceResultService, ClubCalendarService clubCalendarService) {
         this.raceResultService = raceResultService;
+        this.clubCalendarService = clubCalendarService;
     }
 
     /**
@@ -58,7 +55,7 @@ public class RaceController {
         List<String> listeCategorie = raceResultService.getAllCategoriesClub(clubCode);
         List<String> listeAnnees = raceResultService.getAllYearsClub(clubCode);
 
-        java.util.Map<String, String> events2025 = ClubCalendar.eventsFor(clubEnum);
+        java.util.Map<String, String> events2025 = clubCalendarService.eventsFor(clubEnum);
 
         // Prochain événement du calendrier du club (jamais le fallback d'un autre club)
         LocalDate today = LocalDate.now();

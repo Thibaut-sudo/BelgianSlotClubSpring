@@ -60,8 +60,8 @@ MONTH_COLORS = [
 DARK_HEADER_MONTHS = {4, 6}  # mai, juillet (0-based)
 
 ROTATION = [
-    "GT24 / Proto 24",
     "Scaleauto",
+    "GT24 / Proto 24",
     "BPC",
     "Revoslot",
     "BRM",
@@ -147,8 +147,8 @@ def draw_title(c: canvas.Canvas, width: float, year: int, top: float) -> None:
 
 def draw_legend(c: canvas.Canvas, width: float, y: float) -> None:
     items = [
-        ("GT24 / Proto 24", EVENT_COLORS["GT24 / Proto 24"]),
         ("Scaleauto", EVENT_COLORS["Scaleauto"]),
+        ("GT24 / Proto 24", EVENT_COLORS["GT24 / Proto 24"]),
         ("BPC", EVENT_COLORS["BPC"]),
         ("Revoslot", EVENT_COLORS["Revoslot"]),
         ("BRM", EVENT_COLORS["BRM"]),

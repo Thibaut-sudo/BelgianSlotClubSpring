@@ -758,9 +758,10 @@ body.nav-open .nav-toggle span:nth-child(3) {
   overflow: hidden;
   background-color: var(--color-asphalt);
   background-image: var(--club-banner);
-  background-size: cover;
-  background-position: center;
+  background-size: auto 70%;
+  background-position: right 4% center;
   background-repeat: no-repeat;
+  image-rendering: auto;
 }
 
 .page-hero--club::before {
@@ -779,6 +780,27 @@ body.nav-open .nav-toggle span:nth-child(3) {
 .page-hero--club > * {
   position: relative;
   z-index: 1;
+}
+
+@media (max-width: 767px) {
+  .page-hero--club {
+    background-size: auto 40%;
+    background-position: right -6% bottom 18%;
+  }
+
+  .club-tile-media {
+    height: 8rem;
+  }
+
+  .club-tile img,
+  .club-tile .club-tile-image {
+    padding: 0.55rem 0.7rem;
+  }
+
+  .club-tile[data-club="slot4000"] .club-tile-image,
+  .club-tile-muted .club-tile-image {
+    padding: 0;
+  }
 }
 
 .page-hero-content {
@@ -914,12 +936,43 @@ body.nav-open .nav-toggle span:nth-child(3) {
   color: inherit;
 }
 
+.club-tile-media {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  height: 9.25rem;
+  overflow: hidden;
+  background: #fff;
+}
+
 .club-tile img,
 .club-tile .club-tile-image {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
+  height: 100%;
+  padding: 0.7rem 0.9rem;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+}
+
+.club-tile[data-club="slot4000"] .club-tile-media {
+  background: #2b2d29;
+}
+
+.club-tile[data-club="slot4000"] .club-tile-image {
+  padding: 0;
+}
+
+.club-tile-muted .club-tile-media {
   background: var(--color-paper-2);
+}
+
+.club-tile-muted .club-tile-image {
+  padding: 0;
+  object-fit: cover;
 }
 
 .club-tile-body {
@@ -2557,6 +2610,64 @@ input[readonly].time-box {
 
 .forum-reply-form {
   margin-top: var(--space-8);
+}
+
+.forum-attachments {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.forum-attachments__images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: var(--space-2);
+}
+
+.forum-attachments__images:not(:has(a)),
+.forum-attachments__files:not(:has(li)) {
+  display: none;
+}
+
+.forum-attachments__images a {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-paper-2);
+}
+
+.forum-attachments__images img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.forum-attachments__files {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.forum-attachments__files a {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.forum-attachments__files a:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 /* --------------------------------------------------------------------------

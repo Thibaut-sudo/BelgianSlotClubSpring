@@ -4,6 +4,7 @@ import org.example.belgianslotclubspring.entities.ForumQuestion;
 
 public record ForumQuestionCard(
         ForumQuestion question,
-        long replyCount
+        long replyCount,
+        long attachmentCount
 ) {
 }

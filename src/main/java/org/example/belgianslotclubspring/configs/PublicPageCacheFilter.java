@@ -55,7 +55,9 @@ public class PublicPageCacheFilter extends OncePerRequestFilter {
                 || path.startsWith("/upload")
                 || path.startsWith("/api/")
                 || path.startsWith("/actuator")
-                || path.startsWith("/h2-console");
+                || path.startsWith("/h2-console")
+                || path.startsWith("/calendrier")
+                || path.startsWith("/prochain-evenement");
     }
 
     private static boolean isPublicPage(String path) {
@@ -65,8 +67,6 @@ public class PublicPageCacheFilter extends OncePerRequestFilter {
                 || path.startsWith("/reglement")
                 || path.startsWith("/contact")
                 || path.startsWith("/statistiques")
-                || path.startsWith("/prochain-evenement")
-                || path.startsWith("/calendrier")
                 || path.startsWith("/docs/");
     }
 }

@@ -13,8 +13,8 @@ public final class ClubCalendar {
 
     /** Rotation des soirées club SRCS (mardi). */
     static final String[] SRCS_TUESDAY_ROTATION = {
-            "GT24 / Proto 24",
             "Scaleauto",
+            "GT24 / Proto 24",
             "BPC",
             "Revoslot",
             "BRM"
@@ -209,7 +209,7 @@ public final class ClubCalendar {
 
     /**
      * Tous les mardis de septembre à fin juin, hors congés de Noël.
-     * Ordre : GT24/Proto → Scaleauto → BPC → Revoslot → BRM.
+     * Ordre : Scaleauto → GT24/Proto → BPC → Revoslot → BRM.
      */
     private static void addSrcsTuesdayClubSeason(Map<String, String> srcs) {
         LocalDate start = LocalDate.of(2026, 9, 1);

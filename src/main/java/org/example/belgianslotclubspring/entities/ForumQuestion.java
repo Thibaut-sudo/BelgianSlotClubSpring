@@ -37,4 +37,13 @@ public class ForumQuestion {
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("createdAt ASC, id ASC")
     private List<ForumReply> replies = new ArrayList<>();
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC, id ASC")
+    private List<ForumAttachment> attachments = new ArrayList<>();
+
+    public void addAttachment(ForumAttachment attachment) {
+        attachment.setQuestion(this);
+        attachments.add(attachment);
+    }
 }

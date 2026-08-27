@@ -14,7 +14,7 @@
 
     <!-- Page hero -->
     <section class="page-hero page-hero--club"
-             th:style="${club == 'srcs'} ? '--club-banner: url(/images/SRCS.png)' : '--club-banner: url(/images/images.jfif)'">
+             th:style="${club == 'srcs'} ? '--club-banner: url(/images/srcs-logo.jpg?v=3)' : '--club-banner: url(/images/slot4000-logo.jpg?v=3)'">
         <div class="page-hero-content">
             <div class="page-hero-main">
                 <h1 class="page-hero-title"
@@ -39,7 +39,7 @@
                 <a th:href="@{/forum(club=${club})}" class="btn btn-secondary">Forum</a>
                 <a th:href="@{/marketplace(club=${club})}" class="btn btn-secondary">Marketplace</a>
                 <a th:href="@{/prochain-evenement(club=${club})}" class="btn btn-outline">Calendrier</a>
-                <a href="/reglement" class="btn btn-outline">Règlement</a>
+                <a href="/reglement" class="btn btn-outline" th:if="${club == 'slot4000'}">Règlement</a>
             </div>
         </div>
     </section>

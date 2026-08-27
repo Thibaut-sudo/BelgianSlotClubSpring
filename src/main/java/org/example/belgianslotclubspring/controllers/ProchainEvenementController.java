@@ -1,7 +1,7 @@
 package org.example.belgianslotclubspring.controllers;
 
 import org.example.belgianslotclubspring.models.Club;
-import org.example.belgianslotclubspring.models.ClubCalendar;
+import org.example.belgianslotclubspring.services.ClubCalendarService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +10,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Map;
 
 @Controller
 public class ProchainEvenementController {
+
+    private final ClubCalendarService clubCalendarService;
+
+    public ProchainEvenementController(ClubCalendarService clubCalendarService) {
+        this.clubCalendarService = clubCalendarService;
+    }
 
     @GetMapping("/prochain-evenement")
     public String prochainEvenement(
@@ -29,7 +36,7 @@ public class ProchainEvenementController {
         String clubCode = Club.requireCode(club);
         Club clubEnum = Club.fromCode(clubCode).orElseThrow();
 
-        Map<String, String> events2025 = ClubCalendar.eventsFor(clubEnum);
+        Map<String, String> events2025 = clubCalendarService.eventsFor(clubEnum);
 
         LocalDate today = LocalDate.now();
         String nextEventDate = null;
@@ -78,6 +85,8 @@ public class ProchainEvenementController {
         model.addAttribute("hasUpcomingEvent", hasUpcomingEvent);
         model.addAttribute("eventType", eventType);
         model.addAttribute("allEvents", events2025);
+        model.addAttribute("customDates", new ArrayList<>(clubCalendarService.customDates(clubEnum)));
+        model.addAttribute("customCategories", clubCalendarService.customCategories(clubEnum));
 
         return "pages/prochainEvenement";
     }

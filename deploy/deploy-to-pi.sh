@@ -55,7 +55,7 @@ if [ ! -f "target/$JAR_NAME" ]; then
 fi
 
 echo "==> Préparation dossier distant"
-"${SSH[@]}" "$HOST" "mkdir -p '$REMOTE_DIR'/{data,uploads/marketplace,logs,bin}"
+"${SSH[@]}" "$HOST" "mkdir -p '$REMOTE_DIR'/{data,uploads/marketplace,uploads/forum,logs,bin}"
 
 echo "==> Sauvegarde base Pi (avant deploy)"
 "${SSH[@]}" "$HOST" "bash -s" <<'BACKUP'
@@ -136,7 +136,7 @@ sudo_cmd cp /tmp/nginx-belgianslotclub.conf /etc/nginx/sites-available/belgiansl
 sudo_cmd ln -sfn /etc/nginx/sites-available/belgianslotclub /etc/nginx/sites-enabled/belgianslotclub
 sudo_cmd rm -f /etc/nginx/sites-enabled/default
 
-install -d -m 0755 "$REMOTE_DIR/bin" "$REMOTE_DIR/uploads/marketplace"
+install -d -m 0755 "$REMOTE_DIR/bin" "$REMOTE_DIR/uploads/marketplace" "$REMOTE_DIR/uploads/forum"
 install -m 0755 /tmp/h2-backup.sh "$REMOTE_DIR/bin/h2-backup.sh"
 sudo_cmd cp /tmp/h2-backup.service /etc/systemd/system/h2-backup.service
 sudo_cmd cp /tmp/h2-backup.timer /etc/systemd/system/h2-backup.timer

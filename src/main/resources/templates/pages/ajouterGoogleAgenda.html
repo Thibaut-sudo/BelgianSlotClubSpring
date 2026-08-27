@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Ajouter à Google Agenda — Belgian Slot Club')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: nav(active='calendrier', club=${club})}"></header>
+
+    <section class="page-hero">
+        <div class="page-hero-content container">
+            <h1 class="page-hero-title">Ajouter à Google Agenda</h1>
+            <p class="page-hero-sub">
+                Calendrier
+                <span th:text="${clubDisplayName}">club</span>
+                — soirées dès 18h.
+            </p>
+        </div>
+    </section>
+
+    <main class="section">
+        <div class="container" style="max-width: 40rem;">
+            <article class="info-panel">
+                <h2>0. Si tu as déjà cet agenda</h2>
+                <p>
+                    Google garde l’ancienne version en mémoire. Il faut
+                    <strong>supprimer l’ancien calendrier</strong> avant d’en ajouter un nouveau :
+                </p>
+                <ol class="section-lead" style="padding-left: 1.25rem;">
+                    <li>Google Agenda → engrenage → <strong>Paramètres</strong>.</li>
+                    <li>À gauche, clique le calendrier
+                        <strong th:text="${clubDisplayName}">club</strong>
+                        (ou « Belgian Slot Club »).</li>
+                    <li><strong>Se désabonner</strong> ou <strong>Supprimer</strong>.</li>
+                </ol>
+            </article>
+
+            <article class="info-panel" style="margin-top: var(--space-6);">
+                <h2>1. Essai en un clic</h2>
+                <p>Google refuse parfois le lien automatique. Si une erreur « Vérifiez l’URL » s’affiche, utilise l’étape 2.</p>
+                <p>
+                    <a class="btn btn-primary" th:href="${googleUrl}" target="_blank" rel="noopener">
+                        Ouvrir Google Agenda
+                    </a>
+                </p>
+            </article>
+
+            <article class="info-panel" style="margin-top: var(--space-6);">
+                <h2>2. Méthode qui marche à tous les coups</h2>
+                <ol class="section-lead" style="padding-left: 1.25rem;">
+                    <li>Copie l’adresse ci-dessous (nouvelle adresse, pas l’ancienne).</li>
+                    <li>Dans Google Agenda : engrenage → <strong>Paramètres</strong>.</li>
+                    <li><strong>Ajouter un agenda</strong> → <strong>À partir de l’URL</strong>.</li>
+                    <li>Colle l’adresse, puis <strong>Ajouter l’agenda</strong>.</li>
+                </ol>
+                <p>
+                    <input id="icsUrlField" type="text" readonly
+                           class="form-select"
+                           th:value="${icsUrl}"
+                           aria-label="Adresse du calendrier">
+                </p>
+                <p>
+                    <button type="button" class="btn btn-secondary" id="copyIcsBtn">Copier l’adresse</button>
+                    <a class="btn btn-outline" th:href="${icsUrl}">Télécharger le fichier .ics</a>
+                </p>
+                <p id="copyIcsStatus" class="section-lead" hidden>Adresse copiée.</p>
+            </article>
+
+            <article class="info-panel" style="margin-top: var(--space-6);">
+                <h2>3. Sur téléphone, les événements n’apparaissent pas</h2>
+                <p>
+                    C’est normal : Google affiche l’agenda tout de suite sur ordi,
+                    mais <strong>ne le synchronise pas sur mobile par défaut</strong>.
+                    Il faut l’activer une fois, avec le <strong>même compte Google</strong>
+                    que sur l’ordinateur.
+                </p>
+
+                <h3>Étape obligatoire (sur ordi ou dans le navigateur du téléphone)</h3>
+                <ol class="section-lead" style="padding-left: 1.25rem;">
+                    <li>
+                        Ouvre
+                        <a href="https://calendar.google.com/calendar/syncselect"
+                           target="_blank" rel="noopener">la page de sync Google</a>.
+                    </li>
+                    <li>
+                        Coche le calendrier
+                        <strong th:text="${clubDisplayName}">club</strong>
+                        (ou « Belgian Slot Club »).
+                    </li>
+                    <li>Enregistre.</li>
+                </ol>
+
+                <h3>Ensuite dans l’app Google Agenda</h3>
+                <ol class="section-lead" style="padding-left: 1.25rem;">
+                    <li>Menu (trois traits en haut à gauche).</li>
+                    <li>Coche le calendrier du club — il est souvent décoché.</li>
+                    <li>S’il n’est pas dans la liste : Paramètres → ton compte → <strong>Afficher plus</strong> → active la sync.</li>
+                    <li>Reviens au menu, puis <strong>Actualiser</strong>.</li>
+                </ol>
+
+                <p class="section-lead">
+                    Sur iPhone, l’app Calendrier d’Apple est plus fiable :
+                    utilise le bouton <strong>Apple Calendar</strong> sur la page Prochain événement.
+                </p>
+            </article>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('copyIcsBtn')?.addEventListener('click', async function () {
+            const field = document.getElementById('icsUrlField');
+            const status = document.getElementById('copyIcsStatus');
+            try {
+                await navigator.clipboard.writeText(field.value);
+            } catch (e) {
+                field.select();
+                document.execCommand('copy');
+            }
+            if (status) {
+                status.hidden = false;
+            }
+        });
+    </script>
+</body>
+</html>

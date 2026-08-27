@@ -33,7 +33,9 @@ public class WriteRateLimitFilter extends OncePerRequestFilter {
             return true;
         }
         String path = request.getRequestURI();
-        return !(path.startsWith("/forum") || path.startsWith("/marketplace"));
+        return !(path.startsWith("/forum")
+                || path.startsWith("/marketplace")
+                || path.startsWith("/api/calendrier"));
     }
 
     @Override
@@ -45,6 +47,11 @@ public class WriteRateLimitFilter extends OncePerRequestFilter {
             response.setStatus(429);
             response.setHeader("Retry-After", "60");
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            if (request.getRequestURI().startsWith("/api/")) {
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.getWriter().write("{\"success\":false,\"error\":\"Trop de tentatives. Réessayez dans une minute.\"}");
+                return;
+            }
             response.setContentType(MediaType.TEXT_HTML_VALUE);
             response.getWriter().write("""
                     <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Trop de messages</title></head>

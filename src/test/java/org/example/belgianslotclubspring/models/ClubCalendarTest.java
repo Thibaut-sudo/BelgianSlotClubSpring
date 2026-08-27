@@ -75,4 +75,11 @@ class ClubCalendarTest {
         assertEquals("Soirée Fun", events.get("2026-12-18"));
         assertEquals(DayOfWeek.FRIDAY, LocalDate.parse("2026-09-04").getDayOfWeek());
     }
+
+    @Test
+    void scoCalendarHasBasseMeuseRally() {
+        Map<String, String> events = ClubCalendar.eventsFor(Club.SCO);
+        assertEquals("Rallye de la Basse Meuse", events.get("2026-10-25"));
+        assertEquals(1, events.size());
+    }
 }

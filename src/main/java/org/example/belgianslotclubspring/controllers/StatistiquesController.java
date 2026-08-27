@@ -38,6 +38,9 @@ public class StatistiquesController {
             return "redirect:/#clubs";
         }
         String clubCode = Club.requireCode(club);
+        if (Club.fromCode(clubCode).map(Club::isRallyOnly).orElse(false)) {
+            return "redirect:/rallye?club=" + clubCode;
+        }
         if (year != null) {
             return "redirect:/statistiques/" + clubCode + "?year=" + year;
         }
@@ -52,6 +55,9 @@ public class StatistiquesController {
     ) {
         String clubCode = Club.requireCode(club);
         Club clubEnum = Club.fromCode(clubCode).orElseThrow();
+        if (clubEnum.isRallyOnly()) {
+            return "redirect:/rallye?club=" + clubCode;
+        }
 
         List<Integer> years = raceResultService.getAvailableYears(clubCode);
         ClubRaceStats stats = clubRaceStatsService.build(clubCode, year);

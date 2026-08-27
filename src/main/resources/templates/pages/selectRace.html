@@ -13,8 +13,7 @@
     </form>
 
     <!-- Page hero -->
-    <section class="page-hero page-hero--club"
-             th:style="${club == 'srcs'} ? '--club-banner: url(/images/srcs-logo.jpg?v=3)' : '--club-banner: url(/images/slot4000-logo.jpg?v=3)'">
+    <section class="page-hero page-hero--club" th:data-club="${club}">
         <div class="page-hero-content">
             <div class="page-hero-main">
                 <h1 class="page-hero-title"

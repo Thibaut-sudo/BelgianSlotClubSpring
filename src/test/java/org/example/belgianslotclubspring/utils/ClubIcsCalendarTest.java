@@ -48,4 +48,15 @@ class ClubIcsCalendarTest {
         assertTrue(ics.contains("UID:2026-09-05-srcs-v2@belgianslotclub.com"));
         assertTrue(ics.contains("SUMMARY:SRCS — BEL-LMS Chimay"));
     }
+
+    @Test
+    void scoFeedUsesHobby2000AndDaytimeHours() {
+        String ics = ClubIcsCalendar.build(Club.SCO);
+        assertTrue(ics.contains("X-WR-CALNAME:Championnat de Belgique des Rallyes Slot"));
+        assertTrue(ics.contains("SUMMARY:Championnat de Belgique des Rallyes Slot — Rallye de la Basse Meuse"));
+        assertTrue(ics.contains("LOCATION:Quai de la Boverie 78-87\\, 4020 Liège"));
+        assertTrue(ics.contains("DTSTART;TZID=Europe/Brussels:20261025T090000"));
+        assertTrue(ics.contains("DTEND;TZID=Europe/Brussels:20261025T180000"));
+        assertEquals("/calendrier/sco/v2.ics", ClubIcsCalendar.publicFeedPath(Club.SCO));
+    }
 }

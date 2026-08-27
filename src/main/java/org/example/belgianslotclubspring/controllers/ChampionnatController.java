@@ -37,6 +37,9 @@ public class ChampionnatController {
 
         String clubCode = Club.requireCode(club);
         Club clubEnum = Club.fromCode(clubCode).orElseThrow();
+        if (clubEnum.isRallyOnly()) {
+            return "redirect:/rallye?club=" + clubCode;
+        }
 
         model.addAttribute("club", clubCode);
         model.addAttribute("clubDisplayName", clubEnum.getDisplayName());

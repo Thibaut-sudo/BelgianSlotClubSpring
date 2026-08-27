@@ -757,11 +757,22 @@ body.nav-open .nav-toggle span:nth-child(3) {
   position: relative;
   overflow: hidden;
   background-color: var(--color-asphalt);
+  --club-banner: url(/images/slot4000-logo.jpg?v=3);
   background-image: var(--club-banner);
   background-size: auto 70%;
   background-position: right 4% center;
   background-repeat: no-repeat;
   image-rendering: auto;
+}
+
+.page-hero--club[data-club="srcs"] {
+  --club-banner: url(/images/srcs-logo.jpg?v=3);
+}
+
+.page-hero--club[data-club="sco"] {
+  --club-banner: url(/images/sco-banner-art.jpg?v=5);
+  background-size: auto 78%;
+  background-position: right 3% center;
 }
 
 .page-hero--club::before {
@@ -777,6 +788,23 @@ body.nav-open .nav-toggle span:nth-child(3) {
   pointer-events: none;
 }
 
+.page-hero--club[data-club="sco"]::before {
+  background: linear-gradient(
+    90deg,
+    rgb(28 28 30 / 0.94) 0%,
+    rgb(28 28 30 / 0.82) 34%,
+    rgb(28 28 30 / 0.2) 52%,
+    transparent 64%
+  );
+}
+
+.page-hero--club[data-club="sco"] .page-hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-right: clamp(13rem, 42vw, 26rem);
+}
+
 .page-hero--club > * {
   position: relative;
   z-index: 1;
@@ -788,13 +816,32 @@ body.nav-open .nav-toggle span:nth-child(3) {
     background-position: right -6% bottom 18%;
   }
 
+  .page-hero--club[data-club="sco"] {
+    background-size: auto 38%;
+    background-position: right 2% bottom 8%;
+  }
+
+  .page-hero--club[data-club="sco"] .page-hero-content {
+    padding-right: var(--space-4);
+  }
+
   .club-tile-media {
     height: 8rem;
+  }
+
+  .club-tile[data-club="sco"] .club-tile-media {
+    height: auto;
+    aspect-ratio: 3 / 2;
   }
 
   .club-tile img,
   .club-tile .club-tile-image {
     padding: 0.55rem 0.7rem;
+  }
+
+  .club-tile[data-club="slot4000"] .club-tile-image,
+  .club-tile[data-club="sco"] .club-tile-image {
+    padding: 0;
   }
 
   .club-tile[data-club="slot4000"] .club-tile-image,
@@ -875,6 +922,41 @@ body.nav-open .nav-toggle span:nth-child(3) {
   background: var(--color-accent-hover);
   border-color: var(--color-accent-hover);
   color: var(--color-white);
+}
+
+.page-logo-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.85rem;
+  list-style: none;
+  margin: 0 0 var(--space-8);
+  padding: 0 0 var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.page-logo-strip li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.6rem;
+  flex: 1 1 4.8rem;
+  min-width: 4rem;
+}
+
+.page-logo-strip img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.page-logo-strip--dark {
+  background: #2b2d29;
+  border-radius: 4px;
+  padding: 0.15rem 0.35rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -966,6 +1048,18 @@ body.nav-open .nav-toggle span:nth-child(3) {
   padding: 0;
 }
 
+.club-tile[data-club="sco"] .club-tile-media {
+  height: auto;
+  aspect-ratio: 3 / 2;
+  background: #111;
+}
+
+.club-tile[data-club="sco"] .club-tile-image {
+  padding: 0;
+  object-fit: cover;
+  object-position: center center;
+}
+
 .club-tile-muted .club-tile-media {
   background: var(--color-paper-2);
 }
@@ -984,6 +1078,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
   margin-bottom: var(--space-2);
   font-size: 1.125rem;
   color: var(--color-ink);
+  line-height: 1.25;
 }
 
 .club-tile p {
@@ -995,7 +1090,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
 
 @media (min-width: 768px) {
   .club-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -1891,6 +1986,12 @@ a.feature-item:hover h3 {
 
   .contact-clubs {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .contact-clubs {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -2883,5 +2984,69 @@ input[readonly].time-box {
 
   .marketplace-card__photo img {
     height: 11rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Rallye partners
+   -------------------------------------------------------------------------- */
+.partners-section {
+  background: var(--color-paper-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.partner-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.partner-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 8rem;
+  padding: var(--space-4);
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+}
+
+a.partner-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow);
+}
+
+.partner-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.partner-card--dark {
+  background: #2b2d29;
+}
+
+.partner-span {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) {
+  .partner-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .partner-span {
+    grid-column: span 2;
+  }
+
+  .partner-card {
+    height: 8.5rem;
   }
 }

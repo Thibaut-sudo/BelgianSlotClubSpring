@@ -42,6 +42,7 @@ public class RallyeController {
 
         model.addAttribute("club", clubCode);
         model.addAttribute("clubDisplayName", clubEnum.getDisplayName());
+        model.addAttribute("rallyOnly", clubEnum.isRallyOnly());
         model.addAttribute("rallyes", rallyeService.listByClub(clubCode));
         return "pages/rallyeList";
     }

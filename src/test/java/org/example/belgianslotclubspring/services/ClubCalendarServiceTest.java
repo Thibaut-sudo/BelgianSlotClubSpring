@@ -49,6 +49,8 @@ class ClubCalendarServiceTest {
         assertTrue(ClubCalendarService.isOfficialName(Club.SRCS, "Scaleauto"));
         assertTrue(ClubCalendarService.isOfficialName(Club.SRCS, "GT24 / Proto 24"));
         assertFalse(ClubCalendarService.isOfficialName(Club.SRCS, "Ninco"));
+        assertTrue(ClubCalendarService.isOfficialName(Club.SCO, "Rallye de la Basse Meuse"));
+        assertFalse(ClubCalendarService.isOfficialName(Club.SCO, "Scaleauto"));
     }
 
     @Test

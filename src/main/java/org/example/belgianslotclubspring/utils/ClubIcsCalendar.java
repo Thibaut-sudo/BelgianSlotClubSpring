@@ -75,24 +75,39 @@ public final class ClubIcsCalendar {
     }
 
     private static String calendarDescription(Club club) {
+        if (club.isRallyOnly()) {
+            return "Championnat de Belgique des Rallyes Slot. " + eveningHint(club)
+                    + " https://belgianslotclub.com/rallye?club=" + club.getCode();
+        }
         return "Courses et soirées " + club.getDisplayName() + ". " + eveningHint(club)
                 + " https://belgianslotclub.com/prochain-evenement?club=" + club.getCode();
     }
 
     static String location(Club club) {
-        if (club.isSlot4000()) {
-            return "Quai de la Boverie 78-87, 4020 Liège";
+        if (club.isSrcs()) {
+            return "Rue Champs d'Oiseaux 240, 4101 Jemeppe-sur-Meuse";
         }
-        return "Rue Champs d'Oiseaux 240, 4101 Jemeppe-sur-Meuse";
+        return "Quai de la Boverie 78-87, 4020 Liège";
     }
 
     static String eveningHint(Club club) {
+        if (club.isRallyOnly()) {
+            return "Épreuves rallye slot.";
+        }
         return club.isSlot4000() ? "Vendredi dès 18h." : "Mardi dès 18h.";
     }
 
+    private static LocalTime startTime(Club club) {
+        return club.isRallyOnly() ? LocalTime.of(9, 0) : START;
+    }
+
+    private static LocalTime endTime(Club club) {
+        return club.isRallyOnly() ? LocalTime.of(18, 0) : END;
+    }
+
     private static void appendEvent(StringBuilder ics, Club club, LocalDate date, String name) {
-        ZonedDateTime start = date.atTime(START).atZone(ZONE);
-        ZonedDateTime end = date.atTime(END).atZone(ZONE);
+        ZonedDateTime start = date.atTime(startTime(club)).atZone(ZONE);
+        ZonedDateTime end = date.atTime(endTime(club)).atZone(ZONE);
         String uid = date + "-" + club.getCode() + "-v" + FEED_REVISION + "@belgianslotclub.com";
         String summary = club.getDisplayName() + " — " + name;
         String description = name + ". " + eveningHint(club)

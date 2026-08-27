@@ -4,8 +4,7 @@
 <body>
     <header th:replace="~{fragments/layout :: nav(active='championnat', club=${club})}"></header>
 
-    <section class="page-hero page-hero--club"
-             th:style="${club == 'srcs'} ? '--club-banner: url(/images/srcs-logo.jpg?v=3)' : '--club-banner: url(/images/slot4000-logo.jpg?v=3)'">
+    <section class="page-hero page-hero--club" th:data-club="${club}">
         <div class="page-hero-content container">
             <h1 class="page-hero-title">Classement Championnat</h1>
             <p class="page-hero-sub">Suivez le classement général et la catégorie bis pour la saison en cours.</p>

@@ -41,6 +41,9 @@ public class RaceController {
     public String selectRace(@PathVariable String club, Model model) {
         String clubCode = Club.requireCode(club);
         Club clubEnum = Club.fromCode(clubCode).orElseThrow();
+        if (clubEnum.isRallyOnly()) {
+            return "redirect:/rallye?club=" + clubCode;
+        }
 
         List<RaceSummary> raceSummaries = raceResultService.getRaceSummariesByClub(clubCode);
         // Dérivé des résumés (évite un 2e passage DB + normalize)

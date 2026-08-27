@@ -10,7 +10,9 @@ import java.util.Optional;
  */
 public enum Club {
     SLOT4000("slot4000", "Slot 4000"),
-    SRCS("srcs", "SRCS");
+    SRCS("srcs", "SRCS"),
+    /** Championnat de Belgique des Rallyes Slot — pas un club piste. */
+    SCO("sco", "Championnat de Belgique des Rallyes Slot");
 
     private final String code;
     private final String displayName;
@@ -54,5 +56,9 @@ public enum Club {
 
     public boolean isSrcs() {
         return this == SRCS;
+    }
+
+    public boolean isRallyOnly() {
+        return this == SCO;
     }
 }

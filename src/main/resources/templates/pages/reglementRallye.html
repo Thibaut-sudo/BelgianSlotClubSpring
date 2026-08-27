@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Règlement 2026 — Championnat de Belgique des Rallyes Slot')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(active='reglement', club=${club})}"></header>
+
+<section class="page-hero page-hero--club" th:data-club="${club}">
+    <div class="page-hero-content container">
+        <div class="reglement-hero-layout">
+            <div>
+                <h1 class="page-hero-title">Règlement 2026 — Rallyes Slot</h1>
+                <p class="page-hero-sub">Championnat de Belgique des Rallyes Slot — version 2.0 du 21 février 2026</p>
+                <div class="page-hero-meta">
+                    <span>Championnat de Belgique des Rallyes Slot</span>
+                    <span>WRC EX · WRC 1 · WRC 2 · WRC 3</span>
+                    <span>Hobby 2000 Liège</span>
+                </div>
+            </div>
+            <div class="cluster reglement-hero-actions">
+                <button type="button" class="btn btn-secondary" onclick="window.print()">Imprimer</button>
+                <a class="btn btn-primary" th:href="@{/rallye(club=${club})}">Voir les rallyes</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="toc-section">
+    <div class="container">
+        <div class="toc-card">
+            <h2>Table des matières</h2>
+            <div class="toc-grid">
+                <div class="toc-category">
+                    <h3>Sportif</h3>
+                    <ul class="toc-list">
+                        <li><a href="#preface">1. Préface</a></li>
+                        <li><a href="#categories">2. Catégories</a></li>
+                        <li><a href="#tableau">3. Tableau récapitulatif</a></li>
+                        <li><a href="#points">4. Répartition des points</a></li>
+                        <li><a href="#exemples">5. Exemples de classement</a></li>
+                        <li><a href="#sportif">6. Inscriptions et pénalités</a></li>
+                        <li><a href="#parc-ferme">7. Parc fermé et CT</a></li>
+                    </ul>
+                </div>
+                <div class="toc-category">
+                    <h3>Technique</h3>
+                    <ul class="toc-list">
+                        <li><a href="#technique-general">1. Général</a></li>
+                        <li><a href="#wrc-ex">2. WRC EX</a></li>
+                        <li><a href="#wrc-1">3. WRC 1</a></li>
+                        <li><a href="#wrc-2">4. WRC 2</a></li>
+                        <li><a href="#wrc-3">5. WRC 3</a></li>
+                    </ul>
+                </div>
+                <div class="toc-category">
+                    <h3>Annexes</h3>
+                    <ul class="toc-list">
+                        <li><a href="#jantes">Jantes type A / B</a></li>
+                        <li><a href="#penalites">Tableau des pénalités</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="reglement-content">
+    <div class="container">
+
+        <div class="reglement-section" id="sportif-sec">
+            <h2 class="section-title">Règlement sportif</h2>
+
+            <article class="reglement-article" id="preface">
+                <h3>1. Préface</h3>
+                <p>Bienvenue au Championnat de Belgique des Rallyes Slot 2026. Le règlement a été mis à jour pour&nbsp;:</p>
+                <ul class="reglement-list">
+                    <li>augmenter la variété des voitures au départ&nbsp;;</li>
+                    <li>assurer une cohérence entre les catégories&nbsp;;</li>
+                    <li>garantir la disponibilité des pièces nécessaires au montage&nbsp;;</li>
+                    <li>garder des temps de contrôle technique acceptables pour une épreuve d’une journée.</li>
+                </ul>
+                <p>Avec 30 à 36 pilotes typiques, quatre vainqueurs de classe (au lieu de deux) resserrent le championnat et accueillent des voitures qui n’avaient pas leur place en 2025.</p>
+                <p class="reglement-note">L’esprit reste convivial et ludique. La préparation compte, mais le titre se joue aussi hors de la piste&nbsp;: jeux, hasard, passages dans l’eau… Libre à toi de tes choix, mais n’oublie pas de regarder ce qu’il se passe autour de toi.</p>
+            </article>
+
+            <article class="reglement-article" id="categories">
+                <h3>2. Catégories</h3>
+                <ul class="reglement-list">
+                    <li><strong>WRC EX</strong> — voitures les plus performantes (Scaleauto, MSC, Avant Slot). Poids carrosserie mini 18&nbsp;g, châssis maxi 70&nbsp;g, aimantation 16&nbsp;g.</li>
+                    <li><strong>WRC 1</strong> — voitures déjà en WRC 1 l’année précédente et autres plastiques (Ninco, SCX, Scalextric, Fly, NSR…). Aimantation 16&nbsp;g, poids carrosserie libre.</li>
+                    <li><strong>WRC 2</strong> — moteurs inline. Aimantation 20&nbsp;g pour compenser. Axes et jantes «&nbsp;racing&nbsp;» autorisés pour faciliter la préparation.</li>
+                    <li><strong>WRC 3</strong> — exclusivement Ninco inline sur châssis d’origine. Catégorie d’accueil, ouverte aussi aux confirmés (avec contraintes).</li>
+                </ul>
+                <p>Les quatre catégories sont pensées pour rester proches en performance, avec des pièces faciles à trouver plutôt que des introuvables d’époque.</p>
+                <p class="reglement-note"><strong>WRC 3</strong> ne peut pas remporter le championnat général, quel que soit le total de points. Règle claire, sans dérogation.</p>
+            </article>
+
+            <article class="reglement-article" id="tableau">
+                <h3>3. Tableau récapitulatif</h3>
+                <p class="section-lead">Version 2.0 — 21 février 2026. V = autorisé, X = interdit.</p>
+                <div class="reglement-matrix-wrap">
+                    <table class="reglement-matrix">
+                        <thead>
+                            <tr>
+                                <th>Règle</th>
+                                <th>WRC EX</th>
+                                <th>WRC 1</th>
+                                <th>WRC 2</th>
+                                <th>WRC 3</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>Marques</th>
+                                <td>Scaleauto, MSC, Avant Slot</td>
+                                <td>Ninco, SCX, Scalex, Fly, NSR, autres en plastic</td>
+                                <td>Ninco, SCX, Scalex, Fly, NSR, autres en plastic</td>
+                                <td>Ninco uniquement</td>
+                            </tr>
+                            <tr>
+                                <th>Châssis 3D</th>
+                                <td class="is-no">X</td>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V (inline, sans berceau)</td>
+                                <td class="is-no">X</td>
+                            </tr>
+                            <tr>
+                                <th>Poids carrosserie mini</th>
+                                <td class="is-hl">18&nbsp;g</td>
+                                <td class="is-hl">Libre</td>
+                                <td class="is-hl">25&nbsp;g</td>
+                                <td class="is-hl">28&nbsp;g</td>
+                            </tr>
+                            <tr>
+                                <th>Poids châssis maxi</th>
+                                <td class="is-hl">70&nbsp;g</td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <th>Aimantation</th>
+                                <td>16&nbsp;g</td>
+                                <td>16&nbsp;g</td>
+                                <td>20&nbsp;g</td>
+                                <td>20&nbsp;g</td>
+                            </tr>
+                            <tr>
+                                <th>Moteur angle</th>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V</td>
+                                <td class="is-no">X</td>
+                                <td class="is-no">X</td>
+                            </tr>
+                            <tr>
+                                <th>Moteur inline</th>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V</td>
+                            </tr>
+                            <tr>
+                                <th>Suspensions</th>
+                                <td class="is-yes is-hl">V</td>
+                                <td class="is-yes is-hl">V</td>
+                                <td class="is-no is-hl">X</td>
+                                <td class="is-yes is-hl">V</td>
+                            </tr>
+                            <tr>
+                                <th>Axes complets équilibrés</th>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V</td>
+                            </tr>
+                            <tr>
+                                <th>Intérieur lexan</th>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V</td>
+                                <td class="is-no">X</td>
+                            </tr>
+                            <tr>
+                                <th>Vitres lexan</th>
+                                <td class="is-yes">V</td>
+                                <td class="is-yes">V</td>
+                                <td class="is-no">X</td>
+                                <td class="is-no">X</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="reglement-article" id="points">
+                <h3>4. Répartition des points</h3>
+                <ul class="reglement-list">
+                    <li>Les points sont distribués <strong>par catégorie</strong> selon le barème ci-dessous.</li>
+                    <li><strong>+1 point</strong> au vainqueur du classement général (scratch) de chaque rallye (une victoire de catégorie scratch vaut donc 25 points).</li>
+                    <li>Sur 6 rallyes organisés, seuls les <strong>5 meilleurs résultats</strong> sont retenus.</li>
+                    <li>Bonus de présence&nbsp;: <strong>2 points</strong> par participation, <strong>4 points</strong> pour la 6<sup>e</sup> participation. Ces bonus s’ajoutent après le «&nbsp;total −1&nbsp;» et <strong>ne sont pas soumis au jet</strong>.</li>
+                </ul>
+                <div class="points-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Place</th>
+                                <th>Points</th>
+                                <th>Place</th>
+                                <th>Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1<sup>er</sup></td><td>24</td><td>12<sup>e</sup></td><td>12</td></tr>
+                            <tr><td>2<sup>e</sup></td><td>22</td><td>13<sup>e</sup></td><td>11</td></tr>
+                            <tr><td>3<sup>e</sup></td><td>20</td><td>14<sup>e</sup></td><td>10</td></tr>
+                            <tr><td>4<sup>e</sup></td><td>19</td><td>15<sup>e</sup></td><td>9</td></tr>
+                            <tr><td>5<sup>e</sup></td><td>18</td><td>16<sup>e</sup></td><td>8</td></tr>
+                            <tr><td>6<sup>e</sup></td><td>17</td><td>17<sup>e</sup></td><td>7</td></tr>
+                            <tr><td>7<sup>e</sup></td><td>16</td><td>18<sup>e</sup></td><td>6</td></tr>
+                            <tr><td>8<sup>e</sup></td><td>15</td><td>19<sup>e</sup></td><td>5</td></tr>
+                            <tr><td>9<sup>e</sup></td><td>14</td><td>20<sup>e</sup></td><td>4</td></tr>
+                            <tr><td>10<sup>e</sup></td><td>13</td><td>21<sup>e</sup></td><td>3</td></tr>
+                            <tr><td>11<sup>e</sup></td><td>12</td><td>22<sup>e</sup></td><td>2</td></tr>
+                            <tr><td></td><td></td><td>23<sup>e</sup></td><td>1</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>L’objectif du barème est de valoriser la victoire <em>dans sa catégorie</em>, pas seulement d’aller vite au général.</p>
+            </article>
+
+            <article class="reglement-article" id="exemples">
+                <h3>5. Exemples de classement</h3>
+                <ul class="reglement-list">
+                    <li>Un pilote qui domine sa catégorie et la gagne lors de <strong>5 rallyes en 2026</strong> totalise <strong>120 points</strong> (5 × 24).</li>
+                    <li>Pour le battre au général, il faut par exemple <strong>4 victoires scratch à 25 points + une 2<sup>e</sup> place</strong> = 122 points.</li>
+                    <li><strong>3 victoires scratch et deux 2<sup>e</sup> places</strong> = 119 points&nbsp;: insuffisant pour le titre.</li>
+                    <li><strong>4 victoires scratch et une 3<sup>e</sup> place</strong> = 120 points&nbsp;: suffisant au départage «&nbsp;qualité des places&nbsp;».</li>
+                </ul>
+                <p>Un 18<sup>e</sup> au général peut donc marquer plus qu’un 9<sup>e</sup> s’il a gagné sa catégorie (ex. WRC 2) tandis que l’autre a fini plus loin dans une catégorie plus relevée (ex. WRC 1). Pour marquer plus, change de catégorie et bats tes rivaux en face-à-face.</p>
+            </article>
+
+            <article class="reglement-article" id="sportif">
+                <h3>6. Inscriptions, catégorie et responsabilité</h3>
+                <ul class="reglement-list">
+                    <li>Inscription au plus tard <strong>7 jours calendaires</strong> avant le rallye.</li>
+                    <li>La catégorie choisie doit être communiquée au plus tard le <strong>vendredi minuit</strong> précédant l’épreuve.</li>
+                    <li>L’organisateur n’est pas responsable des dégâts (moteurs, éclairages, roulements, etc.). Comme en rallye réel, chacun assume son matériel.</li>
+                    <li>Les poignées sont fournies sur chaque épreuve.</li>
+                </ul>
+                <p class="reglement-note">Pénalité de <strong>60 secondes</strong> si la catégorie est communiquée en retard, si tu changes de catégorie après le vendredi minuit, si tu arrives en retard au CT, ou si la voiture n’est pas conforme et doit être reclassée. Un inscrit forfait (hors force majeure acceptée par l’organisateur) part au rallye suivant avec 60&nbsp;s.</p>
+            </article>
+
+            <article class="reglement-article" id="parc-ferme">
+                <h3>7. Parc fermé, CT et problèmes techniques</h3>
+                <h4>Parc fermé et contrôle technique</h4>
+                <ul class="reglement-list">
+                    <li>Voiture présentée <strong>ouverte</strong> au CT. Prévois un tournevis pour la remonter sur place.</li>
+                    <li>Toute voiture qui passe le CT est en parc fermé. La remettre dans sa valise / son plateau sans autorisation&nbsp;: <strong>60&nbsp;s</strong>.</li>
+                    <li>Pneus secs au CT.</li>
+                    <li>Après le rallye, toute voiture peut être revérifiée. Retour au parc fermé jusqu’à autorisation de récupération.</li>
+                </ul>
+                <h4>Problèmes techniques</h4>
+                <ul class="reglement-list">
+                    <li>Réparation hors du temps d’une spéciale&nbsp;: <strong>30&nbsp;s</strong>.</li>
+                    <li>Changement de voiture&nbsp;: <strong>60&nbsp;s</strong>.</li>
+                    <li>Interdit de «&nbsp;taper&nbsp;» les pneus (adhésif) une fois le rallye commencé.</li>
+                </ul>
+            </article>
+        </div>
+
+        <div class="reglement-section" id="technique">
+            <h2 class="section-title">Règlement technique</h2>
+
+            <article class="reglement-article" id="technique-general">
+                <h3>1. Général</h3>
+                <ul class="reglement-list">
+                    <li>Non-conformité&nbsp;: la voiture doit être remise en règle. Sinon, selon la gravité&nbsp;: avertissement, pénalité en secondes, ou disqualification.</li>
+                    <li>En cas de doute, contacte l’organisateur.</li>
+                    <li>Le CT s’effectue voiture ouverte.</li>
+                    <li>Tout aimant de traction est interdit. Aucun dispositif électronique autre que des éclairages n’est autorisé.</li>
+                    <li>Nul n’est censé ignorer le règlement&nbsp;: les pénalités s’appliquent à tous.</li>
+                    <li>Pénalité en cas de renversement de grenouilles, cougnous ou autre&nbsp;: <strong>5 secondes</strong> (plus 10). L’organisateur peut refuser un décor (grenouilles, cougnous, ours, etc.) s’il n’est pas ludique ou mal placé.</li>
+                    <li>Tout système innovant doit être accepté par le contrôleur technique et peut être refusé s’il ne respecte pas l’esprit du règlement.</li>
+                    <li>L’organisateur se réserve le droit de refuser une voiture sans justification. En cas de doute, contacte-le avant.</li>
+                </ul>
+                <h4>Carrosseries — règles communes (toutes catégories rallye)</h4>
+                <ul class="reglement-list">
+                    <li>Toutes les voitures de rallye de toutes les époques sont autorisées.</li>
+                    <li>Interdit&nbsp;: rallye-raid, course de côte, Ferrari, Porsche (et véhicules du même genre), GT. Une voiture qui ne respecte pas l’esprit rallye est interdite. En cas de doute, envoie un message&nbsp;: l’organisateur peut refuser sans justificatif.</li>
+                    <li>Aucun élément mécanique visible vue du haut.</li>
+                    <li>Décoration libre. Aileron&nbsp;: emplacement et dimensions réalistes.</li>
+                    <li>Éclairages autorisés si tout le système fait partie intégrante de la carrosserie. Rien de fixé au châssis.</li>
+                </ul>
+            </article>
+
+            <article class="reglement-article" id="wrc-ex">
+                <h3>2. WRC EX</h3>
+                <p>Catégorie des Scaleauto, MSC et Avant Slot. Ces carrosseries / châssis ne peuvent pas courir ailleurs. Exemple&nbsp;: une Fly Evo 3 sur châssis Scaleauto d’origine ne court qu’ici.</p>
+                <h4>Carrosserie</h4>
+                <ul class="reglement-list">
+                    <li>Carrosseries plastiques uniquement. Marques&nbsp;: MSC, Scaleauto, Avant Slot.</li>
+                    <li>Intérieur lexan peint avec pilote et copilote 3D, ou intérieur d’origine avec figurines. Pas d’allègement par découpe.</li>
+                    <li>Vitres lexan autorisées. Tilting autorisé.</li>
+                    <li>Systèmes de fixation d’origine, sans modification des points d’attache. Reliés à la partie principale du châssis.</li>
+                    <li>Pas d’artifice pour alourdir la caisse. Les bagues laiton des puits de vis de la Subaru MSC doivent être retirées.</li>
+                </ul>
+                <p class="reglement-note">Poids mini carrosserie <strong>18&nbsp;g</strong> sans vis. Lest sous le capot, max. 2 pièces, sans mousse ni «&nbsp;suspension&nbsp;» du lest. Le lest ne dépasse pas 2&nbsp;mm du plan de référence (face intérieure du capot, hors renforts). Au CT, si le poids n’est pas bon, la voiture n’est pas rendue&nbsp;: le contrôleur fournit le plomb à coller sous ses yeux. Sinon pénalité de <strong>100&nbsp;s</strong>.</p>
+                <h4>Châssis</h4>
+                <ul class="reglement-list">
+                    <li>Platine plastique d’origine correspondant à la caisse. Pas de châssis 3D. Pas de modification des puits de vis.</li>
+                    <li>Berceau d’origine Scaleauto / MSC / Avant Slot, ou berceau Slot.it.</li>
+                    <li>Pas de ponçage, sauf léger aux points de frottement.</li>
+                    <li>Lest autorisé sur la face supérieure (plomb, tungstène, etc.).</li>
+                </ul>
+                <p class="reglement-note">Poids maxi du châssis complet <strong>70&nbsp;g</strong> avec vis, sans carrosserie.</p>
+                <h4>Moteur, transmission, suspensions</h4>
+                <ul class="reglement-list">
+                    <li>Moteur libre. Inline, sidewinder ou anglewinder. Aimantation max. 16&nbsp;g.</li>
+                    <li>Transmission libre, mais par engrenage pignon / couronne.</li>
+                    <li>Suspensions autorisées. 4×4 autorisé.</li>
+                </ul>
+                <h4>Axes, pneus, guide</h4>
+                <ul class="reglement-list">
+                    <li>Avant&nbsp;: roues indépendantes autorisées, axes et roulements libres, diamètre 2 à 2,5&nbsp;mm sur toute la longueur. L’axe ne dépasse pas de la caisse.</li>
+                    <li>Pneus libres en caoutchouc noir, recouvrant toute la jante, vernis ou colle autorisés.</li>
+                    <li>Jantes type A avec inserts 3D réalistes&nbsp;; type B réalistes acceptées. Pneus et jantes ne dépassent pas vue du haut.</li>
+                    <li>Arrière&nbsp;: diamètre 2 à 2,5&nbsp;mm, roulements autorisés, axes et jantes libres, mêmes règles d’inserts et de dépassement. Pneus arrière en caoutchouc noir.</li>
+                    <li>Guide du commerce ou imprimé 3D, plastique, forme modifiable par enlèvement de matière. Tresses pas plus longues que la lame. Tresses et câbles libres.</li>
+                </ul>
+            </article>
+
+            <article class="reglement-article" id="wrc-1">
+                <h3>3. WRC 1</h3>
+                <p>Carrosseries plastiques SCX, Scalextric, Fly, Ninco, NSR et autres. <strong>Scaleauto, MSC et Avant Slot exclus.</strong> Châssis Scaleauto / MSC / Avant Slot interdits.</p>
+                <h4>Carrosserie</h4>
+                <ul class="reglement-list">
+                    <li>Mêmes restrictions de style que le WRC EX (rallye uniquement, pas de GT / Porsche / Ferrari / raid).</li>
+                    <li>Intérieur lexan peint + figurines 3D, ou intérieur d’origine avec pilote et copilote. Pas d’allègement par découpe.</li>
+                    <li>Vitres lexan autorisées. Tilting autorisé. Lests libres sur la caisse. Éclairages intégrés à la caisse uniquement.</li>
+                    <li>Fixations reliées à la partie principale du châssis.</li>
+                </ul>
+                <p class="reglement-note">Pas de poids minimum de carrosserie. Il est possible que le poids mini des caisses WRC 1 soit révisé après 2 courses&nbsp;; tu seras prévenu le cas échéant.</p>
+                <h4>Châssis</h4>
+                <ul class="reglement-list">
+                    <li>Platine principale en plastique. Châssis 3D du commerce autorisés.</li>
+                    <li>Châssis 3D maison&nbsp;: le concurrent doit pouvoir fournir le même châssis à tout acheteur, délai assez court pour la course suivante, prix cohérent.</li>
+                    <li>Lest autorisé sur la face supérieure (plomb, tungstène, etc.).</li>
+                    <li>Autres pièces (support moteur)&nbsp;: plastique ou hybride plastique / fibre de carbone.</li>
+                </ul>
+                <h4>Moteur, transmission, suspensions</h4>
+                <ul class="reglement-list">
+                    <li>Moteur libre. Inline, sidewinder ou anglewinder. Aimantation max. 16&nbsp;g.</li>
+                    <li>Transmission libre, pignon / couronne. Suspensions autorisées.</li>
+                </ul>
+                <h4>Axes, pneus, guide</h4>
+                <ul class="reglement-list">
+                    <li>Avant&nbsp;: roues indépendantes autorisées, axes et roulements libres, 2 à 2,5&nbsp;mm, l’axe ne dépasse pas.</li>
+                    <li>Pneus caoutchouc noir, jante entièrement couverte, vernis ou colle OK. Jantes type A avec inserts 3D&nbsp;; type B réalistes OK.</li>
+                    <li>Arrière&nbsp;: 2 à 2,5&nbsp;mm, roulements autorisés, jantes libres avec les mêmes règles d’inserts. Pneus arrière caoutchouc noir, pas de dépassement vue du haut.</li>
+                    <li>Guide commerce ou 3D, plastique, tresses ≤ lame, câbles libres. 4×4 autorisé.</li>
+                </ul>
+            </article>
+
+            <article class="reglement-article" id="wrc-2">
+                <h3>4. WRC 2</h3>
+                <p>Mêmes marques plastiques que le WRC 1. <strong>Scaleauto, MSC et Avant Slot exclus.</strong> Moteur <strong>inline uniquement</strong>.</p>
+                <h4>Carrosserie</h4>
+                <ul class="reglement-list">
+                    <li>Mêmes restrictions de style rallye. Intérieur lexan peint + figurines 3D, ou intérieur d’origine complet. Pas d’allègement.</li>
+                    <li><strong>Vitres lexan interdites.</strong> Tilting autorisé. Lests autorisés sur la caisse. Éclairages intégrés à la caisse uniquement.</li>
+                </ul>
+                <p class="reglement-note">Poids mini carrosserie <strong>25&nbsp;g</strong> sans vis. Lest sous le capot, max. 2 pièces, sans mousse, ≤ 2&nbsp;mm du plan de référence. Non-conformité au CT&nbsp;: plomb collé devant le contrôleur, sinon <strong>100&nbsp;s</strong>.</p>
+                <h4>Châssis</h4>
+                <ul class="reglement-list">
+                    <li>Platine principale en plastique. Châssis 3D autorisés <strong>inline uniquement, sans berceau moteur</strong>. Châssis 3D du commerce OK.</li>
+                    <li>Châssis 3D maison&nbsp;: même obligation de vente / délai / prix cohérent que le WRC 1.</li>
+                    <li>Lest autorisé sur la face supérieure.</li>
+                </ul>
+                <h4>Moteur, transmission, suspensions</h4>
+                <ul class="reglement-list">
+                    <li>Moteur libre, <strong>inline uniquement</strong>. Aimantation max. 20&nbsp;g. Pas d’aimant démagnétisé.</li>
+                    <li>Transmission libre, pignon / couronne. Axes complets équilibrés autorisés.</li>
+                    <li><strong>Suspensions interdites.</strong></li>
+                </ul>
+                <h4>Axes, pneus, guide</h4>
+                <ul class="reglement-list">
+                    <li>Avant&nbsp;: roues indépendantes <strong>interdites</strong>. Axes acier plein Ø 2,38&nbsp;mm sur toute la longueur.</li>
+                    <li>Arrière&nbsp;: Ø 2 à 2,5&nbsp;mm, roulements autorisés, jantes libres, inserts type A / B, pneus caoutchouc noir, pas de dépassement vue du haut.</li>
+                    <li>Guide commerce ou 3D, plastique, tresses ≤ lame. 4×4 autorisé.</li>
+                </ul>
+            </article>
+
+            <article class="reglement-article" id="wrc-3">
+                <h3>5. WRC 3</h3>
+                <p>Uniquement voitures <strong>Ninco inline</strong> sur <strong>châssis d’origine</strong> correspondant à la caisse. Catégorie d’accueil&nbsp;; un confirmé peut y courir, mais ne peut pas viser le titre général.</p>
+                <h4>Carrosserie</h4>
+                <ul class="reglement-list">
+                    <li>Fixations reliées à la platine principale. Décoration libre. Aileron réaliste.</li>
+                    <li>Vitres lexan interdites. Intérieur lexan interdit. Tilting autorisé. Lests autorisés sur la caisse. Éclairages intégrés à la caisse uniquement.</li>
+                </ul>
+                <p class="reglement-note">Poids mini carrosserie <strong>28&nbsp;g</strong> sans vis. Lest sous le capot, max. 2 pièces, sans mousse, ≤ 2&nbsp;mm du plan de référence. Non-conformité au CT&nbsp;: plomb collé devant le contrôleur, sinon <strong>100&nbsp;s</strong>.</p>
+                <h4>Châssis</h4>
+                <ul class="reglement-list">
+                    <li>Châssis Ninco d’origine correspondant à la caisse. <strong>Pas de 3D.</strong> Pas de modification du système de fixation.</li>
+                    <li>Lest autorisé sur la face supérieure (plomb, tungstène, etc.).</li>
+                </ul>
+                <h4>Moteur, transmission, suspensions</h4>
+                <ul class="reglement-list">
+                    <li>Moteur libre, <strong>inline uniquement</strong>. Aimantation max. 20&nbsp;g.</li>
+                    <li>Transmission pignon / couronne. Axes complets équilibrés autorisés.</li>
+                    <li>Suspensions autorisées. 4×4 autorisé. Visserie titane interdite.</li>
+                </ul>
+                <h4>Axes, pneus, guide</h4>
+                <ul class="reglement-list">
+                    <li>Roulements interdits (avant et arrière). L’axe ne dépasse pas de la caisse.</li>
+                    <li>Arrière&nbsp;: acier plein Ø 2,38&nbsp;mm sur toute la longueur.</li>
+                    <li>Jantes plastique d’origine <strong>ou jantes aluminium plein</strong>. Type A avec inserts 3D réalistes&nbsp;; type B réalistes acceptées.</li>
+                    <li>Pneus caoutchouc noir, recouvrant toute la jante, vernis ou colle OK. Pas de dépassement vue du haut.</li>
+                    <li>Guide commerce ou 3D, plastique, forme modifiable par enlèvement, tresses ≤ lame, câbles libres.</li>
+                </ul>
+            </article>
+
+            <article class="reglement-article" id="jantes">
+                <h3>Jantes autorisées (figure 1)</h3>
+                <ul class="reglement-list">
+                    <li><strong>Type A</strong> — jantes cup / cuvette lisses. Doivent recevoir des inserts 3D réalistes.</li>
+                    <li><strong>Type B</strong> — jantes réalistes (ex. 5 branches). Acceptées telles quelles.</li>
+                    <li>Pneus et jantes ne peuvent pas dépasser de la carrosserie vue du haut.</li>
+                </ul>
+            </article>
+
+            <article class="reglement-article" id="penalites">
+                <h3>Tableau des pénalités</h3>
+                <div class="penalties-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fait</th>
+                                <th>Pénalité</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Catégorie tardive, changement après vendredi minuit, retard CT, voiture recatégorisée, forfait (rallye suivant)</td><td>60&nbsp;s</td></tr>
+                            <tr><td>Voiture remise en valise / plateau sans autorisation (parc fermé)</td><td>60&nbsp;s</td></tr>
+                            <tr><td>Changement de voiture</td><td>60&nbsp;s</td></tr>
+                            <tr><td>Réparation hors temps de spéciale</td><td>30&nbsp;s</td></tr>
+                            <tr><td>Poids carrosserie non conforme et lest impossible à coller au CT</td><td>100&nbsp;s</td></tr>
+                            <tr><td>Renversement de grenouilles, cougnous ou décor</td><td>5&nbsp;s</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section th:replace="~{fragments/layout :: rallyePartners}"></section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<style>
+    .reglement-hero-layout {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-6);
+    }
+    .reglement-hero-actions { flex-shrink: 0; }
+    .toc-section {
+        padding-block: var(--space-8);
+        background: var(--color-paper-2);
+        border-bottom: 1px solid var(--color-border);
+    }
+    .toc-card {
+        padding: var(--space-6);
+        background: var(--color-white);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+    }
+    .toc-card > h2 { margin-bottom: var(--space-6); font-size: clamp(1.25rem, 3vw, 1.5rem); }
+    .toc-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
+    .toc-category h3 {
+        margin-bottom: var(--space-3);
+        font-size: 0.9375rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-muted);
+    }
+    .toc-list { display: flex; flex-direction: column; gap: var(--space-2); }
+    .toc-list a {
+        display: block;
+        padding: var(--space-2) var(--space-3);
+        font-size: 0.9375rem;
+        color: var(--color-ink);
+        text-decoration: none;
+        border-radius: var(--radius-sm);
+    }
+    .toc-list a:hover, .toc-list a.active {
+        background: var(--color-paper-2);
+        color: var(--color-accent);
+    }
+    .reglement-content { padding-block: var(--space-10); }
+    .reglement-section { margin-bottom: var(--space-12); }
+    .reglement-section > .section-title {
+        margin-bottom: var(--space-8);
+        padding-bottom: var(--space-4);
+        border-bottom: 2px solid var(--color-accent);
+    }
+    .reglement-article {
+        margin-bottom: var(--space-8);
+        padding: var(--space-6);
+        background: var(--color-white);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+    }
+    .reglement-article h3 {
+        margin-bottom: var(--space-4);
+        font-size: 1.125rem;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+    .reglement-article h4 {
+        margin-top: var(--space-5);
+        margin-bottom: var(--space-3);
+        font-size: 1rem;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+    .reglement-article p { margin-bottom: var(--space-4); line-height: 1.65; }
+    .reglement-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        padding-left: var(--space-5);
+        list-style: disc;
+        margin-bottom: var(--space-4);
+    }
+    .reglement-list li { font-size: 0.9375rem; line-height: 1.65; }
+    .reglement-note {
+        padding: var(--space-4);
+        background: #fef9c3;
+        border-left: 4px solid #ca8a04;
+        border-radius: var(--radius);
+        font-size: 0.9375rem;
+        line-height: 1.6;
+    }
+    .reglement-matrix-wrap { overflow-x: auto; margin-top: var(--space-4); }
+    .reglement-matrix {
+        width: 100%;
+        min-width: 40rem;
+        border-collapse: collapse;
+        font-size: 0.8125rem;
+    }
+    .reglement-matrix th, .reglement-matrix td {
+        padding: 0.55rem 0.65rem;
+        border: 1px solid var(--color-border);
+        text-align: center;
+        vertical-align: middle;
+    }
+    .reglement-matrix thead th {
+        background: var(--color-asphalt);
+        color: var(--color-white);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .reglement-matrix tbody th {
+        text-align: left;
+        background: var(--color-paper-2);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .reglement-matrix .is-yes { color: #15803d; font-weight: 700; }
+    .reglement-matrix .is-no { color: #b91c1c; font-weight: 700; }
+    .reglement-matrix .is-hl { background: #fef9c3; }
+    @media (min-width: 768px) {
+        .toc-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media print {
+        .site-nav, .reglement-hero-actions, .toc-section, .site-footer, .partners-section { display: none !important; }
+        .reglement-article { break-inside: avoid; box-shadow: none; }
+        .page-hero--club { background-image: none !important; color: #111; }
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (!target) return;
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+        const tocLinks = document.querySelectorAll('.toc-list a');
+        const articles = document.querySelectorAll('.reglement-article');
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                tocLinks.forEach(function (l) { l.classList.remove('active'); });
+                const corresponding = document.querySelector('.toc-list a[href="#' + entry.target.id + '"]');
+                if (corresponding) corresponding.classList.add('active');
+            });
+        }, { rootMargin: '-20% 0px -70% 0px' });
+        articles.forEach(function (article) { observer.observe(article); });
+    });
+</script>
+</body>
+</html>

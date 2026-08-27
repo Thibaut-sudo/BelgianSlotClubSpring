@@ -35,6 +35,9 @@ public class ClubCalendarService {
             "proto32", "gt32", "tcr-scale", "slot.it", "gr5", "proto24", "gt24",
             "1000kms", "tcr all", "soirée fun", "soirée vab"
     );
+    private static final Set<String> SCO_OFFICIAL = Set.of(
+            "rallye de la basse meuse"
+    );
     private static final String[] DEFAULT_COLORS = {
             "#0f766e", "#be185d", "#7c3aed", "#c2410c", "#1d4ed8",
             "#365314", "#9a3412", "#0e7490", "#6d28d9", "#b45309"
@@ -144,6 +147,9 @@ public class ClubCalendarService {
         }
         if (club.isSlot4000()) {
             return SLOT4000_OFFICIAL.contains(key);
+        }
+        if (club.isRallyOnly()) {
+            return SCO_OFFICIAL.contains(key);
         }
         return false;
     }

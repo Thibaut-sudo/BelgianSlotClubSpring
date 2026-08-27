@@ -32,12 +32,15 @@ public final class ClubCalendar {
             events.putAll(SLOT4000);
         } else if (club.isSrcs()) {
             events.putAll(SRCS);
+        } else if (club.isRallyOnly()) {
+            events.putAll(SCO);
         }
         return events;
     }
 
     private static final Map<String, String> SLOT4000;
     private static final Map<String, String> SRCS;
+    private static final Map<String, String> SCO;
 
     static {
         Map<String, String> slot4000 = new TreeMap<>();
@@ -205,6 +208,10 @@ public final class ClubCalendar {
         // 2026–2027 — soirées club du mardi (reprise 1er sept. 2026)
         addSrcsTuesdayClubSeason(srcs);
         SRCS = Collections.unmodifiableMap(srcs);
+
+        Map<String, String> sco = new TreeMap<>();
+        sco.put("2026-10-25", "Rallye de la Basse Meuse");
+        SCO = Collections.unmodifiableMap(sco);
     }
 
     /**

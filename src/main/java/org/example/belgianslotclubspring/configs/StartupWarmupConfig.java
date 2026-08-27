@@ -32,6 +32,9 @@ public class StartupWarmupConfig {
     @EventListener(ApplicationReadyEvent.class)
     public void warmCaches() {
         for (Club club : Club.values()) {
+            if (club.isRallyOnly()) {
+                continue;
+            }
             try {
                 raceResultService.getRaceSummariesByClub(club.getCode());
                 raceResultService.getAllCategoriesClub(club.getCode());

@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css?v=34">
+    <link rel="stylesheet" href="/css/main.css?v=49">
     <link rel="icon" type="image/png" href="/images/favicon.png">
 </head>
 
@@ -50,13 +50,13 @@
                        th:attr="aria-current=${active == 'home'} ? 'page' : null">Accueil</a>
                 </li>
                 <th:block th:if="${club != null and !#strings.isEmpty(club)}">
-                    <li>
+                    <li th:unless="${club == 'sco'}">
                         <a class="nav-link"
                            th:href="@{/selectRace/{club}(club=${club})}"
                            th:classappend="${active == 'courses'} ? ' active' : ''"
                            th:attr="aria-current=${active == 'courses'} ? 'page' : null">Courses</a>
                     </li>
-                    <li>
+                    <li th:unless="${club == 'sco'}">
                         <a class="nav-link"
                            th:href="@{/championnat(club=${club})}"
                            th:classappend="${active == 'championnat'} ? ' active' : ''"
@@ -82,6 +82,12 @@
                     </li>
                     <li th:if="${club == 'slot4000'}">
                         <a href="/reglement" class="nav-link"
+                           th:classappend="${active == 'reglement'} ? ' active' : ''"
+                           th:attr="aria-current=${active == 'reglement'} ? 'page' : null">Règlement</a>
+                    </li>
+                    <li th:if="${club == 'sco'}">
+                        <a class="nav-link"
+                           href="/reglement/sco"
                            th:classappend="${active == 'reglement'} ? ' active' : ''"
                            th:attr="aria-current=${active == 'reglement'} ? 'page' : null">Règlement</a>
                     </li>
@@ -118,11 +124,67 @@
                 <li><a href="/selectRace/slot4000">Slot4000</a></li>
                 <li><a href="/reglement">Règlement Slot 4000</a></li>
                 <li><a href="/selectRace/srcs">SRCS</a></li>
+                <li><a href="/rallye?club=sco">Rallyes Slot</a></li>
+                <li><a href="/reglement/sco">Règlement Rallye Slot</a></li>
             </ul>
         </nav>
         <p class="footer-copyright">&copy; 2026 Belgian Slot Club. Tous droits réservés. — Thibaut Lenertz</p>
     </div>
 </footer>
+
+<section th:fragment="rallyePartners" class="section partners-section" aria-labelledby="partners-heading">
+    <div class="container">
+        <h2 id="partners-heading" class="section-title">Clubs et partenaires</h2>
+        <p class="section-lead">Championnat de Belgique des Rallyes Slot — clubs, sponsors et partenaires.</p>
+        <ul class="partner-grid">
+            <li>
+                <div class="partner-card">
+                    <img src="/images/partners/diepenbeek.png" alt="Slotracefriends Diepenbeek" loading="lazy" decoding="async">
+                </div>
+            </li>
+            <li>
+                <a class="partner-card" href="/selectRace/srcs">
+                    <img src="/images/srcs-logo.jpg?v=3" alt="SRCS — Slot Racing Club Seraing" loading="lazy" decoding="async">
+                </a>
+            </li>
+            <li>
+                <div class="partner-card">
+                    <img src="/images/partners/srcm.png" alt="SRCM — Slot Racing Club Mosan" loading="lazy" decoding="async">
+                </div>
+            </li>
+            <li>
+                <a class="partner-card partner-card--dark" href="/selectRace/slot4000">
+                    <img src="/images/slot4000-logo.jpg?v=3" alt="Slot 4000" loading="lazy" decoding="async">
+                </a>
+            </li>
+            <li>
+                <a class="partner-card" href="/rallye?club=sco">
+                    <img src="/images/partners/sco.png" alt="SCO Slot Rally" loading="lazy" decoding="async">
+                </a>
+            </li>
+            <li>
+                <div class="partner-card">
+                    <img src="/images/partners/scaleauto.png" alt="Scaleauto" loading="lazy" decoding="async">
+                </div>
+            </li>
+            <li>
+                <a class="partner-card" href="https://www.autoecole-georges.be" target="_blank" rel="noopener">
+                    <img src="/images/partners/georges.png" alt="Moto-école Georges" loading="lazy" decoding="async">
+                </a>
+            </li>
+            <li class="partner-span">
+                <a class="partner-card" href="https://hobby2000.be" target="_blank" rel="noopener">
+                    <img src="/images/partners/hobby2000.png" alt="Hobby 2000 Modelisme Center" loading="lazy" decoding="async">
+                </a>
+            </li>
+            <li>
+                <div class="partner-card">
+                    <img src="/images/partners/3d-by-ryu.png" alt="3D by Ryu" loading="lazy" decoding="async">
+                </div>
+            </li>
+        </ul>
+    </div>
+</section>
 
 <!-- Scripts fragment -->
 <th:block th:fragment="scripts">

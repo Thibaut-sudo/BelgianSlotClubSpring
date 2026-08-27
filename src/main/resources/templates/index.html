@@ -51,6 +51,20 @@
                     </div>
                 </a>
 
+                <a href="/rallye?club=sco" class="club-tile" data-club="sco">
+                    <div class="club-tile-media">
+                        <img src="/images/sco-tile.jpg?v=5" alt="Championnat de Belgique des Rallyes Slot" class="club-tile-image" loading="lazy" decoding="async">
+                    </div>
+                    <div class="club-tile-body">
+                        <h3>Championnat de Belgique des Rallyes Slot</h3>
+                        <p>Le rallye slot, c’est du slot en spéciales : on enchaîne les ES, le plus rapide au cumul gagne.</p>
+                        <ul class="club-tile-meta">
+                            <li>Hobby 2000 Liège</li>
+                            <li>Rallyes le week-end</li>
+                        </ul>
+                    </div>
+                </a>
+
                 <div class="club-tile club-tile-muted">
                     <div class="club-tile-media">
                         <img src="/images/autres-clubs.jpg" alt="Autres clubs" class="club-tile-image" loading="lazy" decoding="async">
@@ -90,9 +104,20 @@
                         <a href="https://www.facebook.com/groups/slotracingclubseraing" class="btn btn-outline" target="_blank" rel="noopener">Facebook</a>
                     </div>
                 </article>
+                <article class="info-panel">
+                    <h3>Championnat de Belgique des Rallyes Slot</h3>
+                    <p>Le rallye slot, c’est du slot en spéciales : on enchaîne les ES, le plus rapide au cumul gagne.</p>
+                    <p>Hobby 2000 Liège — rallyes le week-end.</p>
+                    <div class="cluster">
+                        <a href="/rallye?club=sco" class="btn btn-primary">Voir les rallyes</a>
+                        <a href="/reglement/sco" class="btn btn-outline">Règlement</a>
+                    </div>
+                </article>
             </div>
         </div>
     </section>
+
+    <section th:replace="~{fragments/layout :: rallyePartners}"></section>
 
     <footer th:replace="~{fragments/layout :: footer}"></footer>
     <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
@@ -133,7 +158,12 @@
 
             document.querySelectorAll('.club-tile[data-club]').forEach(function (tile) {
                 const club = tile.getAttribute('data-club');
-                tile.setAttribute('href', resolve(club));
+                const rallyOnly = club === 'sco';
+                let href = resolve(club);
+                if (rallyOnly && (goto === 'courses' || goto === 'results' || goto === 'championnat')) {
+                    href = destinations.rallye(club);
+                }
+                tile.setAttribute('href', href);
                 tile.addEventListener('click', function () {
                     sessionStorage.removeItem('bscGoto');
                 });

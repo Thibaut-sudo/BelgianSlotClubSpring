@@ -4,8 +4,7 @@
 <body>
 <header th:replace="~{fragments/layout :: nav(active='forum', club=${club})}"></header>
 
-<section class="page-hero page-hero--club"
-         th:style="${club == 'srcs'} ? '--club-banner: url(/images/srcs-logo.jpg?v=3)' : '--club-banner: url(/images/slot4000-logo.jpg?v=3)'">
+<section class="page-hero page-hero--club" th:data-club="${club}">
     <div class="page-hero-content container">
         <p class="page-hero-eyebrow">
             <a th:href="@{/forum/theme/{id}(id=${theme.id})}" class="page-hero-back"

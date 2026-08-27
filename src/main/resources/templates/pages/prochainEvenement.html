@@ -4,20 +4,19 @@
 <body>
     <header th:replace="~{fragments/layout :: nav(active='calendrier', club=${club})}"></header>
 
-    <section class="page-hero page-hero--club" th:data-club="${club}"
-             th:style="${club == 'srcs'} ? '--club-banner: url(/images/srcs-logo.jpg?v=3)' : '--club-banner: url(/images/slot4000-logo.jpg?v=3)'">
+    <section class="page-hero page-hero--club" th:data-club="${club}">
         <div class="page-hero-content container">
             <div class="calendar-hero-layout">
                 <div>
                     <p class="calendar-hero-eyebrow">Prochain événement</p>
-                    <h1 class="page-hero-title" th:text="'Calendrier ' + ${club == 'slot4000' ? 'SLOT4000' : 'SRCS'}">Calendrier</h1>
+                    <h1 class="page-hero-title" th:text="'Calendrier ' + ${clubDisplayName}">Calendrier</h1>
                     <p class="page-hero-sub">
                         Découvrez le prochain événement
-                        <span th:text="${club == 'slot4000' ? 'SLOT4000' : 'SRCS'}">club</span>
+                        <span th:text="${clubDisplayName}">club</span>
                         et consultez le planning complet de la saison.
                     </p>
                     <div class="page-hero-meta">
-                        <span th:text="${club == 'slot4000' ? 'SLOT4000' : 'SRCS'}">Club</span>
+                        <span th:text="${clubDisplayName}">Club</span>
                         <span>Saison 2026–2027</span>
                     </div>
                 </div>
@@ -64,8 +63,9 @@
                 </dl>
 
                 <div class="cluster next-event-actions">
-                    <a th:href="@{/championnat(club=${club})}" class="btn btn-primary">Voir championnat</a>
-                    <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-secondary">Voir courses</a>
+                    <a th:if="${club == 'sco'}" th:href="@{/rallye(club=${club})}" class="btn btn-primary">Voir les rallyes</a>
+                    <a th:unless="${club == 'sco'}" th:href="@{/championnat(club=${club})}" class="btn btn-primary">Voir championnat</a>
+                    <a th:unless="${club == 'sco'}" th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-secondary">Voir courses</a>
                     <a th:href="@{/calendrier/{club}/google(club=${club})}"
                        class="btn btn-outline"
                        target="_blank"
@@ -85,7 +85,7 @@
                 <h2 id="subscribe-heading" class="section-title">Ajouter à mon agenda</h2>
                 <p class="section-lead">
                     Abonne-toi au calendrier
-                    <span th:text="${club == 'slot4000' ? 'Slot 4000' : 'SRCS'}">club</span>
+                    <span th:text="${clubDisplayName}">club</span>
                     : les dates se mettent à jour toutes seules.
                 </p>
                 <div class="cluster">
@@ -97,7 +97,7 @@
                        th:href="@{/calendrier/{club}/apple(club=${club})}">Apple Calendar</a>
                     <a class="btn btn-outline"
                        th:href="|/calendrier/${club}/v2.ics|"
-                       th:download="${club == 'slot4000' ? 'calendrier-slot4000.ics' : 'calendrier-srcs.ics'}">
+                       th:download="${'calendrier-' + club + '.ics'}">
                         Fichier .ics (Outlook)
                     </a>
                 </div>
@@ -108,10 +108,10 @@
                     <div class="calendar-section-top">
                         <div>
                             <h2 id="calendar-heading" class="section-title">
-                                Calendrier <span th:text="${club == 'slot4000' ? 'SLOT4000' : 'SRCS'}">club</span>
+                                Calendrier <span th:text="${clubDisplayName}">club</span>
                                 <span id="calendarYearLabel">2025</span>
                             </h2>
-                            <p class="section-lead" th:text="'Tous les événements de la saison ' + ${club == 'slot4000' ? 'SLOT4000' : 'SRCS'}">Tous les événements de la saison</p>
+                            <p class="section-lead" th:text="'Tous les événements de la saison ' + ${clubDisplayName}">Tous les événements de la saison</p>
                             <p class="section-lead calendar-admin-hint">Organisateurs : cliquez un jour pour ajouter un événement, ou ajoutez une catégorie dans la légende (mot de passe requis).</p>
                         </div>
                         <div class="year-nav" role="group" aria-label="Changer d'année">
@@ -172,6 +172,12 @@
                     <div class="legend-item">
                         <div class="legend-color event-soiree"></div>
                         <span>Soirée</span>
+                    </div>
+                </div>
+                <div class="legend-grid" th:if="${club == 'sco'}">
+                    <div class="legend-item">
+                        <div class="legend-color event-rallye"></div>
+                        <span>Rallye</span>
                     </div>
                 </div>
                 <div class="legend-grid" th:if="${club == 'srcs'}">
@@ -255,6 +261,9 @@
                                 <option value="Revo (interclubs)"></option>
                                 <option value="Deph'one F1"></option>
                                 <option value="Chall. E.Pirotte"></option>
+                            </th:block>
+                            <th:block th:if="${club == 'sco'}">
+                                <option value="Rallye de la Basse Meuse"></option>
                             </th:block>
                             <th:block th:if="${club == 'slot4000'}">
                                 <option value="PROTO32"></option>
@@ -665,6 +674,11 @@
             background-color: #0f766e;
         }
 
+        .event-rallye,
+        .legend-color.event-rallye {
+            background-color: #c2410c;
+        }
+
         .event-soiree,
         .legend-color.event-soiree,
         .event-soirevab,
@@ -990,6 +1004,8 @@
                             eventClass = 'bpc';
                         } else if (firstEventRaw.includes('brm')) {
                             eventClass = 'brm';
+                        } else if (firstEventRaw.includes('rally')) {
+                            eventClass = 'rallye';
                         } else {
                             eventClass = firstEventRaw.replace(/[^a-z0-9]/g, '');
                         }

@@ -5,20 +5,39 @@
 <body class="rallye-app">
 <header th:replace="~{fragments/layout :: nav(active='rallye', club=${club})}"></header>
 
-<section class="page-hero page-hero--club"
-         th:style="${club == 'srcs'} ? '--club-banner: url(/images/srcs-logo.jpg?v=3)' : '--club-banner: url(/images/slot4000-logo.jpg?v=3)'">
+<section class="page-hero page-hero--club" th:data-club="${club}">
     <div class="page-hero-content container">
-        <h1 class="page-hero-title">Rallye</h1>
-        <p class="page-hero-sub">Créez un rallye, saisissez les temps par ES et obtenez les classements automatiquement.</p>
+        <h1 class="page-hero-title"
+            th:text="${rallyOnly} ? 'Championnat Rallye Slot' : 'Rallye'">Rallye</h1>
+        <p class="page-hero-sub"
+           th:text="${rallyOnly}
+             ? 'Le rallye slot, c’est du slot en spéciales : on enchaîne les ES, le plus rapide au cumul gagne.'
+             : 'Créez un rallye, saisissez les temps par ES et obtenez les classements automatiquement.'">
+            Créez un rallye, saisissez les temps par ES et obtenez les classements automatiquement.
+        </p>
         <div class="page-hero-meta">
-            <span>Club : <strong th:text="${clubDisplayName}">Club</strong></span>
+            <span th:if="${rallyOnly}">Hobby 2000 Liège</span>
+            <span th:unless="${rallyOnly}">Club : <strong th:text="${clubDisplayName}">Club</strong></span>
             <span th:text="${#lists.size(rallyes)} + ' rallye(s)'">0 rallye(s)</span>
+            <a th:if="${rallyOnly}" class="btn btn-secondary" href="/reglement/sco">Règlement 2026</a>
         </div>
     </div>
 </section>
 
 <section class="section">
     <div class="container">
+
+        <ul th:if="${rallyOnly}" class="page-logo-strip" aria-label="Clubs et partenaires">
+            <li><img src="/images/partners/diepenbeek.png" alt="Slotracefriends Diepenbeek"></li>
+            <li><img src="/images/srcs-logo.jpg?v=3" alt="SRCS"></li>
+            <li class="page-logo-strip--dark"><img src="/images/slot4000-logo.jpg?v=3" alt="Slot 4000"></li>
+            <li><img src="/images/partners/srcm.png" alt="SRCM"></li>
+            <li><img src="/images/partners/sco.png" alt="SCO Slot Rally"></li>
+            <li><img src="/images/partners/scaleauto.png" alt="Scaleauto"></li>
+            <li><img src="/images/partners/georges.png" alt="Moto-école Georges"></li>
+            <li><img src="/images/partners/hobby2000.png" alt="Hobby 2000"></li>
+            <li><img src="/images/partners/3d-by-ryu.png" alt="3D by Ryu"></li>
+        </ul>
 
         <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
         <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
@@ -29,7 +48,9 @@
                 <p class="section-lead">Choisissez un rallye ou créez-en un nouveau. Plus besoin de formules Excel : les classements se recalculent à chaque saisie.</p>
 
                 <div th:if="${#lists.isEmpty(rallyes)}" class="empty-state">
-                    <p>Aucun rallye pour ce club. Créez le premier ci-contre.</p>
+                    <p th:text="${rallyOnly} ? 'Aucune épreuve pour ce championnat. Créez la première ci-contre.' : 'Aucun rallye pour ce club. Créez le premier ci-contre.'">
+                        Aucun rallye pour ce club. Créez le premier ci-contre.
+                    </p>
                 </div>
 
                 <ul class="rallye-card-list" th:unless="${#lists.isEmpty(rallyes)}">
@@ -55,7 +76,8 @@
                         <div class="form-group">
                             <label class="form-label" for="name">Nom</label>
                             <input class="form-input" type="text" id="name" name="name"
-                                   placeholder="Rallye Club SRCS" required>
+                                   th:placeholder="${rallyOnly} ? 'Rallye de la Basse Meuse' : 'Rallye Club SRCS'"
+                                   required>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="date">Date</label>

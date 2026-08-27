@@ -5,6 +5,7 @@ import org.example.belgianslotclubspring.entities.RallyePilot;
 import org.example.belgianslotclubspring.entities.RallyeStageTime;
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.models.RallyeStandingRow;
+import org.example.belgianslotclubspring.models.RallyeStandingsPayload;
 import org.example.belgianslotclubspring.services.ImportAuthService;
 import org.example.belgianslotclubspring.services.RallyeService;
 import org.example.belgianslotclubspring.utils.RallyeSheetQr;
@@ -129,6 +130,71 @@ public class RallyeController {
         model.addAttribute("timeDisplay", timeDisplay);
         model.addAttribute("recaps", rallyeService.buildRecaps(id));
         return "pages/rallyeDetail";
+    }
+
+    @GetMapping("/{id}/classement")
+    public String classementLive(
+            @PathVariable Long id,
+            @RequestParam(required = false) Integer after,
+            @RequestParam(required = false) String category,
+            Model model
+    ) {
+        RallyeStandingsPayload payload = buildStandingsPayload(id, after, category);
+        Rallye rallye = rallyeService.get(id);
+        model.addAttribute("rallye", rallye);
+        model.addAttribute("club", rallye.getClubName());
+        model.addAttribute("clubDisplayName",
+                Club.fromCode(rallye.getClubName()).map(Club::getDisplayName).orElse(rallye.getClubName()));
+        model.addAttribute("afterStages", payload.afterStages());
+        model.addAttribute("selectedCategory", payload.category());
+        model.addAttribute("categories", payload.categories());
+        model.addAttribute("checkpoints", payload.checkpoints());
+        model.addAttribute("standings", payload.rows());
+        model.addAttribute("fingerprint", payload.fingerprint());
+        return "pages/rallyeClassement";
+    }
+
+    @GetMapping("/{id}/api/standings")
+    @ResponseBody
+    public RallyeStandingsPayload standingsApi(
+            @PathVariable Long id,
+            @RequestParam(required = false) Integer after,
+            @RequestParam(required = false) String category,
+            jakarta.servlet.http.HttpServletResponse response
+    ) {
+        response.setHeader("Cache-Control", "no-store");
+        return buildStandingsPayload(id, after, category);
+    }
+
+    private RallyeStandingsPayload buildStandingsPayload(Long id, Integer after, String category) {
+        Rallye rallye = rallyeService.get(id);
+        int afterStages = after != null ? after : rallye.totalStages();
+        List<RallyeStandingRow> rows = rallyeService.standings(id, afterStages, category);
+
+        Set<String> categories = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        for (RallyePilot p : rallye.getPilots()) {
+            if (p.getCategory() != null && !p.getCategory().isBlank()) {
+                categories.add(p.getCategory().trim());
+            }
+        }
+
+        List<Integer> checkpoints = new ArrayList<>();
+        for (int b = 1; b <= rallye.getBoucleCount(); b++) {
+            checkpoints.add(b * rallye.getStagesPerBoucle());
+        }
+
+        String cat = category == null || category.isBlank() ? null : category.trim();
+        return new RallyeStandingsPayload(
+                RallyeStandingsPayload.fingerprintOf(rows),
+                rallye.getName(),
+                rallye.isFinished(),
+                afterStages,
+                rallye.totalStages(),
+                checkpoints,
+                List.copyOf(categories),
+                cat,
+                rows
+        );
     }
 
     @PostMapping("/{id}/pilots")

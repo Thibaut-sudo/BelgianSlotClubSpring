@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title=${rallye.name} + ' — Classement')}"></head>
+<link rel="stylesheet" href="/css/rallye-mobile.css?v=16">
+<body class="rallye-app classement-live-page">
+<header th:replace="~{fragments/layout :: nav(active='rallye', club=${club})}"></header>
+
+<section class="page-hero page-hero--club page-hero--rallye-compact" th:data-club="${club}">
+    <div class="page-hero-content container">
+        <p class="page-hero-eyebrow">
+            <a th:href="@{/rallye/{id}(id=${rallye.id})}" class="page-hero-back">← Saisie</a>
+        </p>
+        <h1 class="page-hero-title" th:text="${rallye.name}">Rallye</h1>
+        <p class="page-hero-sub">Classement en direct — se met à jour à chaque nouveau chrono.</p>
+        <div class="page-hero-meta">
+            <span th:text="${#temporals.format(rallye.date, 'dd/MM/yyyy')}">01/01/2026</span>
+            <span th:text="${clubDisplayName}">Club</span>
+            <span class="classement-live-badge" id="liveBadge">
+                <span class="classement-live-dot" aria-hidden="true"></span>
+                En direct
+            </span>
+            <span th:if="${rallye.finished}" class="rallye-finished-badge">Terminé</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div id="liveClassement"
+             th:attr="data-rallye-id=${rallye.id},
+                      data-after=${afterStages},
+                      data-total=${rallye.totalStages()},
+                      data-category=${selectedCategory != null ? selectedCategory : ''},
+                      data-fingerprint=${fingerprint}">
+
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <label class="filter-label">Après</label>
+                    <div class="rallye-tabs rallye-tabs--compact" id="liveCheckpoints">
+                        <button type="button" class="rallye-tab"
+                                th:classappend="${afterStages == rallye.totalStages()} ? ' is-active'"
+                                th:attr="data-after=${rallye.totalStages()}">Général</button>
+                        <button type="button" class="rallye-tab"
+                                th:each="cp : ${checkpoints}"
+                                th:classappend="${cp == afterStages and afterStages != rallye.totalStages()} ? ' is-active'"
+                                th:attr="data-after=${cp}"
+                                th:text="'Après ' + ${cp} + ' ES'">Après 5 ES</button>
+                    </div>
+                </div>
+                <div class="filter-group" th:if="${!#lists.isEmpty(categories)}">
+                    <label class="filter-label" for="liveCatFilter">Catégorie</label>
+                    <select id="liveCatFilter" class="form-select filter-select">
+                        <option value="">Toutes</option>
+                        <option th:each="c : ${categories}"
+                                th:value="${c}"
+                                th:text="${c}"
+                                th:selected="${selectedCategory == c}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-wrap rallye-standings-desktop" id="liveTableWrap"
+                 th:classappend="${#lists.isEmpty(standings)} ? ' is-empty'">
+                <table class="data-table rallye-table classement-live-table" id="liveStandingsTable">
+                    <thead>
+                    <tr>
+                        <th>Pos.</th>
+                        <th>Pilote</th>
+                        <th>Voiture</th>
+                        <th>Cat.</th>
+                        <th>Temps</th>
+                        <th title="Écart avec le pilote précédent">Préc.</th>
+                        <th title="Écart avec le leader">Au 1er</th>
+                        <th>ES</th>
+                    </tr>
+                    </thead>
+                    <tbody id="liveStandingsBody">
+                    <tr th:each="row : ${standings}"
+                        th:classappend="${row.position == 1} ? ' is-leader' : (${row.totalSeconds == null} ? ' is-dnf' : '')">
+                        <td th:text="${row.totalSeconds == null} ? '—' : ${row.position}">1</td>
+                        <td th:text="${row.name}">Nom</td>
+                        <td th:text="${row.car}">Voiture</td>
+                        <td th:text="${row.category}">Cat</td>
+                        <td class="mono" th:text="${row.totalFormatted}">0.000</td>
+                        <td class="mono" th:text="${row.gapToPreviousFormatted}">—</td>
+                        <td class="mono" th:text="${row.gapFormatted}">—</td>
+                        <td th:text="${row.stagesCompleted} + '/' + ${row.stagesExpected}">0/5</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="rallye-standings-mobile" id="liveCardsWrap"
+                 th:classappend="${#lists.isEmpty(standings)} ? ' is-empty'">
+                <article class="rallye-standing-card"
+                         th:each="row : ${standings}"
+                         th:classappend="${row.position == 1} ? ' is-leader' : (${row.totalSeconds == null} ? ' is-dnf' : '')">
+                    <div class="rallye-standing-card__pos"
+                         th:text="${row.totalSeconds == null} ? '—' : ${row.position}">1</div>
+                    <div class="rallye-standing-card__info">
+                        <strong th:text="${row.name}">Nom</strong>
+                        <span th:if="${row.car != null and !#strings.isEmpty(row.car)}" th:text="${row.car}"></span>
+                    </div>
+                    <div class="rallye-standing-card__times">
+                        <span class="mono" th:text="${row.totalFormatted}">0.000</span>
+                        <span class="rallye-standing-card__gap mono">
+                            <span>préc. <span th:text="${row.gapToPreviousFormatted}">—</span></span>
+                            <span class="rallye-standing-card__gap-sep">·</span>
+                            <span>1er <span th:text="${row.gapFormatted}">—</span></span>
+                        </span>
+                        <span class="rallye-standing-card__es"
+                              th:text="${row.stagesCompleted} + '/' + ${row.stagesExpected}">0/5</span>
+                    </div>
+                </article>
+            </div>
+
+            <p class="empty-state" id="liveEmpty"
+               th:classappend="${!#lists.isEmpty(standings)} ? ' is-empty'">Pas encore de classement.</p>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script src="/js/rallye-classement-live.js?v=1"></script>
+</body>
+</html>

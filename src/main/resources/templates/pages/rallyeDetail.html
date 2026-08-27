@@ -24,6 +24,7 @@
             <a href="#saisie" class="btn btn-primary" th:text="${rallye.finished} ? 'Voir les temps' : 'Saisir les temps'">Saisir les temps</a>
             <a th:href="@{/rallye/{id}/grilles(id=${rallye.id})}" class="btn btn-secondary">Grilles à imprimer</a>
             <a href="#classement" class="btn btn-outline">Classement</a>
+            <a th:href="@{/rallye/{id}/classement(id=${rallye.id})}" class="btn btn-outline">Classement live</a>
             <a href="#compte-rendu" class="btn btn-outline">Compte rendu</a>
             <a href="#pilotes" class="btn btn-outline">Pilotes</a>
             <button type="button" class="btn btn-outline" id="rallyeSharePhoneBtn" aria-haspopup="dialog">
@@ -57,6 +58,7 @@
     <a href="#saisie" class="rallye-mobile-nav__link is-primary">Saisie</a>
     <a th:href="@{/rallye/{id}/grilles(id=${rallye.id})}" class="rallye-mobile-nav__link">Grilles</a>
     <a href="#classement" class="rallye-mobile-nav__link">Classement</a>
+    <a th:href="@{/rallye/{id}/classement(id=${rallye.id})}" class="rallye-mobile-nav__link">Live</a>
     <a href="#compte-rendu" class="rallye-mobile-nav__link">Résumé</a>
     <a href="#pilotes" class="rallye-mobile-nav__link">Pilotes</a>
 </nav>

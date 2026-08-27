@@ -256,7 +256,7 @@
                 <input type="hidden" name="boucle" th:value="${activeBoucle}">
                 <p id="timesSaveStatus" class="times-save-status" aria-live="polite"
                    th:unless="${rallye.finished}">
-                    Enregistrement case par case — plusieurs personnes peuvent saisir en même temps.
+                    Les temps s’enregistrent case par case (dès que tu quittes la case). Plusieurs personnes peuvent saisir en même temps.
                 </p>
 
                 <!-- Desktop : tableau -->
@@ -342,7 +342,7 @@
 
                 <div class="rallye-save-bar rallye-save-bar--sticky" th:unless="${rallye.finished}">
                     <button type="submit" class="btn btn-primary btn-block-mobile">Enregistrer boucle <span th:text="${activeBoucle}">1</span></button>
-                    <span class="rallye-hint rallye-hint--desktop">Les classements se mettent à jour après enregistrement.</span>
+                    <span class="rallye-hint rallye-hint--desktop">Inutile d’attendre : chaque case est sauvée dès que tu en sors.</span>
                 </div>
             </form>
             <p th:if="${#lists.isEmpty(rallye.pilots)}" class="empty-state">Ajoutez des pilotes avant de saisir les temps.</p>
@@ -750,7 +750,7 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
-<script src="/js/rallye-times-save.js?v=2"></script>
+<script src="/js/rallye-times-save.js?v=3"></script>
 <script src="/js/export-tables.js"></script>
 <script th:inline="javascript">
     window.__rallyeExportMeta = {

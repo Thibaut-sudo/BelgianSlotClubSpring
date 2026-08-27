@@ -1,7 +1,7 @@
 /**
  * Enregistrement partiel des temps rallye.
  * - Ne soumet / n’envoie que les cases modifiées (évite d’écraser les autres groupes).
- * - Autosave au blur (au fur et à mesure).
+ * - Autosave au blur (au fur et à mesure), y compris les champs mobile (data-mirror).
  */
 (function () {
   'use strict';
@@ -11,6 +11,9 @@
   }
 
   function isDirty(input) {
+    if (!input || input.readOnly || input.disabled) {
+      return false;
+    }
     var initial = input.getAttribute('data-initial');
     if (initial == null) {
       initial = '';
@@ -25,6 +28,36 @@
     window.setTimeout(function () {
       input.classList.remove('is-saved');
     }, 1200);
+  }
+
+  function namedInput(form, el) {
+    if (!el) {
+      return null;
+    }
+    if (el.name && el.name.indexOf('time_') === 0) {
+      return el;
+    }
+    var key = el.getAttribute && el.getAttribute('data-mirror');
+    if (!key) {
+      return null;
+    }
+    return form.querySelector('input[name="' + key + '"]');
+  }
+
+  function syncPair(form, source) {
+    var named = namedInput(form, source);
+    if (!named) {
+      return null;
+    }
+    if (source !== named) {
+      named.value = source.value;
+    }
+    form.querySelectorAll('[data-mirror="' + named.name + '"]').forEach(function (mirror) {
+      if (mirror !== source && mirror.value !== named.value) {
+        mirror.value = named.value;
+      }
+    });
+    return named;
   }
 
   function collectDirty(root) {
@@ -78,9 +111,103 @@
     });
   }
 
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function rowClass(row) {
+    if (row.position === 1) {
+      return ' is-leader';
+    }
+    if (row.totalSeconds == null) {
+      return ' is-dnf';
+    }
+    return '';
+  }
+
+  function posLabel(row) {
+    return row.totalSeconds == null ? '—' : String(row.position);
+  }
+
+  function refreshDetailStandings(form) {
+    var table = document.getElementById('rallyeStandingsTable');
+    if (!table || !form) {
+      return;
+    }
+    var rallyeId = form.getAttribute('data-rallye-id');
+    if (!rallyeId) {
+      return;
+    }
+    var meta = window.__rallyeExportMeta || {};
+    var params = new URLSearchParams();
+    if (meta.after) {
+      params.set('after', String(meta.after));
+    }
+    var cat = document.getElementById('catFilter');
+    if (cat && cat.value) {
+      params.set('category', cat.value);
+    }
+    var query = params.toString();
+    fetch('/rallye/' + encodeURIComponent(rallyeId) + '/api/standings' + (query ? '?' + query : ''), {
+      cache: 'no-store'
+    }).then(function (res) {
+      if (!res.ok) {
+        throw new Error('standings');
+      }
+      return res.json();
+    }).then(function (data) {
+      var rows = data.rows || [];
+      var tbody = table.querySelector('tbody');
+      if (tbody) {
+        tbody.innerHTML = rows.map(function (row) {
+          return '<tr class="' + rowClass(row).trim() + '">'
+            + '<td>' + escapeHtml(posLabel(row)) + '</td>'
+            + '<td>' + escapeHtml(row.name) + '</td>'
+            + '<td>' + escapeHtml(row.car) + '</td>'
+            + '<td>' + escapeHtml(row.category) + '</td>'
+            + '<td class="mono">' + escapeHtml(row.totalFormatted) + '</td>'
+            + '<td class="mono">' + escapeHtml(row.gapToPreviousFormatted) + '</td>'
+            + '<td class="mono">' + escapeHtml(row.gapFormatted) + '</td>'
+            + '<td>' + escapeHtml(row.stagesCompleted + '/' + row.stagesExpected) + '</td>'
+            + '</tr>';
+        }).join('');
+      }
+      var cards = document.querySelector('.rallye-standings-mobile');
+      if (cards) {
+        cards.innerHTML = rows.map(function (row) {
+          var car = row.car ? '<span>' + escapeHtml(row.car) + '</span>' : '';
+          return '<article class="rallye-standing-card' + rowClass(row) + '">'
+            + '<div class="rallye-standing-card__pos">' + escapeHtml(posLabel(row)) + '</div>'
+            + '<div class="rallye-standing-card__info"><strong>' + escapeHtml(row.name) + '</strong>' + car + '</div>'
+            + '<div class="rallye-standing-card__times">'
+            + '<span class="mono">' + escapeHtml(row.totalFormatted) + '</span>'
+            + '<span class="rallye-standing-card__gap mono">'
+            + '<span>préc. <span>' + escapeHtml(row.gapToPreviousFormatted) + '</span></span>'
+            + '<span class="rallye-standing-card__gap-sep">·</span>'
+            + '<span>1er <span>' + escapeHtml(row.gapFormatted) + '</span></span>'
+            + '</span>'
+            + '<span class="rallye-standing-card__es">' + escapeHtml(row.stagesCompleted + '/' + row.stagesExpected) + '</span>'
+            + '</div></article>';
+        }).join('');
+      }
+      var empty = document.querySelector('#classement .empty-state');
+      var wrap = document.querySelector('#classement .rallye-standings-desktop');
+      if (empty) {
+        empty.style.display = rows.length ? 'none' : '';
+      }
+      if (wrap) {
+        wrap.style.display = rows.length ? '' : 'none';
+      }
+    }).catch(function () { /* keep last classement */ });
+  }
+
   function bindForm(form) {
     if (!form || form.getAttribute('data-times-patch') === '1') return;
-    if (form.getAttribute('data-times-ajax') === '0' || form.querySelector('input[name^="time_"][readonly]')) {
+    if (form.getAttribute('data-times-ajax') === '0') {
       return;
     }
     form.setAttribute('data-times-patch', '1');
@@ -108,7 +235,7 @@
       }
 
       if (saving) {
-        queue = timesMap;
+        queue = Object.assign({}, queue || {}, timesMap);
         return Promise.resolve({ saved: 0, queued: true });
       }
       saving = true;
@@ -127,9 +254,15 @@
             var inp = form.querySelector('input[name="' + name + '"]');
             if (!inp) return;
             inp.classList.remove('is-saving');
-            // ne marquer clean que si la valeur n’a pas rechangé pendant l’appel
             if (normalize(inp.value) === normalize(timesMap[name])) {
               markClean(inp);
+              form.querySelectorAll('[data-mirror="' + name + '"]').forEach(function (mirror) {
+                mirror.classList.remove('is-dirty', 'is-save-error');
+                mirror.classList.add('is-saved');
+                window.setTimeout(function () {
+                  mirror.classList.remove('is-saved');
+                }, 1200);
+              });
             }
           });
           var n = data.saved || keys.length;
@@ -139,6 +272,7 @@
               : (n === 1 ? '1 temps enregistré.' : n + ' temps enregistrés.'),
             'is-ok'
           );
+          refreshDetailStandings(form);
           return data;
         })
         .catch(function (err) {
@@ -171,36 +305,49 @@
       }
     });
 
-    // Autosave d’une case au blur
-    form.addEventListener('focusout', function (e) {
-      var inp = e.target;
-      if (!inp || !inp.name || inp.name.indexOf('time_') !== 0) return;
-      if (!isDirty(inp)) return;
-      var one = {};
-      one[inp.name] = inp.value;
-      runSave(one, { silentEmpty: true });
+    form.addEventListener('input', function (e) {
+      var named = syncPair(form, e.target);
+      if (named && named !== e.target) {
+        named.dispatchEvent(new Event('input', { bubbles: false }));
+      }
     });
 
-    // Entrée = blur → autosave
+    function saveFromField(el) {
+      var named = syncPair(form, el);
+      if (!named || named.readOnly) {
+        return;
+      }
+      if (!isDirty(named)) {
+        return;
+      }
+      var one = {};
+      one[named.name] = named.value;
+      runSave(one, { silentEmpty: true });
+    }
+
+    form.addEventListener('focusout', function (e) {
+      saveFromField(e.target);
+    });
+
     form.addEventListener('keydown', function (e) {
       if (e.key !== 'Enter') return;
       var inp = e.target;
-      if (!inp || !inp.name || inp.name.indexOf('time_') !== 0) return;
+      if (!namedInput(form, inp)) return;
       e.preventDefault();
       inp.blur();
     });
 
-    // Submit : uniquement les cases dirty (form classique OU ajax)
     form.addEventListener('submit', function (e) {
+      form.querySelectorAll('[data-mirror]').forEach(function (mirror) {
+        syncPair(form, mirror);
+      });
       var dirty = collectDirty(form);
       var dirtyCount = Object.keys(dirty).length;
 
-      // Désactive les champs non modifiés pour qu’ils ne partent pas dans un POST classique
       form.querySelectorAll('input[name^="time_"]').forEach(function (inp) {
         inp.disabled = !isDirty(inp);
       });
 
-      // Préférer AJAX pour rester sur la page sans perdre le scroll / autres groupes
       if (form.getAttribute('data-times-ajax') === '1') {
         e.preventDefault();
         form.querySelectorAll('input[name^="time_"]').forEach(function (inp) {
@@ -221,7 +368,6 @@
         });
         setStatus(statusEl, 'Rien à enregistrer (aucune case modifiée).', 'is-ok');
       }
-      // sinon POST classique avec seulement les dirty (disabled exclus)
     });
   }
 
@@ -236,7 +382,6 @@
     boot();
   }
 
-  // Expose pour le scan (remplit des cases après OCR → dirty)
   window.RallyeTimesSave = {
     initInput: initInput,
     markDirtyFromFill: function (input) {

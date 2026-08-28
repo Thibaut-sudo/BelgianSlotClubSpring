@@ -2,6 +2,7 @@ package org.example.belgianslotclubspring.controllers;
 
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.services.ClubCalendarService;
+import org.example.belgianslotclubspring.utils.ClubIcsCalendar;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -85,6 +86,7 @@ public class ProchainEvenementController {
         model.addAttribute("allEvents", events2025);
         model.addAttribute("customDates", new ArrayList<>(clubCalendarService.customDates(clubEnum)));
         model.addAttribute("customCategories", clubCalendarService.customCategories(clubEnum));
+        model.addAttribute("icsFeedPath", ClubIcsCalendar.publicFeedPath(clubEnum));
 
         return "pages/prochainEvenement";
     }

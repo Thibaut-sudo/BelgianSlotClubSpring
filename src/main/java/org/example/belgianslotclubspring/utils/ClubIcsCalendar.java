@@ -23,8 +23,8 @@ public final class ClubIcsCalendar {
      * À incrémenter quand les titres ou dates changent.
      * Google Agenda ignore souvent un ICS identique (même URL, mêmes UID).
      */
-    public static final int FEED_REVISION = 2;
-    static final String REVISION_UTC = "20260824T213000Z";
+    public static final int FEED_REVISION = 3;
+    static final String REVISION_UTC = "20260828T205200Z";
 
     private static final DateTimeFormatter LOCAL = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 

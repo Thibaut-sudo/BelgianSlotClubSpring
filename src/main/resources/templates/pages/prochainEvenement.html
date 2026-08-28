@@ -96,7 +96,7 @@
                     <a class="btn btn-secondary"
                        th:href="@{/calendrier/{club}/apple(club=${club})}">Apple Calendar</a>
                     <a class="btn btn-outline"
-                       th:href="|/calendrier/${club}/v2.ics|"
+                       th:href="${icsFeedPath}"
                        th:download="${'calendrier-' + club + '.ics'}">
                         Fichier .ics (Outlook)
                     </a>

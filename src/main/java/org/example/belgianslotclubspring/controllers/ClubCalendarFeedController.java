@@ -37,7 +37,8 @@ public class ClubCalendarFeedController {
             "/calendrier/{club}.ics",
             "/calendrier/{club}/feed",
             "/calendrier/{club}/feed.ics",
-            "/calendrier/{club}/v2.ics"
+            "/calendrier/{club}/v2.ics",
+            "/calendrier/{club}/v3.ics"
     })
     public ResponseEntity<byte[]> ics(@PathVariable String club) {
         Optional<Club> parsed = Club.fromCode(stripIcsSuffix(club));

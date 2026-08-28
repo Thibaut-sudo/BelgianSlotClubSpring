@@ -771,9 +771,9 @@ body.nav-open .nav-toggle span:nth-child(3) {
 }
 
 .page-hero--club[data-club="sco"] {
-  --club-banner: url(/images/sco-banner-art.jpg?v=5);
-  background-size: auto 78%;
-  background-position: right 3% center;
+  --club-banner: url(/images/sco-banner-art.jpg?v=6);
+  background-size: auto 88%;
+  background-position: right 2% center;
 }
 
 .page-hero--club::before {
@@ -818,8 +818,8 @@ body.nav-open .nav-toggle span:nth-child(3) {
   }
 
   .page-hero--club[data-club="sco"] {
-    background-size: auto 38%;
-    background-position: right 2% bottom 8%;
+    background-size: auto 48%;
+    background-position: right 2% bottom 12%;
   }
 
   .page-hero--club[data-club="sco"] .page-hero-content {
@@ -832,7 +832,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
 
   .club-tile[data-club="sco"] .club-tile-media {
     height: auto;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 1536 / 795;
   }
 
   .club-tile[data-club="slot4000"] .club-tile-media {
@@ -1060,7 +1060,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
 
 .club-tile[data-club="sco"] .club-tile-media {
   height: auto;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 1536 / 795;
   background: #111;
 }
 

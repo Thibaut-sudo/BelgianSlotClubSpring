@@ -66,11 +66,12 @@
                             </a>
                             <span class="rallye-card-date" th:text="${#temporals.format(r.date, 'dd/MM/yyyy')}">01/01/2026</span>
                             <span class="rallye-card-name" th:text="${r.name}">Nom</span>
-                            <span class="rallye-card-meta"
-                                  th:text="${r.classementOnly}
-                                    ? (${r.pilots.size()} + ' pilotes · Classement final' + (r.finished ? ' · Terminé' : ''))
-                                    : (${r.boucleCount} + ' boucles · ' + ${r.stagesPerBoucle} + ' ES · ' + ${r.pilots.size()} + ' pilotes' + (r.finished ? ' · Terminé' : ''))">
-                                4 boucles · 5 ES
+                            <span class="rallye-card-meta">
+                                <th:block th:if="${r.classementOnly}"
+                                          th:text="${r.pilots.size() + ' pilotes · Classement final'}">0 pilotes · Classement final</th:block>
+                                <th:block th:unless="${r.classementOnly}"
+                                          th:text="${r.boucleCount + ' boucles · ' + r.stagesPerBoucle + ' ES · ' + r.pilots.size() + ' pilotes'}">4 boucles · 5 ES · 0 pilotes</th:block>
+                                <th:block th:if="${r.finished}"> · Terminé</th:block>
                             </span>
                             <div class="rallye-card-actions">
                                 <a class="btn btn-primary btn-sm" th:if="${r.classementOnly}"

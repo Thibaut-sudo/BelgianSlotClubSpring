@@ -73,9 +73,7 @@ public class ProchainEvenementController {
                 ? LocalDate.parse(nextEventDate).format(formatter)
                 : "—";
 
-        String eventType = nextEventName != null
-                ? nextEventName.split(",")[0].trim().toLowerCase().replaceAll("[^a-z0-9]", "")
-                : "";
+        String eventType = classifyEventType(nextEventName);
 
         model.addAttribute("club", clubCode);
         model.addAttribute("clubDisplayName", clubEnum.getDisplayName());
@@ -90,4 +88,16 @@ public class ProchainEvenementController {
 
         return "pages/prochainEvenement";
     }
-} 
+
+    static String classifyEventType(String nextEventName) {
+        if (nextEventName == null || nextEventName.isBlank()) {
+            return "";
+        }
+        String raw = nextEventName.split(",")[0].trim().toLowerCase();
+        if (ClubCalendarService.isRallyEventName(raw)) {
+            return "rallye";
+        }
+        return raw.replaceAll("[^a-z0-9]", "");
+    }
+}
+ 

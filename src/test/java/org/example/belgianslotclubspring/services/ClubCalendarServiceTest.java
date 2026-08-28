@@ -50,7 +50,27 @@ class ClubCalendarServiceTest {
         assertTrue(ClubCalendarService.isOfficialName(Club.SRCS, "GT24 / Proto 24"));
         assertFalse(ClubCalendarService.isOfficialName(Club.SRCS, "Ninco"));
         assertTrue(ClubCalendarService.isOfficialName(Club.SCO, "Rallye de la Basse Meuse"));
+        assertTrue(ClubCalendarService.isOfficialName(Club.SCO, "Rallye de la Vallée du Geer"));
+        assertTrue(ClubCalendarService.isOfficialName(Club.SCO, "Rallycross de Slins"));
         assertFalse(ClubCalendarService.isOfficialName(Club.SCO, "Scaleauto"));
+    }
+
+    @Test
+    void testRallyNamesAreIgnoredForCalendar() {
+        assertTrue(ClubCalendarService.isTestRallyName("test"));
+        assertTrue(ClubCalendarService.isTestRallyName("Test "));
+        assertTrue(ClubCalendarService.isTestRallyName("test copie"));
+        assertFalse(ClubCalendarService.isTestRallyName("Rallye de la Basse Meuse"));
+    }
+
+    @Test
+    void calendarTitleTruncatesToMaxLength() {
+        assertEquals("Rallye de la Basse Meuse", ClubCalendarService.calendarTitle("  Rallye   de la Basse Meuse "));
+        assertEquals("Rallye", ClubCalendarService.calendarTitle("   "));
+        String longName = "R".repeat(ClubCalendarService.NAME_MAX + 10);
+        String title = ClubCalendarService.calendarTitle(longName);
+        assertTrue(title.length() <= ClubCalendarService.NAME_MAX);
+        assertTrue(title.endsWith("…"));
     }
 
     @Test

@@ -2,6 +2,7 @@ package org.example.belgianslotclubspring.services;
 
 import org.example.belgianslotclubspring.entities.ClubCalendarCategory;
 import org.example.belgianslotclubspring.entities.ClubCalendarEvent;
+import org.example.belgianslotclubspring.entities.Rallye;
 import org.example.belgianslotclubspring.models.CalendarCategory;
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.models.ClubCalendar;
@@ -83,6 +84,46 @@ public class ClubCalendarService {
         return upsert(club, date, name, null);
     }
 
+    /**
+     * Place un rallye sur le calendrier du club (même date = mise à jour du nom).
+     * Ignore les rallyes « test » et les dates hors plage.
+     */
+    @Transactional
+    public boolean upsertFromRallye(Rallye rallye) {
+        if (rallye == null || rallye.getDate() == null) {
+            return false;
+        }
+        if (isTestRallyName(rallye.getName())) {
+            return false;
+        }
+        Club club = Club.fromCode(rallye.getClubName()).orElse(null);
+        if (club == null) {
+            return false;
+        }
+        try {
+            upsert(club, rallye.getDate(), calendarTitle(rallye.getName()));
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /** Retire l’entrée calendrier si elle correspond encore à ce rallye. */
+    @Transactional
+    public boolean deleteIfMatchesRallye(Rallye rallye) {
+        if (rallye == null || rallye.getDate() == null || rallye.getClubName() == null) {
+            return false;
+        }
+        String expected = calendarTitle(rallye.getName());
+        return eventRepo.findByClubNameAndEventDate(rallye.getClubName(), rallye.getDate())
+                .filter(event -> expected.equalsIgnoreCase(event.getName()))
+                .map(event -> {
+                    eventRepo.deleteByClubNameAndEventDate(rallye.getClubName(), rallye.getDate());
+                    return true;
+                })
+                .orElse(false);
+    }
+
     @Transactional
     public boolean deleteCustom(Club club, LocalDate date) {
         requireDate(date);
@@ -143,15 +184,42 @@ public class ClubCalendarService {
         }
         String key = name.trim().toLowerCase(Locale.ROOT);
         if (club.isSrcs()) {
-            return SRCS_OFFICIAL.contains(key);
+            return SRCS_OFFICIAL.contains(key) || isRallyEventName(key);
         }
         if (club.isSlot4000()) {
-            return SLOT4000_OFFICIAL.contains(key);
+            return SLOT4000_OFFICIAL.contains(key) || isRallyEventName(key);
         }
         if (club.isRallyOnly()) {
-            return SCO_OFFICIAL.contains(key);
+            return SCO_OFFICIAL.contains(key) || isRallyEventName(key);
         }
-        return false;
+        return isRallyEventName(key);
+    }
+
+    public static boolean isRallyEventName(String name) {
+        if (name == null || name.isBlank()) {
+            return false;
+        }
+        String key = name.trim().toLowerCase(Locale.ROOT);
+        return key.contains("rallye") || key.contains("rallycross") || key.startsWith("rally");
+    }
+
+    static boolean isTestRallyName(String name) {
+        if (name == null) {
+            return false;
+        }
+        String key = name.trim().toLowerCase(Locale.ROOT);
+        return key.equals("test") || key.startsWith("test ");
+    }
+
+    static String calendarTitle(String name) {
+        String value = name == null ? "" : name.trim().replaceAll("\\s+", " ");
+        if (value.isEmpty()) {
+            return "Rallye";
+        }
+        if (value.length() <= NAME_MAX) {
+            return value;
+        }
+        return value.substring(0, NAME_MAX - 1).trim() + "…";
     }
 
     static String cleanColor(String color, String name) {

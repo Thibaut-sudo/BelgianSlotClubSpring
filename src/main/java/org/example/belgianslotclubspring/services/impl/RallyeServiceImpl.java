@@ -20,10 +20,13 @@ import org.example.belgianslotclubspring.models.RallyeStandingRow;
 import org.example.belgianslotclubspring.repo.RallyeGroupAssignmentRepo;
 import org.example.belgianslotclubspring.repo.RallyePilotRepo;
 import org.example.belgianslotclubspring.repo.RallyeRepo;
+import org.example.belgianslotclubspring.services.ClubCalendarService;
 import org.example.belgianslotclubspring.services.RallyeService;
 import org.example.belgianslotclubspring.utils.RallyeSheetQr;
 import org.example.belgianslotclubspring.utils.RallyeTimeFormat;
 import org.example.belgianslotclubspring.utils.RecapPhrases;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,18 +39,23 @@ import java.util.*;
 @Transactional
 public class RallyeServiceImpl implements RallyeService {
 
+    private static final Logger log = LoggerFactory.getLogger(RallyeServiceImpl.class);
+
     private final RallyeRepo rallyeRepo;
     private final RallyePilotRepo pilotRepo;
     private final RallyeGroupAssignmentRepo groupAssignmentRepo;
+    private final ClubCalendarService clubCalendarService;
 
     public RallyeServiceImpl(
             RallyeRepo rallyeRepo,
             RallyePilotRepo pilotRepo,
-            RallyeGroupAssignmentRepo groupAssignmentRepo
+            RallyeGroupAssignmentRepo groupAssignmentRepo,
+            ClubCalendarService clubCalendarService
     ) {
         this.rallyeRepo = rallyeRepo;
         this.pilotRepo = pilotRepo;
         this.groupAssignmentRepo = groupAssignmentRepo;
+        this.clubCalendarService = clubCalendarService;
     }
 
     @Override
@@ -77,12 +85,18 @@ public class RallyeServiceImpl implements RallyeService {
         if (stagesPerBoucle != null && stagesPerBoucle > 0) {
             rallye.setStagesPerBoucle(stagesPerBoucle);
         }
-        return rallyeRepo.save(rallye);
+        Rallye saved = rallyeRepo.save(rallye);
+        addToCalendar(saved);
+        return saved;
     }
 
     @Override
     public void delete(Long id) {
+        Rallye rallye = rallyeRepo.findById(id).orElse(null);
         rallyeRepo.deleteById(id);
+        if (rallye != null) {
+            clubCalendarService.deleteIfMatchesRallye(rallye);
+        }
     }
 
     @Override
@@ -2055,6 +2069,16 @@ public class RallyeServiceImpl implements RallyeService {
             Integer sourceBoucle,
             int pilotsRanked
     ) {
+    }
+
+    private void addToCalendar(Rallye rallye) {
+        try {
+            if (!clubCalendarService.upsertFromRallye(rallye)) {
+                log.warn("Calendrier : rallye {} non ajouté (date ou nom ignoré).", rallye.getName());
+            }
+        } catch (RuntimeException e) {
+            log.warn("Calendrier : impossible d’ajouter le rallye {} : {}", rallye.getName(), e.getMessage());
+        }
     }
 
     private Rallye requireEditable(Long rallyeId) {

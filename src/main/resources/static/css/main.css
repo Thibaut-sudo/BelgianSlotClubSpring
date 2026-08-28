@@ -1539,6 +1539,8 @@ tbody tr:hover {
 .legend-color.event-slotit { background-color: #6b4fa0; }
 .event-gt,
 .legend-color.event-gt { background-color: #7c3aed; }
+.event-rallye,
+.legend-color.event-rallye { background-color: #c2410c; }
 
 /* Event card accent borders */
 [class*='event-'].next-event-card,
@@ -1569,6 +1571,7 @@ tbody tr:hover {
 .event-soirevab.next-event-card,
 .event-soirefun.next-event-card { border-left-color: #be185d; }
 .event-slotit.next-event-card { border-left-color: #6b4fa0; }
+.event-rallye.next-event-card { border-left-color: #c2410c; }
 
 .legend-color {
   width: 1rem;

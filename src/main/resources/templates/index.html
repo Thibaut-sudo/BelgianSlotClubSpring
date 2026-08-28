@@ -101,6 +101,7 @@
                     <p>Mardi dès 18h · Thibaut Lenertz 0491335150</p>
                     <div class="cluster">
                         <a href="/selectRace/srcs" class="btn btn-primary">Voir les courses</a>
+                        <a href="/reglement/srcs" class="btn btn-outline">Règlement</a>
                         <a href="https://www.facebook.com/groups/slotracingclubseraing" class="btn btn-outline" target="_blank" rel="noopener">Facebook</a>
                     </div>
                 </article>
@@ -160,7 +161,7 @@
                 const club = tile.getAttribute('data-club');
                 const rallyOnly = club === 'sco';
                 let href = resolve(club);
-                if (rallyOnly && (goto === 'courses' || goto === 'results' || goto === 'championnat')) {
+                if (rallyOnly && (goto === 'courses' || goto === 'results')) {
                     href = destinations.rallye(club);
                 }
                 tile.setAttribute('href', href);

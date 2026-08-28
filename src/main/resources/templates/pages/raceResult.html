@@ -6,6 +6,9 @@
 
     <section class="page-hero page-hero--club" th:data-club="${club}">
         <div class="page-hero-content container">
+            <p class="page-hero-eyebrow">
+                <a th:href="@{/selectRace/{club}(club=${club})}" class="page-hero-back">← Courses</a>
+            </p>
             <h1 class="page-hero-title">Résultats de course</h1>
             <p class="page-hero-sub">Qualifications et classement final détaillés</p>
             <div class="page-hero-meta">

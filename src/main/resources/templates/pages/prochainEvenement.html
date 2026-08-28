@@ -64,7 +64,7 @@
 
                 <div class="cluster next-event-actions">
                     <a th:if="${club == 'sco'}" th:href="@{/rallye(club=${club})}" class="btn btn-primary">Voir les rallyes</a>
-                    <a th:unless="${club == 'sco'}" th:href="@{/championnat(club=${club})}" class="btn btn-primary">Voir championnat</a>
+                    <a th:href="@{/championnat(club=${club})}" class="btn btn-primary">Voir championnat</a>
                     <a th:unless="${club == 'sco'}" th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-secondary">Voir courses</a>
                     <a th:href="@{/calendrier/{club}/google(club=${club})}"
                        class="btn btn-outline"

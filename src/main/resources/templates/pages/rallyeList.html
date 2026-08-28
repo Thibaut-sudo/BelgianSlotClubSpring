@@ -19,6 +19,7 @@
             <span th:if="${rallyOnly}">Hobby 2000 Liège</span>
             <span th:unless="${rallyOnly}">Club : <strong th:text="${clubDisplayName}">Club</strong></span>
             <span th:text="${#lists.size(rallyes)} + ' rallye(s)'">0 rallye(s)</span>
+            <a th:if="${rallyOnly}" class="btn btn-secondary" th:href="@{/championnat(club=${club})}">Championnat</a>
             <a th:if="${rallyOnly}" class="btn btn-secondary" href="/reglement/sco">Règlement 2026</a>
         </div>
     </div>
@@ -56,15 +57,33 @@
                 <ul class="rallye-card-list" th:unless="${#lists.isEmpty(rallyes)}">
                     <li th:each="r : ${rallyes}">
                         <article class="rallye-card">
+                            <a class="rallye-card-hit" th:if="${r.classementOnly or r.finished}"
+                               th:href="@{/rallye/{id}/classement(id=${r.id})}">
+                                <span class="sr-only" th:text="${'Ouvrir ' + r.name}">Ouvrir</span>
+                            </a>
+                            <a class="rallye-card-hit" th:unless="${r.classementOnly or r.finished}"
+                               th:href="@{/rallye/{id}(id=${r.id})}">
+                                <span class="sr-only" th:text="${'Ouvrir ' + r.name}">Ouvrir</span>
+                            </a>
                             <span class="rallye-card-date" th:text="${#temporals.format(r.date, 'dd/MM/yyyy')}">01/01/2026</span>
                             <span class="rallye-card-name" th:text="${r.name}">Nom</span>
                             <span class="rallye-card-meta"
-                                  th:text="${r.boucleCount} + ' boucles · ' + ${r.stagesPerBoucle} + ' ES · ' + ${r.pilots.size()} + ' pilotes' + (r.finished ? ' · Terminé' : '')">
+                                  th:text="${r.classementOnly}
+                                    ? (${r.pilots.size()} + ' pilotes · Classement final' + (r.finished ? ' · Terminé' : ''))
+                                    : (${r.boucleCount} + ' boucles · ' + ${r.stagesPerBoucle} + ' ES · ' + ${r.pilots.size()} + ' pilotes' + (r.finished ? ' · Terminé' : ''))">
                                 4 boucles · 5 ES
                             </span>
                             <div class="rallye-card-actions">
-                                <a class="btn btn-primary btn-sm" th:href="@{/rallye/{id}(id=${r.id})}">Saisie</a>
-                                <a class="btn btn-outline btn-sm" th:href="@{/rallye/{id}/classement(id=${r.id})}">Classement live</a>
+                                <a class="btn btn-primary btn-sm" th:if="${r.classementOnly}"
+                                   th:href="@{/rallye/{id}/classement(id=${r.id})}">Classement</a>
+                                <a class="btn btn-primary btn-sm" th:unless="${r.classementOnly}"
+                                   th:href="@{/rallye/{id}(id=${r.id})}">Saisie</a>
+                                <a class="btn btn-outline btn-sm"
+                                   th:if="${!r.classementOnly and !r.finished}"
+                                   th:href="@{/rallye/{id}/classement(id=${r.id})}">Classement live</a>
+                                <a class="btn btn-outline btn-sm"
+                                   th:if="${!r.classementOnly and r.finished}"
+                                   th:href="@{/rallye/{id}/classement(id=${r.id})}">Classement</a>
                             </div>
                         </article>
                     </li>

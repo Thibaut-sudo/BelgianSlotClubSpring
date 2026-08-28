@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="article (heading)" class="reglement-article" id="scaleauto24">
+    <h3 th:text="${heading}">Scaleauto (1/24)</h3>
+    <p>Règlement Scaleauto 2020-2021. Tout ce qui n’est pas mentionné est interdit. En cas de doute, contactez l’organisation.</p>
+
+    <div class="category-details">
+        <h5>Châssis</h5>
+        <ul class="reglement-list">
+            <li>Châssis Scaleauto sans aucune modification. Les bords peuvent être nettoyés.</li>
+            <li>Seuls les châssis en acier sont autorisés (réf. <strong>SC-8000</strong>, <strong>SC-8001</strong>, <strong>SC-8003C</strong> ou <strong>MSC 11</strong>).</li>
+            <li>Poids du châssis : <strong>140–145 g</strong>.</li>
+            <li>Le support moteur doit rester d’origine Scaleauto.</li>
+            <li>La plaque en H doit être fixée aux 4 points d’origine et ne doit pas être à ressort. Aucune autre fixation n’est autorisée.</li>
+            <li>Le support de guide doit rester d’origine.</li>
+            <li>Le support de carrosserie universel <strong>SC-8132</strong> peut être utilisé, mais <strong>sans</strong> la plaque de laiton qui y est fixée.</li>
+            <li>Les supports de carrosserie CNC ne sont pas autorisés.</li>
+            <li>Les supports d’axe avec suspension et la suspension arrière sont interdits.</li>
+            <li>Le contrepoids doit être monté dans les portes de la voiture, au-dessus du montage sur la plaque en H.</li>
+        </ul>
+
+        <h5>Carrosserie</h5>
+        <ul class="reglement-list">
+            <li>Le véhicule doit être complètement peint à la manière d’une voiture de course (une couche de vernis n’est pas une peinture), avec des numéros (de préférence plus élevés que le n° 10).</li>
+            <li>Seules les carrosseries en plastique sont autorisées. La carrosserie peut être renforcée.</li>
+            <li>Les vis de fixation doivent être serrées.</li>
+            <li>Un numéro de pilote sera placé sur la vitre avant pour toute la saison.</li>
+            <li>L’aileron doit être l’aileron Scaleauto d’origine ou la version carbone correspondante ; il peut être monté sur un matériau flexible.</li>
+            <li>Tous les véhicules peuvent être fournis avec vitres et intérieur lexan.</li>
+            <li>Le diffuseur peut être réglé pour que les roues arrière tournent librement, mais il doit être présent.</li>
+            <li>Si du plomb doit être ajouté : au-dessus du support de carrosserie et entre les deux supports de capuchon.</li>
+        </ul>
+
+        <h5>Poids carrosserie (minimum)</h5>
+        <div class="penalties-table">
+            <table>
+                <thead>
+                <tr>
+                    <th>Carrosseries</th>
+                    <th>Poids mini</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>BMW, Jaguar, Mercedes</td>
+                    <td>50 g</td>
+                </tr>
+                <tr>
+                    <td>Audi (ancienne), Porsche</td>
+                    <td>55 g</td>
+                </tr>
+                <tr>
+                    <td>Viper, Corvette, Audi (nouvelle)</td>
+                    <td>60 g</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <ul class="reglement-list">
+            <li><strong>Audi ancienne</strong> (R8 LMS) : reste à <strong>55 g</strong>.</li>
+            <li><strong>Audi nouvelle</strong> (R8 LMS GT3 Evo II) : <strong>60 g</strong>.</li>
+        </ul>
+
+        <h5>Intérieur</h5>
+        <ul class="reglement-list">
+            <li>L’intérieur doit être placé correctement, en position de voir la route, comme un pilote réel.</li>
+        </ul>
+
+        <h5>Axe avant</h5>
+        <ul class="reglement-list">
+            <li>Acier</li>
+            <li>Diamètre min. 25,5 mm</li>
+            <li>Largeur min. 6 mm</li>
+            <li>Maximum 83 mm de large, ou pas à l’extérieur de la carrosserie</li>
+            <li>Inserts 3D identiques obligatoires. Lexan ou autocollants interdits</li>
+        </ul>
+
+        <h5>Axe arrière</h5>
+        <ul class="reglement-list">
+            <li>Acier</li>
+            <li>Diamètre minimum 26 mm</li>
+            <li>Largeur : 13 mm</li>
+            <li>Procomp 3 ou 4, réf. <strong>SC-2425p</strong>, <strong>SC-2421p</strong>, <strong>SC-2525p</strong>, <strong>SC-2521p</strong></li>
+            <li>Maximum 83 mm de large, ou pas à l’extérieur de la carrosserie</li>
+            <li>Inserts 3D identiques obligatoires. Lexan ou autocollants interdits</li>
+        </ul>
+
+        <h5>Guide</h5>
+        <ul class="reglement-list">
+            <li>Scaleauto</li>
+        </ul>
+
+        <h5>Moteur</h5>
+        <ul class="reglement-list">
+            <li>Réf. <strong>SC-0025</strong>, <strong>SC-0025B</strong>, <strong>SC-0026</strong>, <strong>SC-0029</strong>, non ouvert et non modifié</li>
+        </ul>
+
+        <h5>Transmission</h5>
+        <ul class="reglement-list">
+            <li>12×43 ou 12×44</li>
+            <li>Couronne Scaleauto uniquement ; marque et matériau du pignon libres</li>
+        </ul>
+
+        <h5>Garde au sol</h5>
+        <ul class="reglement-list">
+            <li>1,2 mm</li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

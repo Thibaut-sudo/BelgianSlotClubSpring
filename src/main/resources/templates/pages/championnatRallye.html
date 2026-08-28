@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Championnat Rallye Slot — Belgian Slot Club')}"></head>
+<link rel="stylesheet" href="/css/rallye-mobile.css?v=16">
+<body class="rallye-app">
+<header th:replace="~{fragments/layout :: nav(active='championnat', club=${club})}"></header>
+
+<section class="page-hero page-hero--club" th:data-club="${club}">
+    <div class="page-hero-content container">
+        <h1 class="page-hero-title">Championnat 2026</h1>
+        <p class="page-hero-sub">Points par catégorie, +1 au scratch, bonus de présence. Sur 6 manches, les 5 meilleurs résultats comptent.</p>
+        <div class="page-hero-meta">
+            <span th:text="${clubDisplayName}">Championnat de Belgique des Rallyes Slot</span>
+            <span th:text="${table.pilotCount()} + ' pilotes'">0 pilotes</span>
+            <span th:text="${table.rallyCount()} + ' manches'">0 manches</span>
+            <span th:if="${table.leaderPoints() > 0}" th:text="'Leader ' + ${table.leaderPoints()} + ' pts'">Leader</span>
+        </div>
+        <div class="page-hero-actions cluster">
+            <a class="btn btn-primary" th:href="@{/rallye(club=${club})}">Voir les rallyes</a>
+            <a class="btn btn-outline" href="/reglement/sco#points">Règlement des points</a>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+
+        <ul class="page-logo-strip" aria-label="Clubs et partenaires">
+            <li><img src="/images/partners/diepenbeek.png" alt="Slotracefriends Diepenbeek"></li>
+            <li><img src="/images/srcs-logo.jpg?v=3" alt="SRCS"></li>
+            <li class="page-logo-strip--dark"><img src="/images/slot4000-logo.jpg?v=3" alt="Slot 4000"></li>
+            <li><img src="/images/partners/srcm.png" alt="SRCM"></li>
+            <li><img src="/images/partners/sco.png" alt="SCO Slot Rally"></li>
+            <li><img src="/images/partners/scaleauto.png" alt="Scaleauto"></li>
+            <li><img src="/images/partners/georges.png" alt="Moto-école Georges"></li>
+            <li><img src="/images/partners/hobby2000.png" alt="Hobby 2000"></li>
+            <li><img src="/images/partners/3d-by-ryu.png" alt="3D by Ryu"></li>
+        </ul>
+
+        <div class="filters-bar">
+            <div class="filter-group">
+                <label class="filter-label" for="champCat">Catégorie</label>
+                <select id="champCat" class="form-select filter-select"
+                        onchange="location.href=this.value">
+                    <option th:value="@{/championnat(club=${club})}"
+                            th:selected="${selectedCategory == null}">Général</option>
+                    <option th:each="c : ${categories}"
+                            th:value="@{/championnat(club=${club}, categorie=${c})}"
+                            th:text="${c}"
+                            th:selected="${c == selectedCategory}"></option>
+                </select>
+            </div>
+        </div>
+
+        <p class="section-lead">
+            1<sup>er</sup> de catégorie 24 pts · 2<sup>e</sup> 22 · 3<sup>e</sup> 20 · ensuite −1.
+            +1 au vainqueur scratch. +2 par départ (+4 au 6<sup>e</sup>).
+            <span th:if="${table.dropsWorst()}">Le plus mauvais résultat est jeté (bonus conservé).</span>
+            <span th:unless="${table.dropsWorst()}">Le jet du plus mauvais résultat s’appliquera à 6 manches.</span>
+            WRC 3 ne peut pas remporter le titre général.
+        </p>
+
+        <div class="table-wrap championship-table-wrap" th:if="${!#lists.isEmpty(table.rows)}">
+            <table class="data-table rallye-table championship-table" id="rallyeChampTable">
+                <thead>
+                <tr>
+                    <th class="position">Pos.</th>
+                    <th>Pilote</th>
+                    <th>Cat.</th>
+                    <th th:each="ev : ${table.events}">
+                        <a th:href="@{/rallye/{id}/classement(id=${ev.id})}"
+                           th:text="${ev.shortLabel}">Manche</a>
+                    </th>
+                    <th>Bonus</th>
+                    <th class="total-points">Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${table.rows}"
+                    th:classappend="${table.titleLeader() != null and row.position == table.titleLeader().position} ? ' is-leader' : (${!row.titleEligible} ? ' is-ineligible' : '')">
+                    <td class="position"
+                        th:classappend="' position-' + ${row.position}"
+                        th:text="${row.position}">1</td>
+                    <td class="pilot-name">
+                        <span th:text="${row.name}">Nom</span>
+                        <span class="rallye-champ-note" th:if="${!row.titleEligible}">hors titre</span>
+                    </td>
+                    <td th:text="${row.category}">WRC EX</td>
+                    <td th:each="pts, iter : ${row.racePoints}"
+                        class="mono"
+                        th:classappend="${pts != null and pts >= 25} ? ' rallye-champ-scratch' : (${row.droppedPoints != null and pts != null and pts == row.droppedPoints} ? ' rallye-champ-dropped' : '')"
+                        th:text="${pts == null} ? '—' : ${pts}">—</td>
+                    <td class="mono" th:text="${row.presenceBonus}">6</td>
+                    <td class="mono total-points" th:text="${row.total}">0</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <p th:if="${#lists.isEmpty(table.rows)}" class="empty-state">
+            Aucun rallye terminé pour ce championnat. Les points apparaîtront dès qu’une manche sera close.
+        </p>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

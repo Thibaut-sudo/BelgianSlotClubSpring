@@ -64,4 +64,11 @@ public class Rallye {
     public int totalStages() {
         return boucleCount * stagesPerBoucle;
     }
+
+    /**
+     * Rallye-cross / résultat d’archive : une seule place par pilote, sans saisie ES.
+     */
+    public boolean isClassementOnly() {
+        return boucleCount == 1 && stagesPerBoucle == 1;
+    }
 }

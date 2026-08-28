@@ -8,14 +8,20 @@
 <section class="page-hero page-hero--club page-hero--rallye-compact" th:data-club="${club}">
     <div class="page-hero-content container">
         <p class="page-hero-eyebrow">
-            <a th:href="@{/rallye/{id}(id=${rallye.id})}" class="page-hero-back">← Saisie</a>
+            <a th:href="@{/rallye/{id}(id=${rallye.id})}" class="page-hero-back"
+               th:text="${rallye.classementOnly} ? '← Rallye' : '← Saisie'">← Saisie</a>
         </p>
         <h1 class="page-hero-title" th:text="${rallye.name}">Rallye</h1>
-        <p class="page-hero-sub">Classement en direct — se met à jour à chaque nouveau chrono.</p>
+        <p class="page-hero-sub"
+           th:text="${rallye.classementOnly or rallye.finished}
+             ? 'Classement final de l’épreuve.'
+             : 'Classement en direct — se met à jour à chaque nouveau chrono.'">
+            Classement en direct — se met à jour à chaque nouveau chrono.
+        </p>
         <div class="page-hero-meta">
             <span th:text="${#temporals.format(rallye.date, 'dd/MM/yyyy')}">01/01/2026</span>
             <span th:text="${clubDisplayName}">Club</span>
-            <span class="classement-live-badge" id="liveBadge">
+            <span class="classement-live-badge" id="liveBadge" th:unless="${rallye.classementOnly or rallye.finished}">
                 <span class="classement-live-dot" aria-hidden="true"></span>
                 En direct
             </span>
@@ -31,10 +37,12 @@
                       data-after=${afterStages},
                       data-total=${rallye.totalStages()},
                       data-category=${selectedCategory != null ? selectedCategory : ''},
-                      data-fingerprint=${fingerprint}">
+                      data-fingerprint=${fingerprint},
+                      data-classement-only=${rallye.classementOnly},
+                      data-finished=${rallye.finished}">
 
             <div class="filters-bar">
-                <div class="filter-group">
+                <div class="filter-group" th:unless="${rallye.classementOnly}">
                     <label class="filter-label">Après</label>
                     <div class="rallye-tabs rallye-tabs--compact" id="liveCheckpoints">
                         <button type="button" class="rallye-tab"
@@ -68,10 +76,10 @@
                         <th>Pilote</th>
                         <th>Voiture</th>
                         <th>Cat.</th>
-                        <th>Temps</th>
-                        <th title="Écart avec le pilote précédent">Préc.</th>
-                        <th title="Écart avec le leader">Au 1er</th>
-                        <th>ES</th>
+                        <th th:unless="${rallye.classementOnly}">Temps</th>
+                        <th th:unless="${rallye.classementOnly}" title="Écart avec le pilote précédent">Préc.</th>
+                        <th th:unless="${rallye.classementOnly}" title="Écart avec le leader">Au 1er</th>
+                        <th th:unless="${rallye.classementOnly}">ES</th>
                     </tr>
                     </thead>
                     <tbody id="liveStandingsBody">
@@ -81,10 +89,10 @@
                         <td th:text="${row.name}">Nom</td>
                         <td th:text="${row.car}">Voiture</td>
                         <td th:text="${row.category}">Cat</td>
-                        <td class="mono" th:text="${row.totalFormatted}">0.000</td>
-                        <td class="mono" th:text="${row.gapToPreviousFormatted}">—</td>
-                        <td class="mono" th:text="${row.gapFormatted}">—</td>
-                        <td th:text="${row.stagesCompleted} + '/' + ${row.stagesExpected}">0/5</td>
+                        <td class="mono" th:unless="${rallye.classementOnly}" th:text="${row.totalFormatted}">0.000</td>
+                        <td class="mono" th:unless="${rallye.classementOnly}" th:text="${row.gapToPreviousFormatted}">—</td>
+                        <td class="mono" th:unless="${rallye.classementOnly}" th:text="${row.gapFormatted}">—</td>
+                        <td th:unless="${rallye.classementOnly}" th:text="${row.stagesCompleted} + '/' + ${row.stagesExpected}">0/5</td>
                     </tr>
                     </tbody>
                 </table>
@@ -100,8 +108,10 @@
                     <div class="rallye-standing-card__info">
                         <strong th:text="${row.name}">Nom</strong>
                         <span th:if="${row.car != null and !#strings.isEmpty(row.car)}" th:text="${row.car}"></span>
+                        <span th:if="${rallye.classementOnly and row.category != null and !#strings.isEmpty(row.category)}"
+                              th:text="${row.category}"></span>
                     </div>
-                    <div class="rallye-standing-card__times">
+                    <div class="rallye-standing-card__times" th:unless="${rallye.classementOnly}">
                         <span class="mono" th:text="${row.totalFormatted}">0.000</span>
                         <span class="rallye-standing-card__gap mono">
                             <span>préc. <span th:text="${row.gapToPreviousFormatted}">—</span></span>
@@ -122,6 +132,6 @@
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
-<script src="/js/rallye-classement-live.js?v=1"></script>
+<script src="/js/rallye-classement-live.js?v=3"></script>
 </body>
 </html>

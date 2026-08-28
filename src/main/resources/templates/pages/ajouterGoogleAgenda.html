@@ -6,6 +6,9 @@
 
     <section class="page-hero">
         <div class="page-hero-content container">
+            <p class="page-hero-eyebrow">
+                <a th:href="@{/prochain-evenement(club=${club})}" class="page-hero-back">← Calendrier</a>
+            </p>
             <h1 class="page-hero-title">Ajouter à Google Agenda</h1>
             <p class="page-hero-sub">
                 Calendrier
@@ -103,6 +106,8 @@
         </div>
     </main>
 
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
     <script>
         document.getElementById('copyIcsBtn')?.addEventListener('click', async function () {
             const field = document.getElementById('icsUrlField');

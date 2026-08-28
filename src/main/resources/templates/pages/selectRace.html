@@ -38,7 +38,8 @@
                 <a th:href="@{/forum(club=${club})}" class="btn btn-secondary">Forum</a>
                 <a th:href="@{/marketplace(club=${club})}" class="btn btn-secondary">Marketplace</a>
                 <a th:href="@{/prochain-evenement(club=${club})}" class="btn btn-outline">Calendrier</a>
-                <a href="/reglement" class="btn btn-outline" th:if="${club == 'slot4000'}">Règlement</a>
+                <a th:href="@{/reglement/{club}(club=${club})}" class="btn btn-outline"
+                   th:if="${club == 'slot4000' or club == 'srcs'}">Règlement</a>
             </div>
         </div>
     </section>

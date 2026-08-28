@@ -5,6 +5,8 @@
     }
 
     const rallyeId = root.dataset.rallyeId;
+    const classementOnly = root.dataset.classementOnly === 'true';
+    const finished = root.dataset.finished === 'true';
     let after = Number(root.dataset.after) || 0;
     let category = root.dataset.category || '';
     let fingerprint = root.dataset.fingerprint || '';
@@ -48,32 +50,39 @@
         empty.classList.toggle('is-empty', hasRows);
 
         tbody.innerHTML = rows.map(function (row) {
-            return '<tr class="' + rowClass(row).trim() + '">'
+            var html = '<tr class="' + rowClass(row).trim() + '">'
                 + '<td>' + escapeHtml(posLabel(row)) + '</td>'
                 + '<td>' + escapeHtml(row.name) + '</td>'
                 + '<td>' + escapeHtml(row.car) + '</td>'
-                + '<td>' + escapeHtml(row.category) + '</td>'
-                + '<td class="mono">' + escapeHtml(row.totalFormatted) + '</td>'
-                + '<td class="mono">' + escapeHtml(row.gapToPreviousFormatted) + '</td>'
-                + '<td class="mono">' + escapeHtml(row.gapFormatted) + '</td>'
-                + '<td>' + escapeHtml(row.stagesCompleted + '/' + row.stagesExpected) + '</td>'
-                + '</tr>';
+                + '<td>' + escapeHtml(row.category) + '</td>';
+            if (!classementOnly) {
+                html += '<td class="mono">' + escapeHtml(row.totalFormatted) + '</td>'
+                    + '<td class="mono">' + escapeHtml(row.gapToPreviousFormatted) + '</td>'
+                    + '<td class="mono">' + escapeHtml(row.gapFormatted) + '</td>'
+                    + '<td>' + escapeHtml(row.stagesCompleted + '/' + row.stagesExpected) + '</td>';
+            }
+            return html + '</tr>';
         }).join('');
 
         cardsWrap.innerHTML = rows.map(function (row) {
-            const car = row.car ? '<span>' + escapeHtml(row.car) + '</span>' : '';
-            return '<article class="rallye-standing-card' + rowClass(row) + '">'
+            const extra = row.car
+                ? '<span>' + escapeHtml(row.car) + '</span>'
+                : (classementOnly && row.category ? '<span>' + escapeHtml(row.category) + '</span>' : '');
+            var html = '<article class="rallye-standing-card' + rowClass(row) + '">'
                 + '<div class="rallye-standing-card__pos">' + escapeHtml(posLabel(row)) + '</div>'
-                + '<div class="rallye-standing-card__info"><strong>' + escapeHtml(row.name) + '</strong>' + car + '</div>'
-                + '<div class="rallye-standing-card__times">'
-                + '<span class="mono">' + escapeHtml(row.totalFormatted) + '</span>'
-                + '<span class="rallye-standing-card__gap mono">'
-                + '<span>préc. <span>' + escapeHtml(row.gapToPreviousFormatted) + '</span></span>'
-                + '<span class="rallye-standing-card__gap-sep">·</span>'
-                + '<span>1er <span>' + escapeHtml(row.gapFormatted) + '</span></span>'
-                + '</span>'
-                + '<span class="rallye-standing-card__es">' + escapeHtml(row.stagesCompleted + '/' + row.stagesExpected) + '</span>'
-                + '</div></article>';
+                + '<div class="rallye-standing-card__info"><strong>' + escapeHtml(row.name) + '</strong>' + extra + '</div>';
+            if (!classementOnly) {
+                html += '<div class="rallye-standing-card__times">'
+                    + '<span class="mono">' + escapeHtml(row.totalFormatted) + '</span>'
+                    + '<span class="rallye-standing-card__gap mono">'
+                    + '<span>préc. <span>' + escapeHtml(row.gapToPreviousFormatted) + '</span></span>'
+                    + '<span class="rallye-standing-card__gap-sep">·</span>'
+                    + '<span>1er <span>' + escapeHtml(row.gapFormatted) + '</span></span>'
+                    + '</span>'
+                    + '<span class="rallye-standing-card__es">' + escapeHtml(row.stagesCompleted + '/' + row.stagesExpected) + '</span>'
+                    + '</div>';
+            }
+            return html + '</article>';
         }).join('');
     }
 
@@ -140,7 +149,9 @@
         });
     }
 
-    window.setInterval(poll, 2500);
+    if (!classementOnly && !finished) {
+        window.setInterval(poll, 2500);
+    }
     document.addEventListener('visibilitychange', function () {
         if (!document.hidden) {
             poll();

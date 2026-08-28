@@ -20,18 +20,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css?v=50">
+    <link rel="stylesheet" href="/css/main.css?v=54">
     <link rel="icon" type="image/png" href="/images/favicon.png">
 </head>
 
 <!-- Navigation fragment -->
-<header th:fragment="nav (active, club)" class="site-nav" id="navbar">
+<header th:fragment="nav (active, club)" class="site-nav" id="navbar"
+        th:attr="data-club=${club}">
     <div class="nav-inner container">
         <div class="nav-brand-wrap">
-            <button type="button" class="nav-back" id="navBackBtn" aria-label="Retour" title="Retour"
-                    th:if="${active != 'home'}">
+            <a class="nav-back" id="navBackBtn" href="/" aria-label="Retour" title="Retour"
+               th:if="${active != 'home'}">
                 <span aria-hidden="true">‹</span>
-            </button>
+            </a>
             <a href="/" class="nav-brand">
                 <span class="nav-brand-mark">BSC</span>
                 <span class="nav-brand-text">Belgian Slot Club</span>
@@ -56,7 +57,7 @@
                            th:classappend="${active == 'courses'} ? ' active' : ''"
                            th:attr="aria-current=${active == 'courses'} ? 'page' : null">Courses</a>
                     </li>
-                    <li th:unless="${club == 'sco'}">
+                    <li>
                         <a class="nav-link"
                            th:href="@{/championnat(club=${club})}"
                            th:classappend="${active == 'championnat'} ? ' active' : ''"
@@ -82,6 +83,12 @@
                     </li>
                     <li th:if="${club == 'slot4000'}">
                         <a href="/reglement" class="nav-link"
+                           th:classappend="${active == 'reglement'} ? ' active' : ''"
+                           th:attr="aria-current=${active == 'reglement'} ? 'page' : null">Règlement</a>
+                    </li>
+                    <li th:if="${club == 'srcs'}">
+                        <a class="nav-link"
+                           href="/reglement/srcs"
                            th:classappend="${active == 'reglement'} ? ' active' : ''"
                            th:attr="aria-current=${active == 'reglement'} ? 'page' : null">Règlement</a>
                     </li>
@@ -124,6 +131,7 @@
                 <li><a href="/selectRace/slot4000">Slot4000</a></li>
                 <li><a href="/reglement">Règlement Slot 4000</a></li>
                 <li><a href="/selectRace/srcs">SRCS</a></li>
+                <li><a href="/reglement/srcs">Règlement SRCS</a></li>
                 <li><a href="/rallye?club=sco">Rallyes Slot</a></li>
                 <li><a href="/reglement/sco">Règlement Rallye Slot</a></li>
             </ul>
@@ -209,7 +217,7 @@
             </form>
         </div>
     </div>
-    <script src="/js/navigation.js"></script>
+    <script src="/js/navigation.js?v=2"></script>
     <script src="/js/import-auth.js?v=1"></script>
 </th:block>
 

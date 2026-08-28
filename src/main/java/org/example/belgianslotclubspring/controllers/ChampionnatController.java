@@ -1,7 +1,9 @@
 package org.example.belgianslotclubspring.controllers;
 
 import org.example.belgianslotclubspring.models.Club;
+import org.example.belgianslotclubspring.models.RallyeChampionshipTable;
 import org.example.belgianslotclubspring.services.RaceResultService;
+import org.example.belgianslotclubspring.services.RallyeChampionshipService;
 import org.example.belgianslotclubspring.utils.CategoryNames;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,9 +19,14 @@ import java.util.Map;
 public class ChampionnatController {
 
     private final RaceResultService raceResultService;
+    private final RallyeChampionshipService rallyeChampionshipService;
 
-    public ChampionnatController(RaceResultService raceResultService) {
+    public ChampionnatController(
+            RaceResultService raceResultService,
+            RallyeChampionshipService rallyeChampionshipService
+    ) {
         this.raceResultService = raceResultService;
+        this.rallyeChampionshipService = rallyeChampionshipService;
     }
 
     @GetMapping("/championnat")
@@ -38,7 +45,15 @@ public class ChampionnatController {
         String clubCode = Club.requireCode(club);
         Club clubEnum = Club.fromCode(clubCode).orElseThrow();
         if (clubEnum.isRallyOnly()) {
-            return "redirect:/rallye?club=" + clubCode;
+            RallyeChampionshipTable table = rallyeChampionshipService.build(clubCode, year, category);
+            model.addAttribute("club", clubCode);
+            model.addAttribute("clubDisplayName", clubEnum.getDisplayName());
+            model.addAttribute("rallyOnly", true);
+            model.addAttribute("table", table);
+            model.addAttribute("selectedYear", table.year());
+            model.addAttribute("selectedCategory", table.selectedCategory());
+            model.addAttribute("categories", table.categories());
+            return "pages/championnatRallye";
         }
 
         model.addAttribute("club", clubCode);

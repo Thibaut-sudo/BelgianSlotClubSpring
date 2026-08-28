@@ -201,6 +201,7 @@ ul, ol {
   width: 1.75rem;
   height: 1.75rem;
   padding: 0;
+  text-decoration: none;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-paper);
@@ -834,6 +835,11 @@ body.nav-open .nav-toggle span:nth-child(3) {
     aspect-ratio: 3 / 2;
   }
 
+  .club-tile[data-club="slot4000"] .club-tile-media {
+    height: auto;
+    aspect-ratio: 3070 / 966;
+  }
+
   .club-tile img,
   .club-tile .club-tile-image {
     padding: 0.55rem 0.7rem;
@@ -1041,11 +1047,15 @@ body.nav-open .nav-toggle span:nth-child(3) {
 }
 
 .club-tile[data-club="slot4000"] .club-tile-media {
-  background: #2b2d29;
+  height: auto;
+  aspect-ratio: 3070 / 966;
+  background: #d4d4d2;
 }
 
 .club-tile[data-club="slot4000"] .club-tile-image {
   padding: 0;
+  object-fit: cover;
+  object-position: center;
 }
 
 .club-tile[data-club="sco"] .club-tile-media {
@@ -1608,6 +1618,27 @@ tbody tr:hover {
   color: var(--color-accent);
 }
 
+.rallye-champ-note {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.rallye-champ-scratch {
+  font-weight: 700;
+}
+
+.rallye-champ-dropped {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.championship-table tr.is-ineligible td.pilot-name {
+  font-weight: 500;
+}
+
 .championship-table .sortable {
   cursor: pointer;
   user-select: none;
@@ -2061,6 +2092,7 @@ a.feature-item:hover h3 {
 }
 
 .rallye-card {
+  position: relative;
   display: grid;
   gap: var(--space-1);
   padding: var(--space-5);
@@ -2069,13 +2101,22 @@ a.feature-item:hover h3 {
   background: var(--color-white);
   text-decoration: none;
   color: inherit;
+  cursor: pointer;
   transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
 }
 
-.rallye-card:hover {
+.rallye-card:hover,
+.rallye-card:has(.rallye-card-hit:focus-visible) {
   border-color: var(--color-accent);
   box-shadow: var(--shadow);
   transform: translateY(-1px);
+}
+
+.rallye-card-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
 }
 
 .rallye-card-date {
@@ -2098,14 +2139,12 @@ a.feature-item:hover h3 {
 }
 
 .rallye-card-actions {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-4);
-}
-
-article.rallye-card:hover {
-  transform: none;
 }
 
 .stack-form {

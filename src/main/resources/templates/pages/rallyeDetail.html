@@ -11,21 +11,28 @@
             <a th:href="@{/rallye(club=${club})}" class="page-hero-back">← Rallyes</a>
         </p>
         <h1 class="page-hero-title" th:text="${rallye.name}">Rallye</h1>
-        <p class="page-hero-sub page-hero-sub--desktop">Saisie simplifiée des temps · classements recalculés automatiquement</p>
+        <p class="page-hero-sub page-hero-sub--desktop"
+           th:text="${rallye.classementOnly}
+             ? 'Classement final — places, pilotes et catégories.'
+             : 'Saisie simplifiée des temps · classements recalculés automatiquement'">
+            Saisie simplifiée des temps · classements recalculés automatiquement
+        </p>
         <div class="page-hero-meta">
             <span th:text="${#temporals.format(rallye.date, 'dd/MM/yyyy')}">01/01/2026</span>
             <span th:text="${clubDisplayName}">SRCS</span>
-            <span th:text="${rallye.boucleCount} + ' boucles'">4 boucles</span>
-            <span th:text="${rallye.stagesPerBoucle} + ' ES'">5 ES</span>
+            <span th:unless="${rallye.classementOnly}" th:text="${rallye.boucleCount} + ' boucles'">4 boucles</span>
+            <span th:unless="${rallye.classementOnly}" th:text="${rallye.stagesPerBoucle} + ' ES'">5 ES</span>
+            <span th:if="${rallye.classementOnly}">Classement final</span>
             <span th:text="${rallye.pilots.size()} + ' pilotes'">0 pilotes</span>
             <span th:if="${rallye.finished}" class="rallye-finished-badge">Terminé</span>
         </div>
         <div class="page-hero-actions cluster page-hero-actions--desktop">
-            <a href="#saisie" class="btn btn-primary" th:text="${rallye.finished} ? 'Voir les temps' : 'Saisir les temps'">Saisir les temps</a>
-            <a th:href="@{/rallye/{id}/grilles(id=${rallye.id})}" class="btn btn-secondary">Grilles à imprimer</a>
-            <a href="#classement" class="btn btn-outline">Classement</a>
-            <a th:href="@{/rallye/{id}/classement(id=${rallye.id})}" class="btn btn-outline">Classement live</a>
-            <a href="#compte-rendu" class="btn btn-outline">Compte rendu</a>
+            <a th:unless="${rallye.classementOnly}" href="#saisie" class="btn btn-primary" th:text="${rallye.finished} ? 'Voir les temps' : 'Saisir les temps'">Saisir les temps</a>
+            <a th:unless="${rallye.classementOnly}" th:href="@{/rallye/{id}/grilles(id=${rallye.id})}" class="btn btn-secondary">Grilles à imprimer</a>
+            <a href="#classement" class="btn" th:classappend="${rallye.classementOnly} ? ' btn-primary' : ' btn-outline'">Classement</a>
+            <a th:href="@{/rallye/{id}/classement(id=${rallye.id})}" class="btn btn-outline"
+               th:text="${rallye.classementOnly} ? 'Classement public' : (${rallye.finished} ? 'Classement' : 'Classement live')">Classement live</a>
+            <a th:unless="${rallye.classementOnly}" href="#compte-rendu" class="btn btn-outline">Compte rendu</a>
             <a href="#pilotes" class="btn btn-outline">Pilotes</a>
             <button type="button" class="btn btn-outline" id="rallyeSharePhoneBtn" aria-haspopup="dialog">
                 Sur téléphone
@@ -55,11 +62,14 @@
 </div>
 
 <nav class="rallye-mobile-nav no-print" aria-label="Navigation rallye">
-    <a href="#saisie" class="rallye-mobile-nav__link is-primary">Saisie</a>
-    <a th:href="@{/rallye/{id}/grilles(id=${rallye.id})}" class="rallye-mobile-nav__link">Grilles</a>
-    <a href="#classement" class="rallye-mobile-nav__link">Classement</a>
-    <a th:href="@{/rallye/{id}/classement(id=${rallye.id})}" class="rallye-mobile-nav__link">Live</a>
-    <a href="#compte-rendu" class="rallye-mobile-nav__link">Résumé</a>
+    <a th:unless="${rallye.classementOnly}" href="#saisie" class="rallye-mobile-nav__link is-primary">Saisie</a>
+    <a th:unless="${rallye.classementOnly}" th:href="@{/rallye/{id}/grilles(id=${rallye.id})}" class="rallye-mobile-nav__link">Grilles</a>
+    <a href="#classement" class="rallye-mobile-nav__link"
+       th:classappend="${rallye.classementOnly} ? ' is-primary'">Classement</a>
+    <a th:href="@{/rallye/{id}/classement(id=${rallye.id})}" class="rallye-mobile-nav__link"
+       th:if="${rallye.classementOnly or !rallye.finished}"
+       th:text="${rallye.classementOnly} ? 'Public' : 'Live'">Live</a>
+    <a th:unless="${rallye.classementOnly}" href="#compte-rendu" class="rallye-mobile-nav__link">Résumé</a>
     <a href="#pilotes" class="rallye-mobile-nav__link">Pilotes</a>
 </nav>
 
@@ -68,7 +78,10 @@
 
         <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
         <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
-        <div th:if="${rallye.finished}" class="flash rallye-locked-banner" role="status">
+        <div th:if="${rallye.finished}" class="flash rallye-locked-banner" role="status"
+             th:text="${rallye.classementOnly}
+               ? 'Classement final figé.'
+               : 'Ce rallye est terminé. Les pilotes, temps et grilles ne peuvent plus être modifiés.'">
             Ce rallye est terminé. Les pilotes, temps et grilles ne peuvent plus être modifiés.
         </div>
 
@@ -82,7 +95,7 @@
                         Ajoutez à la main ou importez un Excel SRCS (pilotes + temps de chaque ES).
                     </p>
                 </div>
-                <a th:if="${!#lists.isEmpty(rallye.pilots)}"
+                <a th:if="${!#lists.isEmpty(rallye.pilots) and !rallye.classementOnly}"
                    th:href="@{/rallye/{id}/grilles(id=${rallye.id})}"
                    class="btn btn-secondary btn-sm page-hero-actions--desktop">Grilles groupes</a>
             </div>
@@ -187,7 +200,7 @@
         </div>
 
         <!-- Saisie temps -->
-        <div id="saisie" class="rallye-block">
+        <div id="saisie" class="rallye-block" th:unless="${rallye.classementOnly}">
             <div class="rallye-block-header">
                 <div>
                     <h2 class="section-title">Saisie des temps</h2>
@@ -352,17 +365,23 @@
         <div id="classement" class="rallye-block">
             <div class="rallye-block-header">
                 <div>
-                    <h2 class="section-title">Classement général</h2>
-                    <p class="section-lead section-lead--desktop">Cumul de toutes les ES (toutes boucles). Choisissez un seuil pour un classement intermédiaire.</p>
+                    <h2 class="section-title"
+                        th:text="${rallye.classementOnly} ? 'Classement final' : 'Classement général'">Classement général</h2>
+                    <p class="section-lead section-lead--desktop"
+                       th:text="${rallye.classementOnly}
+                         ? 'Places officielles de l’épreuve, filtrables par catégorie.'
+                         : 'Cumul de toutes les ES (toutes boucles). Choisissez un seuil pour un classement intermédiaire.'">
+                        Cumul de toutes les ES (toutes boucles). Choisissez un seuil pour un classement intermédiaire.
+                    </p>
                 </div>
-                <div class="cluster rallye-export-actions no-print" th:if="${!#lists.isEmpty(standings)}">
+                <div class="cluster rallye-export-actions no-print" th:if="${!rallye.classementOnly and !#lists.isEmpty(standings)}">
                     <button type="button" class="btn btn-secondary btn-sm" id="exportRallyeExcel">Exporter Excel</button>
                     <button type="button" class="btn btn-secondary btn-sm" id="exportRallyePdf">Exporter PDF</button>
                 </div>
             </div>
 
             <div class="filters-bar">
-                <div class="filter-group">
+                <div class="filter-group" th:unless="${rallye.classementOnly}">
                     <label class="filter-label">Après</label>
                     <div class="rallye-tabs rallye-tabs--compact">
                         <a th:href="@{/rallye/{id}(id=${rallye.id}, boucle=${activeBoucle}, after=${rallye.totalStages()}, category=${selectedCategory})} + '#classement'"
@@ -396,10 +415,10 @@
                         <th>Pilote</th>
                         <th>Voiture</th>
                         <th>Cat.</th>
-                        <th>Temps</th>
-                        <th title="Écart avec le pilote précédent">Préc.</th>
-                        <th title="Écart avec le leader">Au 1er</th>
-                        <th>ES</th>
+                        <th th:unless="${rallye.classementOnly}">Temps</th>
+                        <th th:unless="${rallye.classementOnly}" title="Écart avec le pilote précédent">Préc.</th>
+                        <th th:unless="${rallye.classementOnly}" title="Écart avec le leader">Au 1er</th>
+                        <th th:unless="${rallye.classementOnly}">ES</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -409,10 +428,10 @@
                         <td th:text="${row.name}">Nom</td>
                         <td th:text="${row.car}">Voiture</td>
                         <td th:text="${row.category}">Cat</td>
-                        <td class="mono" th:text="${row.totalFormatted}">0.000</td>
-                        <td class="mono" th:text="${row.gapToPreviousFormatted}">—</td>
-                        <td class="mono" th:text="${row.gapFormatted}">—</td>
-                        <td th:text="${row.stagesCompleted} + '/' + ${row.stagesExpected}">0/5</td>
+                        <td class="mono" th:unless="${rallye.classementOnly}" th:text="${row.totalFormatted}">0.000</td>
+                        <td class="mono" th:unless="${rallye.classementOnly}" th:text="${row.gapToPreviousFormatted}">—</td>
+                        <td class="mono" th:unless="${rallye.classementOnly}" th:text="${row.gapFormatted}">—</td>
+                        <td th:unless="${rallye.classementOnly}" th:text="${row.stagesCompleted} + '/' + ${row.stagesExpected}">0/5</td>
                     </tr>
                     </tbody>
                 </table>
@@ -427,8 +446,10 @@
                     <div class="rallye-standing-card__info">
                         <strong th:text="${row.name}">Nom</strong>
                         <span th:if="${row.car != null and !#strings.isEmpty(row.car)}" th:text="${row.car}"></span>
+                        <span th:if="${rallye.classementOnly and row.category != null and !#strings.isEmpty(row.category)}"
+                              th:text="${row.category}"></span>
                     </div>
-                    <div class="rallye-standing-card__times">
+                    <div class="rallye-standing-card__times" th:unless="${rallye.classementOnly}">
                         <span class="mono" th:text="${row.totalFormatted}">0.000</span>
                         <span class="rallye-standing-card__gap mono">
                             <span title="Écart avec le précédent">préc. <span th:text="${row.gapToPreviousFormatted}">—</span></span>
@@ -444,7 +465,7 @@
         </div>
 
         <!-- Compte-rendus : seulement boucles en cours / terminées (+ final si rallye fini) -->
-        <div id="compte-rendu" class="rallye-block" th:if="${recaps != null and recaps.hasAnything}">
+        <div id="compte-rendu" class="rallye-block" th:if="${!rallye.classementOnly and recaps != null and recaps.hasAnything}">
             <div class="rallye-block-header">
                 <div>
                     <h2 class="section-title">Compte rendu</h2>

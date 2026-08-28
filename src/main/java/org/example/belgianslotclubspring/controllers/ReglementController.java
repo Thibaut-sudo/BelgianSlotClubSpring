@@ -30,6 +30,11 @@ public class ReglementController {
             model.addAttribute("clubDisplayName", resolved.getDisplayName());
             return "pages/reglementRallye";
         }
+        if (resolved.isSrcs()) {
+            model.addAttribute("club", resolved.getCode());
+            model.addAttribute("clubDisplayName", resolved.getDisplayName());
+            return "pages/reglementSrcs";
+        }
         if (club != null && !club.isBlank() && !resolved.isSlot4000()) {
             return "redirect:/selectRace/" + resolved.getCode();
         }

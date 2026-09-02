@@ -2,7 +2,7 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(title='Résultats — Belgian Slot Club')}"></head>
 <body class="page-race-results">
-    <link rel="stylesheet" href="/css/race-mobile.css?v=2">
+    <link rel="stylesheet" href="/css/race-mobile.css?v=3">
     <header th:replace="~{fragments/layout :: nav(active='courses', club=${club})}"></header>
 
     <section class="page-hero page-hero--club" th:data-club="${club}">
@@ -156,10 +156,10 @@
                                 <th class="total-col" scope="col">Total tours</th>
                                 <th colspan="2" class="track-header track-1 track-start" scope="colgroup" title="Piste 1 — Rouge">P1</th>
                                 <th colspan="2" class="track-header track-2" scope="colgroup" title="Piste 2 — Blanc">P2</th>
-                                <th colspan="2" class="track-header track-3" scope="colgroup" title="Piste 3 — Bleu">P3</th>
-                                <th colspan="2" class="track-header track-4" scope="colgroup" title="Piste 4 — Jaune">P4</th>
-                                <th colspan="2" class="track-header track-5" scope="colgroup" title="Piste 5 — Orange">P5</th>
-                                <th colspan="2" class="track-header track-6" scope="colgroup" title="Piste 6 — Vert">P6</th>
+                                <th colspan="2" class="track-header track-3" scope="colgroup" title="Piste 3 — Vert">P3</th>
+                                <th colspan="2" class="track-header track-4" scope="colgroup" title="Piste 4 — Orange">P4</th>
+                                <th colspan="2" class="track-header track-5" scope="colgroup" title="Piste 5 — Bleu">P5</th>
+                                <th colspan="2" class="track-header track-6" scope="colgroup" title="Piste 6 — Jaune">P6</th>
                             </tr>
                             <tr class="sub-header">
                                 <th class="position"></th>
@@ -219,10 +219,10 @@
                 <div class="race-mobile-legend">
                     <span class="table-legend-item"><span class="table-legend-swatch lane lane-1"></span>P1 rouge</span>
                     <span class="table-legend-item"><span class="table-legend-swatch lane lane-2"></span>P2 blanc</span>
-                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-3"></span>P3 bleu</span>
-                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-4"></span>P4 jaune</span>
-                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-5"></span>P5 orange</span>
-                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-6"></span>P6 vert</span>
+                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-3"></span>P3 vert</span>
+                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-4"></span>P4 orange</span>
+                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-5"></span>P5 bleu</span>
+                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-6"></span>P6 jaune</span>
                     <span class="table-legend-item">Cadre doré = scratch</span>
                 </div>
                 <p class="table-scroll-hint">Faire défiler horizontalement pour voir toutes les pistes.</p>
@@ -234,16 +234,16 @@
                         <span class="table-legend-swatch lane lane-2" aria-hidden="true"></span>2 Blanc
                     </span>
                     <span class="table-legend-item">
-                        <span class="table-legend-swatch lane lane-3" aria-hidden="true"></span>3 Bleu
+                        <span class="table-legend-swatch lane lane-3" aria-hidden="true"></span>3 Vert
                     </span>
                     <span class="table-legend-item">
-                        <span class="table-legend-swatch lane lane-4" aria-hidden="true"></span>4 Jaune
+                        <span class="table-legend-swatch lane lane-4" aria-hidden="true"></span>4 Orange
                     </span>
                     <span class="table-legend-item">
-                        <span class="table-legend-swatch lane lane-5" aria-hidden="true"></span>5 Orange
+                        <span class="table-legend-swatch lane lane-5" aria-hidden="true"></span>5 Bleu
                     </span>
                     <span class="table-legend-item">
-                        <span class="table-legend-swatch lane lane-6" aria-hidden="true"></span>6 Vert
+                        <span class="table-legend-swatch lane lane-6" aria-hidden="true"></span>6 Jaune
                     </span>
                     <span class="table-legend-item">Cadre doré = scratch de la piste</span>
                 </div>

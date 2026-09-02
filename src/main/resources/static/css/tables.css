@@ -76,12 +76,12 @@
   border: 1px solid rgb(0 0 0 / 0.15);
 }
 
-.table-legend-swatch.lane-1 { background: #e30613; }
+.table-legend-swatch.lane-1 { background: #c62828; }
 .table-legend-swatch.lane-2 { background: #f4f4f2; }
-.table-legend-swatch.lane-3 { background: #0057b8; }
-.table-legend-swatch.lane-4 { background: #ffd100; }
-.table-legend-swatch.lane-5 { background: #ff6a00; }
-.table-legend-swatch.lane-6 { background: #009640; }
+.table-legend-swatch.lane-3 { background: #7cb342; }
+.table-legend-swatch.lane-4 { background: #ff9800; }
+.table-legend-swatch.lane-5 { background: #4fc3f7; }
+.table-legend-swatch.lane-6 { background: #fdd835; }
 
 .table-scroll-hint {
   display: none;
@@ -189,12 +189,12 @@
   letter-spacing: 0.02em;
 }
 
-/* Couleurs internationales 6 pistes : rouge, blanc, bleu, jaune, orange, vert */
+/* Couleurs pistes DS : 1 rouge, 2 blanc, 3 vert, 4 orange, 5 bleu, 6 jaune */
 .race-results-table .track-1 {
-  --lane: #e30613;
+  --lane: #c62828;
   --lane-ink: #ffffff;
-  --lane-soft: #fde8ea;
-  --lane-soft-alt: #f8d0d4;
+  --lane-soft: #fde8e8;
+  --lane-soft-alt: #f6cfcf;
 }
 .race-results-table .track-2 {
   --lane: #f4f4f2;
@@ -203,28 +203,28 @@
   --lane-soft-alt: #e7e5df;
 }
 .race-results-table .track-3 {
-  --lane: #0057b8;
-  --lane-ink: #ffffff;
-  --lane-soft: #e5eef8;
-  --lane-soft-alt: #cfdff0;
+  --lane: #7cb342;
+  --lane-ink: #1c1c1e;
+  --lane-soft: #eaf6d8;
+  --lane-soft-alt: #d4ecb3;
 }
 .race-results-table .track-4 {
-  --lane: #ffd100;
+  --lane: #ff9800;
   --lane-ink: #1c1c1e;
-  --lane-soft: #fff6cc;
-  --lane-soft-alt: #ffe899;
+  --lane-soft: #ffe8cc;
+  --lane-soft-alt: #ffd199;
 }
 .race-results-table .track-5 {
-  --lane: #ff6a00;
-  --lane-ink: #ffffff;
-  --lane-soft: #ffe8d6;
-  --lane-soft-alt: #ffd0ad;
+  --lane: #4fc3f7;
+  --lane-ink: #1c1c1e;
+  --lane-soft: #e3f6fd;
+  --lane-soft-alt: #c5ebfa;
 }
 .race-results-table .track-6 {
-  --lane: #009640;
-  --lane-ink: #ffffff;
-  --lane-soft: #dcf5e6;
-  --lane-soft-alt: #bfe8ce;
+  --lane: #fdd835;
+  --lane-ink: #1c1c1e;
+  --lane-soft: #fff8d1;
+  --lane-soft-alt: #ffef99;
 }
 
 .race-results-table thead .track-header,
@@ -234,26 +234,26 @@
   border-left: 1px solid rgb(0 0 0 / 0.12);
 }
 
-.race-results-table thead .track-1 { background: #e30613; color: #fff; }
+.race-results-table thead .track-1 { background: #c62828; color: #fff; }
 .race-results-table thead .track-2 { background: #f4f4f2; color: #1c1c1e; }
-.race-results-table thead .track-3 { background: #0057b8; color: #fff; }
-.race-results-table thead .track-4 { background: #ffd100; color: #1c1c1e; }
-.race-results-table thead .track-5 { background: #ff6a00; color: #fff; }
-.race-results-table thead .track-6 { background: #009640; color: #fff; }
+.race-results-table thead .track-3 { background: #7cb342; color: #1c1c1e; }
+.race-results-table thead .track-4 { background: #ff9800; color: #1c1c1e; }
+.race-results-table thead .track-5 { background: #4fc3f7; color: #1c1c1e; }
+.race-results-table thead .track-6 { background: #fdd835; color: #1c1c1e; }
 
-.race-results-table tbody td.track-1 { background: #fde8ea; }
+.race-results-table tbody td.track-1 { background: #fde8e8; }
 .race-results-table tbody td.track-2 { background: #f3f2ee; }
-.race-results-table tbody td.track-3 { background: #e5eef8; }
-.race-results-table tbody td.track-4 { background: #fff6cc; }
-.race-results-table tbody td.track-5 { background: #ffe8d6; }
-.race-results-table tbody td.track-6 { background: #dcf5e6; }
+.race-results-table tbody td.track-3 { background: #eaf6d8; }
+.race-results-table tbody td.track-4 { background: #ffe8cc; }
+.race-results-table tbody td.track-5 { background: #e3f6fd; }
+.race-results-table tbody td.track-6 { background: #fff8d1; }
 
-.race-results-table tbody tr:nth-child(even) td.track-1 { background: #f8d0d4; }
+.race-results-table tbody tr:nth-child(even) td.track-1 { background: #f6cfcf; }
 .race-results-table tbody tr:nth-child(even) td.track-2 { background: #e7e5df; }
-.race-results-table tbody tr:nth-child(even) td.track-3 { background: #cfdff0; }
-.race-results-table tbody tr:nth-child(even) td.track-4 { background: #ffe899; }
-.race-results-table tbody tr:nth-child(even) td.track-5 { background: #ffd0ad; }
-.race-results-table tbody tr:nth-child(even) td.track-6 { background: #bfe8ce; }
+.race-results-table tbody tr:nth-child(even) td.track-3 { background: #d4ecb3; }
+.race-results-table tbody tr:nth-child(even) td.track-4 { background: #ffd199; }
+.race-results-table tbody tr:nth-child(even) td.track-5 { background: #c5ebfa; }
+.race-results-table tbody tr:nth-child(even) td.track-6 { background: #ffef99; }
 
 .race-results-table thead .track-2 {
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.18);

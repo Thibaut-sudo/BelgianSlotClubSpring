@@ -225,12 +225,12 @@
     text-align: center;
   }
 
-  .race-card-lane.track-1 { --lane: #e30613; --lane-soft: #fde8ea; }
+  .race-card-lane.track-1 { --lane: #c62828; --lane-soft: #fde8e8; }
   .race-card-lane.track-2 { --lane: #cfc9bd; --lane-soft: #f3f2ee; }
-  .race-card-lane.track-3 { --lane: #0057b8; --lane-soft: #e5eef8; }
-  .race-card-lane.track-4 { --lane: #ffd100; --lane-soft: #fff6cc; }
-  .race-card-lane.track-5 { --lane: #ff6a00; --lane-soft: #ffe8d6; }
-  .race-card-lane.track-6 { --lane: #009640; --lane-soft: #dcf5e6; }
+  .race-card-lane.track-3 { --lane: #7cb342; --lane-soft: #eaf6d8; }
+  .race-card-lane.track-4 { --lane: #ff9800; --lane-soft: #ffe8cc; }
+  .race-card-lane.track-5 { --lane: #4fc3f7; --lane-soft: #e3f6fd; }
+  .race-card-lane.track-6 { --lane: #fdd835; --lane-soft: #fff8d1; }
 
   .race-card-lane-id {
     font-size: 0.62rem;

@@ -133,6 +133,10 @@
                         <div class="legend-color event-club-all"></div>
                         <span>Plusieurs clubs</span>
                     </div>
+                    <div class="legend-item" th:each="cat : ${customCategories}">
+                        <div class="legend-color" th:style="'background-color:' + ${cat.color}"></div>
+                        <span th:text="${cat.name}">Catégorie</span>
+                    </div>
                 </div>
                 <p class="section-lead calendar-club-links">
                     Un chiffre indique plusieurs clubs le même jour, en couleur unie. Les calendriers de chaque club restent accessibles via la légende.
@@ -179,6 +183,7 @@
                             <option value="Deph'one F1"></option>
                             <option value="Chall. E.Pirotte"></option>
                             <option value="Rallye de la Basse Meuse"></option>
+                            <option th:each="cat : ${customCategories}" th:value="${cat.name}"></option>
                         </datalist>
                     </p>
                     <p id="calendarEventColorRow">
@@ -636,6 +641,7 @@
     <script th:inline="javascript">
         const eventsByDate = /*[[${allEvents}]]*/ {};
         const customByClub = /*[[${customByClub}]]*/ {};
+        const customCategories = /*[[${customCategories}]]*/ [];
         const YEAR_STORAGE_KEY = 'calendarYear-all';
         const CLUB_COLORS = {
             slot4000: '#0f766e',
@@ -715,6 +721,15 @@
             if (modal) modal.style.display = 'none';
         }
 
+        function categoryColor(name) {
+            if (!name || !Array.isArray(customCategories)) return '';
+            const first = name.split(',')[0].trim().toLowerCase();
+            const found = customCategories.find(function (cat) {
+                return String(cat.name || '').toLowerCase() === first;
+            });
+            return found && found.color ? found.color : '';
+        }
+
         function sharedEventName(events) {
             if (!events.length) return '';
             const first = String(events[0].name || '').trim();
@@ -723,6 +738,23 @@
                 return String(event.name || '').trim() === first;
             });
             return same ? first : '';
+        }
+
+        function dayCategoryColor(events) {
+            if (!events.length) return '';
+            const shared = sharedEventName(events);
+            if (shared) {
+                return categoryColor(shared);
+            }
+            const colors = events.map(function (event) {
+                return categoryColor(event.name);
+            }).filter(Boolean);
+            if (colors.length === events.length && colors.every(function (color) {
+                return color === colors[0];
+            })) {
+                return colors[0];
+            }
+            return '';
         }
 
         function fillEventModal(isoDate) {
@@ -741,7 +773,7 @@
                 nameInput.value = existingName;
             }
             if (colorInput) {
-                colorInput.value = '#0f766e';
+                colorInput.value = categoryColor(existingName) || '#0f766e';
             }
             if (deleteBtn) {
                 deleteBtn.hidden = !custom;
@@ -823,6 +855,12 @@
         }
 
         function applyClubColors(dayDiv, events) {
+            const customColor = dayCategoryColor(events);
+            if (customColor) {
+                dayDiv.style.backgroundColor = customColor;
+                dayDiv.style.color = '#fff';
+                return;
+            }
             if (events.length === 1) {
                 const club = events[0].clubCode;
                 dayDiv.style.backgroundColor = CLUB_COLORS[club] || UNIFIED_COLOR;
@@ -965,6 +1003,13 @@
                 e.preventDefault();
                 if (window.confirm('Supprimer cet événement ajouté ? Il disparaîtra aussi des calendriers de chaque club, et le calendrier officiel reviendra s’il existe.')) {
                     submitCalendarEvent('delete');
+                }
+            });
+            document.getElementById('calendarEventName')?.addEventListener('input', function () {
+                const colorInput = document.getElementById('calendarEventColor');
+                const fromCategory = categoryColor(this.value);
+                if (colorInput && fromCategory) {
+                    colorInput.value = fromCategory;
                 }
             });
             form?.addEventListener('submit', function (e) {

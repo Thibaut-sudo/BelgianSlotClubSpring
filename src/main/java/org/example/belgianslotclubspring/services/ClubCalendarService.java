@@ -210,6 +210,20 @@ public class ClubCalendarService {
         return categories;
     }
 
+    /** Catégories personnalisées de tous les clubs, pour le calendrier commun. */
+    public List<CalendarCategory> allCustomCategories() {
+        Map<String, CalendarCategory> byKey = new LinkedHashMap<>();
+        for (Club club : Club.values()) {
+            for (CalendarCategory category : customCategories(club)) {
+                if (category == null || category.name() == null || category.name().isBlank()) {
+                    continue;
+                }
+                byKey.put(category.name().toLowerCase(Locale.ROOT), category);
+            }
+        }
+        return new ArrayList<>(byKey.values());
+    }
+
     @Transactional
     public CalendarCategory upsertCategory(Club club, String name, String color) {
         String cleanName = cleanName(name);

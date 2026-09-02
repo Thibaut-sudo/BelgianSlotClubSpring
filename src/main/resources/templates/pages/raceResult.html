@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(title='Résultats — Belgian Slot Club')}"></head>
-<body>
+<body class="page-race-results">
+    <link rel="stylesheet" href="/css/race-mobile.css?v=2">
     <header th:replace="~{fragments/layout :: nav(active='courses', club=${club})}"></header>
 
     <section class="page-hero page-hero--club" th:data-club="${club}">
@@ -116,20 +117,29 @@
                             <tr>
                                 <th class="position">Pos</th>
                                 <th>Pilote</th>
-                                <th>Meilleur temps</th>
+                                <th class="best-time">Meilleur temps</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="quali, stat : ${qualiResult}" th:class="${stat.count <= 3 ? 'top-' + stat.count : ''}">
                                 <td class="position" th:classappend="${' position-' + stat.count}">
-                                    <span th:text="${stat.count}"></span>
+                                    <span class="pos-badge" th:text="${stat.count}"></span>
                                 </td>
                                 <td class="pilot-name" th:text="${quali.getPilotName()}"></td>
-                                <td class="best-time" th:text="${quali.getBestTime()}"></td>
+                                <td class="best-time" th:text="${#numbers.formatDecimal(quali.bestTime, 1, 'NONE', 3, 'POINT')}"></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+                <ol class="race-mobile-qualif">
+                    <li th:each="quali, stat : ${qualiResult}" th:class="${stat.count <= 3 ? 'top-' + stat.count : ''}">
+                        <span class="position" th:classappend="${' position-' + stat.count}">
+                            <span class="pos-badge" th:text="${stat.count}"></span>
+                        </span>
+                        <span class="pilot-name" th:text="${quali.getPilotName()}"></span>
+                        <span class="best-time" th:text="${#numbers.formatDecimal(quali.bestTime, 1, 'NONE', 3, 'POINT')}"></span>
+                    </li>
+                </ol>
             </div>
 
             <div class="table-container race-table-container">
@@ -137,44 +147,105 @@
                     <h2>Résultats de la course</h2>
                     <p>Classement final avec détails par piste</p>
                 </div>
-                <div class="table-wrapper">
+                <div class="table-wrapper table-wrapper--scroll">
                     <table class="race-results-table" id="raceResultsTable">
                         <thead>
                             <tr>
-                                <th class="position">Pos</th>
-                                <th>Pilote</th>
-                                <th>Total tours</th>
-                                <th colspan="2" class="track-header track-1">Piste 1</th>
-                                <th colspan="2" class="track-header track-2">Piste 2</th>
-                                <th colspan="2" class="track-header track-3">Piste 3</th>
-                                <th colspan="2" class="track-header track-4">Piste 4</th>
-                                <th colspan="2" class="track-header track-5">Piste 5</th>
-                                <th colspan="2" class="track-header track-6">Piste 6</th>
+                                <th class="position" scope="col">Pos</th>
+                                <th class="pilot-col" scope="col">Pilote</th>
+                                <th class="total-col" scope="col">Total tours</th>
+                                <th colspan="2" class="track-header track-1 track-start" scope="colgroup" title="Piste 1 — Rouge">P1</th>
+                                <th colspan="2" class="track-header track-2" scope="colgroup" title="Piste 2 — Blanc">P2</th>
+                                <th colspan="2" class="track-header track-3" scope="colgroup" title="Piste 3 — Bleu">P3</th>
+                                <th colspan="2" class="track-header track-4" scope="colgroup" title="Piste 4 — Jaune">P4</th>
+                                <th colspan="2" class="track-header track-5" scope="colgroup" title="Piste 5 — Orange">P5</th>
+                                <th colspan="2" class="track-header track-6" scope="colgroup" title="Piste 6 — Vert">P6</th>
                             </tr>
                             <tr class="sub-header">
-                                <th></th><th></th><th></th>
-                                <th class="track-1">Tours</th><th class="track-1">Temps</th>
-                                <th class="track-2">Tours</th><th class="track-2">Temps</th>
-                                <th class="track-3">Tours</th><th class="track-3">Temps</th>
-                                <th class="track-4">Tours</th><th class="track-4">Temps</th>
-                                <th class="track-5">Tours</th><th class="track-5">Temps</th>
-                                <th class="track-6">Tours</th><th class="track-6">Temps</th>
+                                <th class="position"></th>
+                                <th class="pilot-col"></th>
+                                <th class="total-col"></th>
+                                <th class="track-1 track-start">Tours</th><th class="track-1">Temps</th>
+                                <th class="track-2 track-start">Tours</th><th class="track-2">Temps</th>
+                                <th class="track-3 track-start">Tours</th><th class="track-3">Temps</th>
+                                <th class="track-4 track-start">Tours</th><th class="track-4">Temps</th>
+                                <th class="track-5 track-start">Tours</th><th class="track-5">Temps</th>
+                                <th class="track-6 track-start">Tours</th><th class="track-6">Temps</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="raceResult, stat : ${raceResultDate}" th:class="${stat.count <= 3 ? 'top-' + stat.count : ''}">
                                 <td class="position" th:classappend="${' position-' + stat.count}">
-                                    <span th:text="${stat.count}"></span>
+                                    <span class="pos-badge" th:text="${stat.count}"></span>
                                 </td>
                                 <td class="pilot-name" th:text="${raceResult.getNom()}"></td>
-                                <td class="total-laps" th:text="${raceResult.getTotalTours()}"></td>
+                                <td class="total-laps" th:text="${#numbers.formatDecimal(raceResult.totalTours, 1, 'NONE', 2, 'POINT')}"></td>
                                 <th:block th:each="lap, iterStat : ${raceResult.lapsPerTrack}">
                                     <td th:class="'track-' + ${iterStat.index + 1} + ' laps'" th:text="${lap.laps}"></td>
-                                    <td th:class="'track-' + ${iterStat.index + 1} + ' time'" th:text="${raceResult.bestTime[iterStat.index].bestLapTime}"></td>
+                                    <td th:class="'track-' + ${iterStat.index + 1} + ' time'"
+                                        th:text="${#numbers.formatDecimal(raceResult.bestTime[iterStat.index].bestLapTime, 1, 'NONE', 3, 'POINT')}"></td>
                                 </th:block>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="race-mobile-results">
+                    <article class="race-card" th:each="raceResult, stat : ${raceResultDate}"
+                             th:classappend="${stat.count <= 3 ? ' top-' + stat.count : ''}">
+                        <header class="race-card-head">
+                            <span class="position" th:classappend="${' position-' + stat.count}">
+                                <span class="pos-badge" th:text="${stat.count}"></span>
+                            </span>
+                            <div class="race-card-id">
+                                <strong th:text="${raceResult.getNom()}">Pilote</strong>
+                                <p class="race-card-total">
+                                    Total <b th:text="${#numbers.formatDecimal(raceResult.totalTours, 1, 'NONE', 2, 'POINT')}">0.00</b> tours
+                                </p>
+                            </div>
+                        </header>
+                        <div class="race-card-lanes">
+                            <div class="race-card-lane"
+                                 th:each="lap, iterStat : ${raceResult.lapsPerTrack}"
+                                 th:classappend="${' track-' + (iterStat.index + 1)}"
+                                 th:attr="data-track=${iterStat.index + 1}, data-time=${raceResult.bestTime[iterStat.index].bestLapTime}">
+                                <span class="race-card-lane-id" th:text="'P' + ${iterStat.index + 1}">P1</span>
+                                <span class="race-card-lane-laps" th:text="${lap.laps} + ' t'">0 t</span>
+                                <span class="race-card-lane-time"
+                                      th:text="${#numbers.formatDecimal(raceResult.bestTime[iterStat.index].bestLapTime, 1, 'NONE', 3, 'POINT')}">0.000</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="race-mobile-legend">
+                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-1"></span>P1 rouge</span>
+                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-2"></span>P2 blanc</span>
+                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-3"></span>P3 bleu</span>
+                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-4"></span>P4 jaune</span>
+                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-5"></span>P5 orange</span>
+                    <span class="table-legend-item"><span class="table-legend-swatch lane lane-6"></span>P6 vert</span>
+                    <span class="table-legend-item">Cadre doré = scratch</span>
+                </div>
+                <p class="table-scroll-hint">Faire défiler horizontalement pour voir toutes les pistes.</p>
+                <div class="table-legend">
+                    <span class="table-legend-item">
+                        <span class="table-legend-swatch lane lane-1" aria-hidden="true"></span>1 Rouge
+                    </span>
+                    <span class="table-legend-item">
+                        <span class="table-legend-swatch lane lane-2" aria-hidden="true"></span>2 Blanc
+                    </span>
+                    <span class="table-legend-item">
+                        <span class="table-legend-swatch lane lane-3" aria-hidden="true"></span>3 Bleu
+                    </span>
+                    <span class="table-legend-item">
+                        <span class="table-legend-swatch lane lane-4" aria-hidden="true"></span>4 Jaune
+                    </span>
+                    <span class="table-legend-item">
+                        <span class="table-legend-swatch lane lane-5" aria-hidden="true"></span>5 Orange
+                    </span>
+                    <span class="table-legend-item">
+                        <span class="table-legend-swatch lane lane-6" aria-hidden="true"></span>6 Vert
+                    </span>
+                    <span class="table-legend-item">Cadre doré = scratch de la piste</span>
                 </div>
             </div>
 
@@ -205,6 +276,59 @@
             const clubLabel = /*[[${clubDisplayName != null ? clubDisplayName : club}]]*/ '';
             const baseName = ['resultats', clubLabel, categoryLabel, raceDateLabel]
                 .filter(Boolean).join('_');
+
+            function highlightScratches(table) {
+                if (!table) return;
+                const rows = Array.from(table.querySelectorAll('tbody tr'));
+                if (!rows.length) return;
+                const timeCols = [];
+                rows[0].querySelectorAll('td.time').forEach(td => {
+                    timeCols.push(Array.prototype.indexOf.call(rows[0].children, td));
+                });
+                timeCols.forEach(col => {
+                    let best = Infinity;
+                    const winners = [];
+                    rows.forEach(row => {
+                        const cell = row.children[col];
+                        if (!cell) return;
+                        const value = parseFloat(String(cell.textContent || '').replace(',', '.').replace(/\s/g, ''));
+                        if (!Number.isFinite(value) || value <= 0) return;
+                        if (value < best - 0.0005) {
+                            best = value;
+                            winners.length = 0;
+                            winners.push(cell);
+                        } else if (Math.abs(value - best) < 0.0005) {
+                            winners.push(cell);
+                        }
+                    });
+                    winners.forEach(cell => cell.classList.add('is-scratch'));
+                });
+            }
+
+            highlightScratches(document.getElementById('raceResultsTable'));
+
+            (function highlightMobileLanes() {
+                const cards = document.querySelectorAll('.race-card');
+                if (!cards.length) return;
+                for (let track = 1; track <= 6; track++) {
+                    let best = Infinity;
+                    const winners = [];
+                    cards.forEach(card => {
+                        const lane = card.querySelector('[data-track="' + track + '"]');
+                        if (!lane) return;
+                        const value = parseFloat(String(lane.getAttribute('data-time') || '').replace(',', '.'));
+                        if (!Number.isFinite(value) || value <= 0) return;
+                        if (value < best - 0.0005) {
+                            best = value;
+                            winners.length = 0;
+                            winners.push(lane);
+                        } else if (Math.abs(value - best) < 0.0005) {
+                            winners.push(lane);
+                        }
+                    });
+                    winners.forEach(lane => lane.classList.add('is-scratch'));
+                }
+            })();
 
             function raceMatrix() {
                 const table = document.getElementById('raceResultsTable');

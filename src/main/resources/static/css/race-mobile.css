@@ -1,0 +1,287 @@
+/* =============================================================================
+   Résultats de course — version téléphone UNIQUEMENT
+   Desktop inchangé : tout est masqué au-dessus de 768px
+   ============================================================================= */
+
+.race-mobile-qualif,
+.race-mobile-results,
+.race-mobile-legend {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .page-race-results {
+    overflow-x: hidden;
+  }
+
+  .page-race-results .qualif-table-container .table-wrapper,
+  .page-race-results .race-table-container .table-wrapper,
+  .page-race-results .table-scroll-hint,
+  .page-race-results .table-legend {
+    display: none !important;
+  }
+
+  .race-mobile-qualif,
+  .race-mobile-results,
+  .race-mobile-legend {
+    display: block;
+  }
+
+  .page-race-results .page-hero {
+    padding-block: 1.25rem;
+  }
+
+  .page-race-results .page-hero-title {
+    font-size: 1.5rem;
+  }
+
+  .page-race-results .page-hero-sub {
+    display: none;
+  }
+
+  .page-race-results .page-hero-meta {
+    gap: 0.4rem;
+  }
+
+  .page-race-results .stats-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .page-race-results .stat-block {
+    padding: 0.7rem 0.4rem;
+  }
+
+  .page-race-results .stat-block-value {
+    font-size: 1.05rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .page-race-results .stat-block-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+  }
+
+  .page-race-results .rallye-block {
+    margin-bottom: 1.25rem;
+  }
+
+  .page-race-results .rallye-block-header {
+    margin-bottom: 0.75rem;
+  }
+
+  .page-race-results .section-title {
+    font-size: 1.05rem;
+  }
+
+  .page-race-results .table-container {
+    margin-bottom: 1.25rem;
+  }
+
+  .page-race-results .table-header {
+    padding: 0.85rem 1rem;
+    text-align: left;
+  }
+
+  .page-race-results .table-header h2 {
+    font-size: 1rem;
+  }
+
+  .page-race-results .table-header p {
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+  }
+
+  /* —— Qualifications : liste compacte —— */
+  .race-mobile-qualif {
+    list-style: none;
+    margin: 0;
+    padding: 0.35rem 0;
+  }
+
+  .race-mobile-qualif li {
+    display: grid;
+    grid-template-columns: 2.4rem 1fr auto;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .race-mobile-qualif li:last-child {
+    border-bottom: none;
+  }
+
+  .race-mobile-qualif .pilot-name {
+    font-size: 0.95rem;
+  }
+
+  .race-mobile-qualif .best-time {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--color-accent);
+  }
+
+  .race-mobile-qualif li.top-1 {
+    background: rgb(232 160 32 / 0.12);
+  }
+
+  .race-mobile-qualif li.top-2 {
+    background: rgb(107 107 112 / 0.08);
+  }
+
+  .race-mobile-qualif li.top-3 {
+    background: rgb(184 115 51 / 0.1);
+  }
+
+  /* —— Course : une carte par pilote —— */
+  .race-mobile-results {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 0.75rem;
+  }
+
+  .race-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 0.65rem;
+    overflow: hidden;
+  }
+
+  .race-card.top-1 {
+    border-color: #e8a020;
+  }
+
+  .race-card.top-2 {
+    border-color: #9a9aa0;
+  }
+
+  .race-card.top-3 {
+    border-color: #b87333;
+  }
+
+  .race-card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.7rem 0.8rem 0.55rem;
+  }
+
+  .race-card-head .pos-badge {
+    flex-shrink: 0;
+  }
+
+  .race-card-id {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .race-card-id strong {
+    display: block;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    line-height: 1.2;
+  }
+
+  .race-card-total {
+    margin: 0.15rem 0 0;
+    font-size: 0.75rem;
+    color: var(--color-muted);
+  }
+
+  .race-card-total b {
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .race-card-lanes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem;
+    padding: 0 0.7rem 0.7rem;
+  }
+
+  @media (min-width: 480px) {
+    .race-card-lanes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .race-card-lane {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    padding: 0.4rem 0.25rem 0.45rem;
+    border-radius: 0.4rem;
+    background: var(--lane-soft, var(--color-paper));
+    border-top: 3px solid var(--lane, var(--color-asphalt));
+    text-align: center;
+  }
+
+  .race-card-lane.track-1 { --lane: #e30613; --lane-soft: #fde8ea; }
+  .race-card-lane.track-2 { --lane: #cfc9bd; --lane-soft: #f3f2ee; }
+  .race-card-lane.track-3 { --lane: #0057b8; --lane-soft: #e5eef8; }
+  .race-card-lane.track-4 { --lane: #ffd100; --lane-soft: #fff6cc; }
+  .race-card-lane.track-5 { --lane: #ff6a00; --lane-soft: #ffe8d6; }
+  .race-card-lane.track-6 { --lane: #009640; --lane-soft: #dcf5e6; }
+
+  .race-card-lane-id {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .race-card-lane-laps {
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink);
+  }
+
+  .race-card-lane-time {
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink);
+  }
+
+  .race-card-lane.is-scratch {
+    box-shadow: inset 0 0 0 2px #c9a227;
+  }
+
+  .race-mobile-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    padding: 0 0.75rem 0.85rem;
+    font-size: 0.68rem;
+    color: var(--color-muted);
+  }
+
+  .page-race-results .actions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .page-race-results .export-actions,
+  .page-race-results .navigation-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .page-race-results .actions-section .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

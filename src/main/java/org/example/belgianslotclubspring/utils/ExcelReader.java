@@ -57,24 +57,35 @@ public class ExcelReader {
 
                 String qualifName = getStringCellValue(row.getCell(1), evaluator);
                 String qualiTime = getStringCellValue(row.getCell(2), evaluator);
+                String raceNameRaw = getStringCellValue(row.getCell(4), evaluator);
+                double totalLaps = getDoubleCellValue(row.getCell(5));
 
-                if (qualifName.isEmpty() || qualiTime.isEmpty()) {
+                boolean hasQualif = isUsablePilotName(qualifName) && isUsableQualiTime(qualiTime);
+                if (!isUsablePilotName(raceNameRaw) || looksLikeFormula(raceNameRaw)) {
+                    raceNameRaw = PilotNames.baseName(qualifName);
+                }
+                boolean hasRace = isUsablePilotName(raceNameRaw) && totalLaps > 0.0001;
+
+                // Les feuilles club ont parfois les temps de qualif (colonne C) vides
+                // alors que le classement course (E–R) est déjà calculé.
+                if (!hasQualif && !hasRace) {
                     continue;
                 }
 
-                Qualif qualif = new Qualif(qualifName, qualiTime, date);
-                qualifs.add(qualif);
-
-                String raceNameRaw = getStringCellValue(row.getCell(4), evaluator);
-                if (raceNameRaw.isEmpty() || looksLikeFormula(raceNameRaw)) {
-                    raceNameRaw = PilotNames.baseName(qualifName);
+                if (hasQualif) {
+                    qualifs.add(new Qualif(qualifName, qualiTime, date));
                 }
+
+                if (!isUsablePilotName(raceNameRaw)) {
+                    continue;
+                }
+
                 boolean bis = PilotNames.isBis(qualifName) || PilotNames.isBis(raceNameRaw);
                 String raceName = PilotNames.withBisMarker(raceNameRaw, bis);
 
                 RaceResult pilot = new RaceResult(
                         raceName,
-                        getDoubleCellValue(row.getCell(5)),
+                        totalLaps,
                         String.valueOf(date),
                         categoryName
                 );
@@ -130,6 +141,33 @@ public class ExcelReader {
 
     private static boolean looksLikeFormula(String value) {
         return value.contains("!") || value.startsWith("=") || value.contains("$");
+    }
+
+    static boolean isUsablePilotName(String name) {
+        if (name == null) {
+            return false;
+        }
+        String value = name.trim();
+        if (value.isEmpty() || "-".equals(value) || "—".equals(value)) {
+            return false;
+        }
+        if (looksLikeFormula(value)) {
+            return false;
+        }
+        return !value.matches("0+(\\.0+)?");
+    }
+
+    static boolean isUsableQualiTime(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return false;
+        }
+        String value = raw.trim().replace(',', '.');
+        try {
+            Float.parseFloat(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private String getStringCellValue(Cell cell, FormulaEvaluator evaluator) {

@@ -38,14 +38,19 @@ public class SaveExcelFilleServiceImpl implements SaveExcelFilleService {
         try {
             ExcelFilleResult excelFilleResult = excelReader.readRaceResults(path);
 
-            if (excelFilleResult.getQualifs() != null && !excelFilleResult.getQualifs().isEmpty()) {
+            boolean hasQualifs = excelFilleResult.getQualifs() != null && !excelFilleResult.getQualifs().isEmpty();
+            boolean hasRaces = excelFilleResult.getRaceResults() != null && !excelFilleResult.getRaceResults().isEmpty();
+            if (!hasQualifs && !hasRaces) {
+                throw new IllegalArgumentException(
+                        "Aucun pilote trouvé dans le fichier (qualifs et course vides).");
+            }
+
+            if (hasQualifs) {
                 saveQualifList(excelFilleResult.getQualifs(), clubCode);
             }
 
-            if (excelFilleResult.getRaceResults() != null && !excelFilleResult.getRaceResults().isEmpty()) {
+            if (hasRaces) {
                 saveRaceResultList(excelFilleResult.getRaceResults(), clubCode);
-            } else {
-                System.out.println("Aucun résultat de course à sauvegarder");
             }
 
             raceResultService.invalidateClubMaintenanceCaches(clubCode);

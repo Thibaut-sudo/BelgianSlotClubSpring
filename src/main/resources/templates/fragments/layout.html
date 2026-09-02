@@ -51,6 +51,11 @@
                        th:classappend="${active == 'home'} ? ' active' : ''"
                        th:attr="aria-current=${active == 'home'} ? 'page' : null">Accueil</a>
                 </li>
+                <li th:if="${club == null or #strings.isEmpty(club)}">
+                    <a href="/calendrier" class="nav-link"
+                       th:classappend="${active == 'calendrier'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'calendrier'} ? 'page' : null">Calendrier</a>
+                </li>
                 <th:block th:if="${club != null and !#strings.isEmpty(club)}">
                     <li th:unless="${club == 'sco'}">
                         <a class="nav-link"
@@ -126,6 +131,7 @@
         <nav class="footer-nav" aria-label="Liens du pied de page">
             <ul class="footer-links">
                 <li><a href="/">Accueil</a></li>
+                <li><a href="/calendrier">Calendrier</a></li>
                 <li><a href="/contact">Contact</a></li>
                 <li><a href="/?goto=forum#clubs">Forum</a></li>
                 <li><a href="/marketplace">Marketplace</a></li>

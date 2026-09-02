@@ -2,6 +2,7 @@ package org.example.belgianslotclubspring.services;
 
 import org.example.belgianslotclubspring.entities.ClubCalendarEvent;
 import org.example.belgianslotclubspring.models.Club;
+import org.example.belgianslotclubspring.models.GlobalCalendarEvent;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -84,5 +85,29 @@ class ClubCalendarServiceTest {
     void firstCategoryNameTakesPartBeforeComma() {
         assertEquals("Ninco", ClubCalendarService.firstCategoryName("Ninco, proto"));
         assertEquals("Scaleauto", ClubCalendarService.firstCategoryName("Scaleauto"));
+    }
+
+    @Test
+    void mergeAllClubsKeepsSameDayEventsFromDifferentClubs() {
+        Map<Club, Map<String, String>> perClub = Map.of(
+                Club.SLOT4000, Map.of("2026-09-04", "GT32"),
+                Club.SRCS, Map.of("2026-09-04", "Scaleauto", "2026-09-08", "BPC"),
+                Club.SCO, Map.of("2026-09-06", "Rallye de la Basse Meuse")
+        );
+
+        Map<String, List<GlobalCalendarEvent>> merged = ClubCalendarService.mergeAllClubs(perClub);
+
+        assertEquals(3, merged.size());
+        List<GlobalCalendarEvent> sameDay = merged.get("2026-09-04");
+        assertEquals(2, sameDay.size());
+        assertEquals("slot4000", sameDay.get(0).clubCode());
+        assertEquals("Slot 4000", sameDay.get(0).clubLabel());
+        assertEquals("GT32", sameDay.get(0).name());
+        assertEquals("srcs", sameDay.get(1).clubCode());
+        assertEquals("Scaleauto", sameDay.get(1).name());
+        assertEquals("Rallyes Slot", merged.get("2026-09-06").get(0).clubLabel());
+        assertEquals("BPC", merged.get("2026-09-08").get(0).name());
+        assertTrue(merged instanceof java.util.TreeMap);
+        assertEquals(List.of("2026-09-04", "2026-09-06", "2026-09-08"), List.copyOf(merged.keySet()));
     }
 }

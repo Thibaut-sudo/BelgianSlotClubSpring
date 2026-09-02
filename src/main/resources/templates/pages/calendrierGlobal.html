@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Calendrier — Belgian Slot Club')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: nav(active='calendrier', club=${null})}"></header>
+
+    <section class="page-hero">
+        <div class="page-hero-content container">
+            <div class="calendar-hero-layout">
+                <div>
+                    <p class="calendar-hero-eyebrow">Tous les clubs</p>
+                    <h1 class="page-hero-title">Calendrier</h1>
+                    <p class="page-hero-sub">
+                        Toutes les dates Slot 4000, SRCS et Rallyes Slot au même endroit.
+                    </p>
+                    <div class="page-hero-meta">
+                        <span>Belgian Slot Club</span>
+                        <span>Saison 2026–2027</span>
+                    </div>
+                </div>
+                <aside class="countdown-panel" aria-label="Compte à rebours">
+                    <th:block th:if="${hasUpcomingEvent}">
+                        <p class="countdown-panel-label">Compte à rebours</p>
+                        <p class="countdown-panel-value" th:text="${daysUntilNext}">0</p>
+                        <p class="countdown-panel-unit">jours restants</p>
+                    </th:block>
+                    <th:block th:unless="${hasUpcomingEvent}">
+                        <p class="countdown-panel-label">Calendrier</p>
+                        <p class="countdown-panel-value">—</p>
+                        <p class="countdown-panel-unit">saison terminée</p>
+                    </th:block>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <main class="section">
+        <div class="container">
+            <article class="next-event-card" th:classappend="${!#strings.isEmpty(nextEventClubCode) ? 'club-' + nextEventClubCode : ''}">
+                <header class="next-event-header">
+                    <div class="next-event-heading">
+                        <h2 class="next-event-title" th:text="${nextEventTitle}">Événement</h2>
+                        <p class="next-event-date" th:text="${nextEventDate}">Date</p>
+                    </div>
+                    <span class="next-event-badge" th:if="${hasUpcomingEvent}">À venir</span>
+                </header>
+
+                <ul class="next-event-clubs" th:if="${nextEvents != null and !#lists.isEmpty(nextEvents)}">
+                    <li th:each="event : ${nextEvents}">
+                        <span class="legend-color" th:classappend="'event-club-' + ${event.clubCode}"></span>
+                        <span>
+                            <strong th:text="${event.clubLabel}">Club</strong>
+                            — <span th:text="${event.name}">Événement</span>
+                        </span>
+                    </li>
+                </ul>
+
+                <dl class="next-event-details">
+                    <div class="next-event-detail">
+                        <dt>Date</dt>
+                        <dd th:text="${nextEventDate}">Date</dd>
+                    </div>
+                    <div class="next-event-detail">
+                        <dt>Temps restant</dt>
+                        <dd th:text="${hasUpcomingEvent} ? (${daysUntilNext} + ' jours') : 'Saison terminée'">0 jours</dd>
+                    </div>
+                    <div class="next-event-detail">
+                        <dt>Clubs</dt>
+                        <dd th:text="${!#strings.isEmpty(nextEventClubs) ? nextEventClubs : '—'}">Clubs</dd>
+                    </div>
+                </dl>
+            </article>
+
+            <section class="calendar-section" aria-labelledby="calendar-heading">
+                <header class="calendar-section-header">
+                    <div class="calendar-section-top">
+                        <div>
+                            <h2 id="calendar-heading" class="section-title">
+                                Calendrier <span id="calendarYearLabel">2026</span>
+                            </h2>
+                            <p class="section-lead">Tous les événements Slot 4000, SRCS et Rallyes Slot.</p>
+                            <p class="section-lead calendar-admin-hint">Organisateurs : cliquez un jour pour ajouter un événement (mot de passe requis). Il apparaîtra aussi sur les calendriers de chaque club.</p>
+                        </div>
+                        <div class="year-nav" role="group" aria-label="Changer d'année">
+                            <button type="button" class="year-nav-btn" id="prevYearBtn" aria-label="Année précédente">‹</button>
+                            <span class="year-nav-value" id="yearNavValue">2026</span>
+                            <button type="button" class="year-nav-btn" id="nextYearBtn" aria-label="Année suivante">›</button>
+                        </div>
+                    </div>
+                </header>
+                <div class="calendar-container">
+                    <div class="calendar-grid" id="fullCalendarGrid"></div>
+                </div>
+            </section>
+
+            <section class="legend-section" aria-labelledby="legend-heading">
+                <h2 id="legend-heading" class="section-title">Légende des clubs</h2>
+                <div class="legend-grid">
+                    <a class="legend-item" href="/prochain-evenement?club=slot4000">
+                        <div class="legend-color event-club-slot4000"></div>
+                        <span>Slot 4000</span>
+                    </a>
+                    <a class="legend-item" href="/prochain-evenement?club=srcs">
+                        <div class="legend-color event-club-srcs"></div>
+                        <span>SRCS</span>
+                    </a>
+                    <a class="legend-item" href="/prochain-evenement?club=sco">
+                        <div class="legend-color event-club-sco"></div>
+                        <span>Rallyes Slot</span>
+                    </a>
+                </div>
+                <p class="section-lead calendar-club-links">
+                    Un chiffre indique plusieurs clubs le même jour. Les calendriers de chaque club restent accessibles via la légende.
+                </p>
+            </section>
+        </div>
+    </main>
+
+    <div id="calendarEventModal" class="modal" style="display: none;" role="dialog"
+         aria-labelledby="calendarEventTitle" aria-modal="true">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3 id="calendarEventTitle">Ajouter un événement</h3>
+            </div>
+            <form id="calendarEventForm">
+                <div class="modal-body">
+                    <p class="section-lead">Réservé aux organisateurs. L’événement est enregistré sur les calendriers de tous les clubs.</p>
+                    <p id="calendarEventDateRow">
+                        <label class="form-label" for="calendarEventDateLabel">Date</label>
+                        <input class="form-input" id="calendarEventDateLabel" type="text" readonly>
+                    </p>
+                    <p>
+                        <label class="form-label" for="calendarEventName">Événement</label>
+                        <input class="form-input" id="calendarEventName" name="name" type="text"
+                               maxlength="80" required placeholder="Ex. BEL-LMS, Scaleauto, Rallye…"
+                               list="calendarEventSuggestions" autocomplete="off">
+                        <datalist id="calendarEventSuggestions">
+                            <option value="PROTO32"></option>
+                            <option value="GT32"></option>
+                            <option value="TCR-SCALE"></option>
+                            <option value="SLOT.IT"></option>
+                            <option value="GR5"></option>
+                            <option value="PROTO24"></option>
+                            <option value="GT24"></option>
+                            <option value="TCR ALL"></option>
+                            <option value="Soirée Fun"></option>
+                            <option value="Scaleauto"></option>
+                            <option value="GT24 / Proto 24"></option>
+                            <option value="BPC"></option>
+                            <option value="Revoslot"></option>
+                            <option value="BRM"></option>
+                            <option value="BEL-LMS"></option>
+                            <option value="Revo (interclubs)"></option>
+                            <option value="Deph'one F1"></option>
+                            <option value="Chall. E.Pirotte"></option>
+                            <option value="Rallye de la Basse Meuse"></option>
+                        </datalist>
+                    </p>
+                    <p id="calendarEventColorRow">
+                        <label class="form-label" for="calendarEventColor">Couleur de la catégorie</label>
+                        <input id="calendarEventColor" name="color" type="color" value="#0f766e"
+                               style="width: 3.5rem; height: 2.5rem; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius); cursor: pointer;">
+                    </p>
+                    <p>
+                        <label class="form-label" for="calendarEventPassword">Mot de passe organisateur</label>
+                        <input class="form-input" id="calendarEventPassword" name="password" type="password"
+                               autocomplete="current-password" required>
+                    </p>
+                    <p id="calendarEventError" class="import-password-error" hidden></p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="calendarEventDelete" hidden
+                            style="margin-right: auto;">Supprimer</button>
+                    <button type="button" class="btn btn-secondary" id="calendarEventCancel">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="calendarEventSave">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+    <style>
+        .calendar-hero-layout {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-8);
+        }
+
+        .calendar-hero-eyebrow {
+            margin: 0 0 var(--space-2);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgb(255 255 255 / 0.65);
+        }
+
+        .countdown-panel {
+            min-width: 10rem;
+            padding: var(--space-6);
+            text-align: center;
+            background: rgb(255 255 255 / 0.08);
+            border: 1px solid rgb(255 255 255 / 0.15);
+            border-radius: var(--radius-lg);
+        }
+
+        .countdown-panel-label {
+            margin: 0 0 var(--space-2);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: rgb(255 255 255 / 0.7);
+        }
+
+        .countdown-panel-value {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 6vw, 3.5rem);
+            line-height: 1;
+            color: var(--color-white);
+        }
+
+        .countdown-panel-unit {
+            margin: var(--space-2) 0 0;
+            font-size: 0.875rem;
+            color: rgb(255 255 255 / 0.75);
+        }
+
+        .next-event-card {
+            margin-bottom: var(--space-10);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .next-event-card.club-slot4000 { border-left: 4px solid #0f766e; }
+        .next-event-card.club-srcs { border-left: 4px solid #1d4ed8; }
+        .next-event-card.club-sco { border-left: 4px solid #9a3412; }
+
+        .next-event-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+            padding: var(--space-6);
+            background: var(--color-paper-2);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .next-event-title {
+            margin: 0 0 var(--space-1);
+            font-size: clamp(1.25rem, 3vw, 1.75rem);
+        }
+
+        .next-event-date {
+            margin: 0;
+            color: var(--color-muted);
+        }
+
+        .next-event-badge {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--color-asphalt);
+            background: var(--color-amber);
+            border-radius: 999px;
+        }
+
+        .next-event-clubs {
+            display: grid;
+            gap: var(--space-3);
+            margin: 0;
+            padding: var(--space-6);
+            list-style: none;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .next-event-clubs li {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            font-size: 0.9375rem;
+        }
+
+        .next-event-details {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+            margin: 0;
+            padding: var(--space-6);
+        }
+
+        .next-event-detail {
+            display: grid;
+            gap: var(--space-1);
+        }
+
+        .next-event-detail dt {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--color-muted);
+        }
+
+        .next-event-detail dd {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-ink);
+        }
+
+        .calendar-section {
+            margin-bottom: var(--space-10);
+        }
+
+        .calendar-section-header {
+            margin-bottom: var(--space-6);
+        }
+
+        .calendar-admin-hint {
+            margin-top: var(--space-2);
+            font-size: 0.875rem;
+        }
+
+        .calendar-section-top {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: var(--space-4);
+        }
+
+        .year-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: 0.25rem;
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+        }
+
+        .year-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--color-paper);
+            color: var(--color-ink);
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        .year-nav-btn:hover:not(:disabled) {
+            background: var(--color-asphalt);
+            color: var(--color-white);
+        }
+
+        .year-nav-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .year-nav-value {
+            min-width: 3.5rem;
+            font-family: var(--font-display, inherit);
+            font-size: 1.125rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--color-ink);
+        }
+
+        .calendar-container {
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--space-2);
+            padding: var(--space-6);
+            overflow-x: auto;
+        }
+
+        .calendar-month {
+            display: flex;
+            flex-direction: column;
+            min-width: 5rem;
+        }
+
+        .month-header {
+            margin-bottom: var(--space-2);
+            padding: var(--space-2);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-align: center;
+            text-transform: uppercase;
+            color: var(--color-white);
+            background: var(--color-asphalt);
+            border-radius: var(--radius-sm);
+        }
+
+        .month-days {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .calendar-day {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 2rem;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            line-height: 1.1;
+            text-align: center;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: transform var(--transition);
+        }
+
+        .calendar-day:not(.has-event):hover {
+            background: rgb(26 122 76 / 0.12);
+            box-shadow: inset 0 0 0 1px var(--color-success);
+        }
+
+        .calendar-day.is-custom::after {
+            content: '';
+            position: absolute;
+            right: 3px;
+            top: 3px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--color-amber, #f5c518);
+        }
+
+        .calendar-day.has-event {
+            color: var(--color-white);
+            font-weight: 700;
+        }
+
+        .calendar-day .day-letter {
+            position: absolute;
+            left: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.5625rem;
+            font-weight: 700;
+            opacity: 0.7;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+
+        .calendar-day .day-content {
+            margin-left: 0.55rem;
+        }
+
+        .calendar-day.is-weekend .day-letter {
+            color: var(--color-accent);
+            opacity: 1;
+        }
+
+        .calendar-day.has-event .day-letter {
+            color: inherit;
+            opacity: 0.9;
+        }
+
+        .calendar-day.is-weekend:not(.has-event) {
+            background: rgb(200 16 46 / 0.12);
+            color: var(--color-asphalt);
+            font-weight: 700;
+        }
+
+        .calendar-day:hover {
+            transform: scale(1.05);
+            z-index: 1;
+        }
+
+        .calendar-day.today {
+            background: var(--color-amber) !important;
+            color: var(--color-ink) !important;
+            font-weight: 800;
+            box-shadow: inset 0 0 0 2px var(--color-asphalt);
+        }
+
+        .calendar-day.today .day-letter {
+            color: var(--color-ink);
+            opacity: 1;
+        }
+
+        .legend-section .section-title {
+            margin-bottom: var(--space-5);
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+            gap: var(--space-3);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            color: inherit;
+            text-decoration: none;
+        }
+
+        a.legend-item:hover {
+            border-color: var(--color-asphalt);
+        }
+
+        .legend-item span {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-ink);
+        }
+
+        .event-club-slot4000,
+        .legend-color.event-club-slot4000 {
+            background-color: #0f766e;
+        }
+
+        .event-club-srcs,
+        .legend-color.event-club-srcs {
+            background-color: #1d4ed8;
+        }
+
+        .event-club-sco,
+        .legend-color.event-club-sco {
+            background-color: #9a3412;
+        }
+
+        .calendar-club-links {
+            margin-top: var(--space-4);
+        }
+
+        @media (min-width: 768px) {
+            .next-event-details {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .calendar-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .legend-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script th:inline="javascript">
+        const eventsByDate = /*[[${allEvents}]]*/ {};
+        const customByClub = /*[[${customByClub}]]*/ {};
+        const YEAR_STORAGE_KEY = 'calendarYear-all';
+        const CLUB_COLORS = {
+            slot4000: '#0f766e',
+            srcs: '#1d4ed8',
+            sco: '#9a3412'
+        };
+
+        const MIN_YEAR = 2024;
+        const MAX_YEAR = 2032;
+        const nowYear = new Date().getFullYear();
+        const storedYear = parseInt(sessionStorage.getItem(YEAR_STORAGE_KEY) || '', 10);
+        let selectedYear = (storedYear >= MIN_YEAR && storedYear <= MAX_YEAR)
+            ? storedYear
+            : ((nowYear >= MIN_YEAR && nowYear <= MAX_YEAR) ? nowYear : 2026);
+
+        const monthNamesFr = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+            'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+        function eventsForDay(isoDate) {
+            const raw = eventsByDate ? eventsByDate[isoDate] : null;
+            if (!raw) return [];
+            if (Array.isArray(raw)) return raw;
+            if (typeof raw === 'string') {
+                return [{ clubCode: '', clubLabel: '', name: raw }];
+            }
+            return [];
+        }
+
+        function isCustom(club, isoDate) {
+            const dates = customByClub && customByClub[club];
+            return Array.isArray(dates) && dates.indexOf(isoDate) >= 0;
+        }
+
+        function dayHasCustom(isoDate) {
+            return Object.keys(customByClub || {}).some(function (club) {
+                return isCustom(club, isoDate);
+            });
+        }
+
+        function formatDateFr(iso) {
+            const [year, month, day] = iso.split('-').map(Number);
+            return String(day).padStart(2, '0') + ' ' + monthNamesFr[month - 1] + ' ' + year;
+        }
+
+        function shortName(event) {
+            const name = (event && event.name) ? String(event.name) : '';
+            const first = name.split(',')[0].trim();
+            if (!first) return (event && event.clubLabel) || '';
+            return first.length > 8 ? first.substring(0, 6) + '…' : first;
+        }
+
+        function eventTitle(weekdayLabel, events) {
+            const parts = events.map(function (event) {
+                const club = event.clubLabel || event.clubCode || 'Club';
+                return club + ' : ' + (event.name || '');
+            });
+            const detail = parts.length ? parts.join(' · ') : '';
+            const hint = ' — cliquer pour ajouter';
+            return (detail ? weekdayLabel + ' — ' + detail : weekdayLabel) + hint;
+        }
+
+        function setEventError(message) {
+            const errorEl = document.getElementById('calendarEventError');
+            if (!errorEl) return;
+            if (message) {
+                errorEl.textContent = message;
+                errorEl.hidden = false;
+            } else {
+                errorEl.textContent = '';
+                errorEl.hidden = true;
+            }
+        }
+
+        function closeEventModal() {
+            const modal = document.getElementById('calendarEventModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function sharedEventName(events) {
+            if (!events.length) return '';
+            const first = String(events[0].name || '').trim();
+            if (!first) return '';
+            const same = events.every(function (event) {
+                return String(event.name || '').trim() === first;
+            });
+            return same ? first : '';
+        }
+
+        function fillEventModal(isoDate) {
+            const nameInput = document.getElementById('calendarEventName');
+            const colorInput = document.getElementById('calendarEventColor');
+            const deleteBtn = document.getElementById('calendarEventDelete');
+            const title = document.getElementById('calendarEventTitle');
+            const events = eventsForDay(isoDate);
+            const shared = sharedEventName(events);
+            const custom = dayHasCustom(isoDate);
+            const existingName = shared || (custom
+                ? (events.find(function (event) { return isCustom(event.clubCode, isoDate); }) || {}).name || ''
+                : '');
+
+            if (nameInput) {
+                nameInput.value = existingName;
+            }
+            if (colorInput) {
+                colorInput.value = '#0f766e';
+            }
+            if (deleteBtn) {
+                deleteBtn.hidden = !custom;
+            }
+            if (title) {
+                title.textContent = existingName ? 'Modifier l’événement' : 'Ajouter un événement';
+            }
+        }
+
+        function openEventModal(isoDate) {
+            const modal = document.getElementById('calendarEventModal');
+            const dateLabel = document.getElementById('calendarEventDateLabel');
+            const nameInput = document.getElementById('calendarEventName');
+            const passwordInput = document.getElementById('calendarEventPassword');
+            if (!modal || !nameInput) return;
+
+            modal.dataset.date = isoDate;
+            if (dateLabel) dateLabel.value = formatDateFr(isoDate);
+            if (passwordInput && !passwordInput.value) passwordInput.value = '';
+            setEventError('');
+            fillEventModal(isoDate);
+            modal.style.display = 'flex';
+            setTimeout(function () { nameInput.focus(); }, 50);
+        }
+
+        async function submitCalendarEvent(action) {
+            const modal = document.getElementById('calendarEventModal');
+            const nameInput = document.getElementById('calendarEventName');
+            const colorInput = document.getElementById('calendarEventColor');
+            const passwordInput = document.getElementById('calendarEventPassword');
+            const saveBtn = document.getElementById('calendarEventSave');
+            const deleteBtn = document.getElementById('calendarEventDelete');
+            const date = modal ? modal.dataset.date : '';
+            const password = passwordInput ? passwordInput.value : '';
+            const name = nameInput ? nameInput.value.trim() : '';
+            const color = colorInput ? colorInput.value : '';
+
+            if (!password) {
+                setEventError('Saisis le mot de passe organisateur.');
+                passwordInput?.focus();
+                return;
+            }
+            if (action === 'save' && !name) {
+                setEventError('Indique le nom de l’événement.');
+                nameInput?.focus();
+                return;
+            }
+            if (!date) return;
+
+            setEventError('');
+            if (saveBtn) saveBtn.disabled = true;
+            if (deleteBtn) deleteBtn.disabled = true;
+            try {
+                const url = action === 'delete'
+                    ? '/api/calendrier/events/delete'
+                    : '/api/calendrier/events';
+                const payload = action === 'delete'
+                    ? { password: password, date: date }
+                    : { password: password, date: date, name: name, color: color };
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json().catch(function () { return {}; });
+                if (!res.ok || data.success === false) {
+                    setEventError(data.error || 'Impossible d’enregistrer.');
+                    if (res.status === 401) passwordInput?.select();
+                    return;
+                }
+                sessionStorage.setItem(YEAR_STORAGE_KEY, String(selectedYear));
+                window.location.reload();
+            } catch (err) {
+                setEventError('Impossible de contacter le serveur.');
+            } finally {
+                if (saveBtn) saveBtn.disabled = false;
+                if (deleteBtn) deleteBtn.disabled = false;
+            }
+        }
+
+        function applyClubColors(dayDiv, events) {
+            const colors = events.map(function (event) {
+                return CLUB_COLORS[event.clubCode] || '#3d3d42';
+            });
+            if (colors.length === 1) {
+                dayDiv.style.backgroundColor = colors[0];
+                if (events[0].clubCode) {
+                    dayDiv.classList.add('event-club-' + events[0].clubCode);
+                }
+                return;
+            }
+            const stops = colors.map(function (color, index) {
+                const start = (index / colors.length) * 100;
+                const end = ((index + 1) / colors.length) * 100;
+                return color + ' ' + start + '%, ' + color + ' ' + end + '%';
+            }).join(', ');
+            dayDiv.style.background = 'linear-gradient(90deg, ' + stops + ')';
+            dayDiv.classList.add('has-multiple');
+        }
+
+        function updateYearControls() {
+            const yearLabel = document.getElementById('calendarYearLabel');
+            const yearNavValue = document.getElementById('yearNavValue');
+            const prevBtn = document.getElementById('prevYearBtn');
+            const nextBtn = document.getElementById('nextYearBtn');
+
+            if (yearLabel) yearLabel.textContent = String(selectedYear);
+            if (yearNavValue) yearNavValue.textContent = String(selectedYear);
+            if (prevBtn) prevBtn.disabled = selectedYear <= MIN_YEAR;
+            if (nextBtn) nextBtn.disabled = selectedYear >= MAX_YEAR;
+        }
+
+        function initializeFullCalendar(year) {
+            const calendarGrid = document.getElementById('fullCalendarGrid');
+            if (!calendarGrid) return;
+
+            calendarGrid.innerHTML = '';
+            selectedYear = year;
+            updateYearControls();
+
+            const months = ['JANVIER', 'FÉVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN',
+                           'JUILLET', 'AOÛT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DÉCEMBRE'];
+
+            months.forEach(function (month, monthIndex) {
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'calendar-month';
+
+                const monthHeader = document.createElement('div');
+                monthHeader.className = 'month-header';
+                monthHeader.textContent = month;
+
+                const monthDays = document.createElement('div');
+                monthDays.className = 'month-days';
+
+                const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+                const today = new Date();
+                const isCurrentMonth = today.getFullYear() === year && today.getMonth() === monthIndex;
+                const dayLetters = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+                const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'calendar-day';
+
+                    const weekday = new Date(year, monthIndex, day).getDay();
+                    if (weekday === 0 || weekday === 6) {
+                        dayDiv.classList.add('is-weekend');
+                    }
+
+                    const letterSpan = document.createElement('span');
+                    letterSpan.className = 'day-letter';
+                    letterSpan.textContent = dayLetters[weekday];
+
+                    const contentSpan = document.createElement('span');
+                    contentSpan.className = 'day-content';
+                    contentSpan.textContent = day.toString().padStart(2, '0');
+
+                    dayDiv.appendChild(letterSpan);
+                    dayDiv.appendChild(contentSpan);
+
+                    const eventKey = year + '-' + (monthIndex + 1).toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0');
+                    const events = eventsForDay(eventKey);
+                    dayDiv.dataset.date = eventKey;
+                    dayDiv.setAttribute('title', dayNames[weekday] + ' — cliquer pour ajouter');
+                    dayDiv.addEventListener('click', function () {
+                        openEventModal(eventKey);
+                    });
+
+                    if (dayHasCustom(eventKey)) {
+                        dayDiv.classList.add('is-custom');
+                    }
+
+                    if (events.length) {
+                        dayDiv.classList.add('has-event');
+                        dayDiv.setAttribute('title', eventTitle(dayNames[weekday], events));
+                        applyClubColors(dayDiv, events);
+
+                        if (events.length === 1 || sharedEventName(events)) {
+                            const label = shortName(events[0]);
+                            contentSpan.textContent = label;
+                            contentSpan.style.fontSize = '0.6rem';
+                            contentSpan.style.fontWeight = 'bold';
+                        } else {
+                            contentSpan.textContent = String(events.length);
+                            contentSpan.style.fontWeight = 'bold';
+                        }
+                    }
+
+                    if (isCurrentMonth && day === today.getDate()) {
+                        dayDiv.classList.add('today');
+                        const currentTitle = dayDiv.getAttribute('title') || '';
+                        dayDiv.setAttribute('title', currentTitle ? currentTitle + ' — Aujourd\'hui' : 'Aujourd\'hui');
+                    }
+
+                    monthDays.appendChild(dayDiv);
+                }
+
+                monthDiv.appendChild(monthHeader);
+                monthDiv.appendChild(monthDays);
+                calendarGrid.appendChild(monthDiv);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeFullCalendar(selectedYear);
+
+            document.getElementById('prevYearBtn')?.addEventListener('click', function () {
+                if (selectedYear > MIN_YEAR) {
+                    initializeFullCalendar(selectedYear - 1);
+                    sessionStorage.setItem(YEAR_STORAGE_KEY, String(selectedYear));
+                }
+            });
+
+            document.getElementById('nextYearBtn')?.addEventListener('click', function () {
+                if (selectedYear < MAX_YEAR) {
+                    initializeFullCalendar(selectedYear + 1);
+                    sessionStorage.setItem(YEAR_STORAGE_KEY, String(selectedYear));
+                }
+            });
+
+            const modal = document.getElementById('calendarEventModal');
+            const form = document.getElementById('calendarEventForm');
+            document.getElementById('calendarEventCancel')?.addEventListener('click', function (e) {
+                e.preventDefault();
+                closeEventModal();
+            });
+            document.getElementById('calendarEventDelete')?.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (window.confirm('Supprimer cet événement ajouté ? Il disparaîtra aussi des calendriers de chaque club, et le calendrier officiel reviendra s’il existe.')) {
+                    submitCalendarEvent('delete');
+                }
+            });
+            form?.addEventListener('submit', function (e) {
+                e.preventDefault();
+                submitCalendarEvent('save');
+            });
+            modal?.addEventListener('click', function (e) {
+                if (e.target === modal) closeEventModal();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+                    closeEventModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/calendrier/{club}")
+@RequestMapping("/api/calendrier")
 public class ClubCalendarEventController {
 
     private final ClubCalendarService clubCalendarService;
@@ -32,7 +32,7 @@ public class ClubCalendarEventController {
         this.importAuthService = importAuthService;
     }
 
-    @PostMapping("/events")
+    @PostMapping("/{club}/events")
     public ResponseEntity<Map<String, Object>> save(@PathVariable String club,
                                                     @RequestBody Map<String, String> body) {
         Optional<Club> parsed = Club.fromCode(club);
@@ -56,7 +56,25 @@ public class ClubCalendarEventController {
         }
     }
 
-    @PostMapping("/events/delete")
+    @PostMapping("/events")
+    public ResponseEntity<Map<String, Object>> saveAll(@RequestBody Map<String, String> body) {
+        if (!importAuthService.matches(body == null ? null : body.get("password"))) {
+            return error(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect.");
+        }
+        try {
+            LocalDate date = parseDate(body.get("date"));
+            clubCalendarService.upsertAllClubs(date, body.get("name"), body.get("color"));
+            Map<String, Object> ok = new LinkedHashMap<>();
+            ok.put("success", true);
+            ok.put("date", date.toString());
+            ok.put("name", body.get("name"));
+            return ResponseEntity.ok(ok);
+        } catch (IllegalArgumentException e) {
+            return error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{club}/events/delete")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable String club,
                                                       @RequestBody Map<String, String> body) {
         Optional<Club> parsed = Club.fromCode(club);
@@ -81,7 +99,27 @@ public class ClubCalendarEventController {
         }
     }
 
-    @PostMapping("/categories")
+    @PostMapping("/events/delete")
+    public ResponseEntity<Map<String, Object>> deleteAll(@RequestBody Map<String, String> body) {
+        if (!importAuthService.matches(body == null ? null : body.get("password"))) {
+            return error(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect.");
+        }
+        try {
+            LocalDate date = parseDate(body.get("date"));
+            boolean removed = clubCalendarService.deleteCustomAllClubs(date);
+            if (!removed) {
+                return error(HttpStatus.NOT_FOUND, "Aucun événement ajouté à supprimer pour ce jour.");
+            }
+            Map<String, Object> ok = new LinkedHashMap<>();
+            ok.put("success", true);
+            ok.put("date", date.toString());
+            return ResponseEntity.ok(ok);
+        } catch (IllegalArgumentException e) {
+            return error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{club}/categories")
     public ResponseEntity<Map<String, Object>> saveCategory(@PathVariable String club,
                                                             @RequestBody Map<String, String> body) {
         Optional<Club> parsed = Club.fromCode(club);
@@ -106,7 +144,7 @@ public class ClubCalendarEventController {
         }
     }
 
-    @PostMapping("/categories/delete")
+    @PostMapping("/{club}/categories/delete")
     public ResponseEntity<Map<String, Object>> deleteCategory(@PathVariable String club,
                                                               @RequestBody Map<String, String> body) {
         Optional<Club> parsed = Club.fromCode(club);

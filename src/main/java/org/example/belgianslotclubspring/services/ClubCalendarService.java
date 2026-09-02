@@ -6,6 +6,7 @@ import org.example.belgianslotclubspring.entities.Rallye;
 import org.example.belgianslotclubspring.models.CalendarCategory;
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.models.ClubCalendar;
+import org.example.belgianslotclubspring.models.GlobalCalendarEvent;
 import org.example.belgianslotclubspring.repo.ClubCalendarCategoryRepo;
 import org.example.belgianslotclubspring.repo.ClubCalendarEventRepo;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -56,10 +59,52 @@ public class ClubCalendarService {
         return merge(ClubCalendar.eventsFor(club), eventRepo.findByClubName(club.getCode()));
     }
 
+    /**
+     * Tous les événements de tous les clubs, groupés par date ISO.
+     * Un même jour peut contenir plusieurs clubs.
+     */
+    public Map<String, List<GlobalCalendarEvent>> allEventsByDate() {
+        Map<Club, Map<String, String>> perClub = new EnumMap<>(Club.class);
+        for (Club club : Club.values()) {
+            perClub.put(club, eventsFor(club));
+        }
+        return mergeAllClubs(perClub);
+    }
+
+    static Map<String, List<GlobalCalendarEvent>> mergeAllClubs(Map<Club, Map<String, String>> perClub) {
+        Map<String, List<GlobalCalendarEvent>> byDate = new TreeMap<>();
+        if (perClub == null) {
+            return byDate;
+        }
+        for (Club club : Club.values()) {
+            Map<String, String> events = perClub.get(club);
+            if (events == null || events.isEmpty()) {
+                continue;
+            }
+            for (Map.Entry<String, String> entry : events.entrySet()) {
+                if (entry.getKey() == null || entry.getValue() == null) {
+                    continue;
+                }
+                byDate.computeIfAbsent(entry.getKey(), key -> new ArrayList<>())
+                        .add(new GlobalCalendarEvent(club.getCode(), club.getCalendarLabel(), entry.getValue()));
+            }
+        }
+        return byDate;
+    }
+
     public Set<String> customDates(Club club) {
         return eventRepo.findByClubName(club.getCode()).stream()
                 .map(event -> event.getEventDate().toString())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    /** Dates ajoutées par un organisateur, par code club — pour le calendrier commun. */
+    public Map<String, List<String>> customDatesByClub() {
+        Map<String, List<String>> byClub = new LinkedHashMap<>();
+        for (Club club : Club.values()) {
+            byClub.put(club.getCode(), new ArrayList<>(customDates(club)));
+        }
+        return byClub;
     }
 
     @Transactional
@@ -82,6 +127,26 @@ public class ClubCalendarService {
     @Transactional
     public ClubCalendarEvent upsert(Club club, LocalDate date, String name) {
         return upsert(club, date, name, null);
+    }
+
+    /** Enregistre le même événement sur tous les clubs (calendrier général). */
+    @Transactional
+    public void upsertAllClubs(LocalDate date, String name, String color) {
+        for (Club club : Club.values()) {
+            upsert(club, date, name, color);
+        }
+    }
+
+    /** Retire l’événement ajouté de tous les clubs pour cette date. */
+    @Transactional
+    public boolean deleteCustomAllClubs(LocalDate date) {
+        boolean removed = false;
+        for (Club club : Club.values()) {
+            if (deleteCustom(club, date)) {
+                removed = true;
+            }
+        }
+        return removed;
     }
 
     /**

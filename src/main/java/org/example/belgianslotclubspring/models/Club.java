@@ -30,6 +30,11 @@ public enum Club {
         return displayName;
     }
 
+    /** Libellé court pour le calendrier commun (légende et pastilles). */
+    public String getCalendarLabel() {
+        return this == SCO ? "Rallyes Slot" : displayName;
+    }
+
     public static Optional<Club> fromCode(String raw) {
         if (raw == null || raw.isBlank()) {
             return Optional.empty();

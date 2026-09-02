@@ -65,6 +65,10 @@
             return statsClub ? '/selectRace/' + encodeURIComponent(statsClub) : '/';
         }
 
+        const googleAll = path === '/calendrier/google' || path === '/calendrier/all/google';
+        if (googleAll) {
+            return '/calendrier';
+        }
         const googleCal = path.match(/^\/calendrier\/([^/]+)\/google$/);
         if (googleCal) {
             return '/prochain-evenement?club=' + encodeURIComponent(googleCal[1]);

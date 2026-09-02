@@ -71,6 +71,27 @@
                 </dl>
             </article>
 
+            <section class="calendar-subscribe" aria-labelledby="subscribe-heading">
+                <h2 id="subscribe-heading" class="section-title">Ajouter à mon agenda</h2>
+                <p class="section-lead">
+                    Abonne-toi au calendrier de tous les clubs.
+                    Apple et Outlook se mettent à jour tout seuls.
+                    Google Agenda suit aussi, souvent avec quelques heures de décalage.
+                </p>
+                <div class="cluster">
+                    <a class="btn btn-primary"
+                       href="/calendrier/google"
+                       target="_blank"
+                       rel="noopener">Google Agenda</a>
+                    <a class="btn btn-secondary" href="/calendrier/apple">Apple Calendar</a>
+                    <a class="btn btn-outline"
+                       th:href="${icsFeedPath}"
+                       download="calendrier-belgian-slot-club.ics">
+                        Fichier .ics (Outlook)
+                    </a>
+                </div>
+            </section>
+
             <section class="calendar-section" aria-labelledby="calendar-heading">
                 <header class="calendar-section-header">
                     <div class="calendar-section-top">
@@ -108,9 +129,13 @@
                         <div class="legend-color event-club-sco"></div>
                         <span>Rallyes Slot</span>
                     </a>
+                    <div class="legend-item">
+                        <div class="legend-color event-club-all"></div>
+                        <span>Plusieurs clubs</span>
+                    </div>
                 </div>
                 <p class="section-lead calendar-club-links">
-                    Un chiffre indique plusieurs clubs le même jour. Les calendriers de chaque club restent accessibles via la légende.
+                    Un chiffre indique plusieurs clubs le même jour, en couleur unie. Les calendriers de chaque club restent accessibles via la légende.
                 </p>
             </section>
         </div>
@@ -318,6 +343,22 @@
             font-size: 1rem;
             font-weight: 600;
             color: var(--color-ink);
+        }
+
+        .calendar-subscribe {
+            margin: 0 0 var(--space-10);
+            padding: var(--space-6);
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+        }
+
+        .calendar-subscribe .section-title {
+            margin-bottom: var(--space-2);
+        }
+
+        .calendar-subscribe .section-lead {
+            margin-bottom: var(--space-4);
         }
 
         .calendar-section {
@@ -560,6 +601,11 @@
             background-color: #9a3412;
         }
 
+        .event-club-all,
+        .legend-color.event-club-all {
+            background-color: #1c1c1e;
+        }
+
         .calendar-club-links {
             margin-top: var(--space-4);
         }
@@ -596,6 +642,7 @@
             srcs: '#1d4ed8',
             sco: '#9a3412'
         };
+        const UNIFIED_COLOR = '#1c1c1e';
 
         const MIN_YEAR = 2024;
         const MAX_YEAR = 2032;
@@ -776,23 +823,16 @@
         }
 
         function applyClubColors(dayDiv, events) {
-            const colors = events.map(function (event) {
-                return CLUB_COLORS[event.clubCode] || '#3d3d42';
-            });
-            if (colors.length === 1) {
-                dayDiv.style.backgroundColor = colors[0];
-                if (events[0].clubCode) {
-                    dayDiv.classList.add('event-club-' + events[0].clubCode);
+            if (events.length === 1) {
+                const club = events[0].clubCode;
+                dayDiv.style.backgroundColor = CLUB_COLORS[club] || UNIFIED_COLOR;
+                if (club) {
+                    dayDiv.classList.add('event-club-' + club);
                 }
                 return;
             }
-            const stops = colors.map(function (color, index) {
-                const start = (index / colors.length) * 100;
-                const end = ((index + 1) / colors.length) * 100;
-                return color + ' ' + start + '%, ' + color + ' ' + end + '%';
-            }).join(', ');
-            dayDiv.style.background = 'linear-gradient(90deg, ' + stops + ')';
-            dayDiv.classList.add('has-multiple');
+            dayDiv.style.backgroundColor = UNIFIED_COLOR;
+            dayDiv.classList.add('event-club-all');
         }
 
         function updateYearControls() {

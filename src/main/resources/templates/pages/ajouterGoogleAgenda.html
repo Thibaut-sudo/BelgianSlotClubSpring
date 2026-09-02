@@ -7,13 +7,15 @@
     <section class="page-hero">
         <div class="page-hero-content container">
             <p class="page-hero-eyebrow">
-                <a th:href="@{/prochain-evenement(club=${club})}" class="page-hero-back">← Calendrier</a>
+                <a th:if="${combined}" href="/calendrier" class="page-hero-back">← Calendrier</a>
+                <a th:unless="${combined}" th:href="@{/prochain-evenement(club=${club})}" class="page-hero-back">← Calendrier</a>
             </p>
             <h1 class="page-hero-title">Ajouter à Google Agenda</h1>
             <p class="page-hero-sub">
                 Calendrier
                 <span th:text="${clubDisplayName}">club</span>
-                — soirées dès 18h.
+                <th:block th:if="${combined}"> — Slot 4000, SRCS et Rallyes Slot.</th:block>
+                <th:block th:unless="${combined}"> — soirées dès 18h.</th:block>
             </p>
         </div>
     </section>
@@ -100,7 +102,25 @@
 
                 <p class="section-lead">
                     Sur iPhone, l’app Calendrier d’Apple est plus fiable :
-                    utilise le bouton <strong>Apple Calendar</strong> sur la page Prochain événement.
+                    utilise le bouton <strong>Apple Calendar</strong>
+                    <th:block th:if="${combined}">sur la page Calendrier.</th:block>
+                    <th:block th:unless="${combined}">sur la page Prochain événement.</th:block>
+                </p>
+            </article>
+
+            <article class="info-panel" style="margin-top: var(--space-6);">
+                <h2>4. Quand une date change sur le site</h2>
+                <p>
+                    L’abonnement est un flux : Google vient le relire tout seul.
+                    Une date ajoutée ou modifiée sur belgianslotclub.com
+                    <strong>arrive dans Google Agenda au prochain passage</strong>
+                    (souvent quelques heures, parfois jusqu’à 24&nbsp;h).
+                    Ce n’est pas instantané, Google ne le permet pas.
+                </p>
+                <p>
+                    Apple Calendar et Outlook se mettent en général à jour plus vite.
+                    Pour forcer tout de suite : désabonne-toi, puis ré-ajoute l’agenda
+                    (étape 0 puis 1 ou 2).
                 </p>
             </article>
         </div>

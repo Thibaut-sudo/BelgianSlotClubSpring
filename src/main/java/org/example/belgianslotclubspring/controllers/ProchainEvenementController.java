@@ -151,6 +151,7 @@ public class ProchainEvenementController {
         model.addAttribute("hasUpcomingEvent", hasUpcomingEvent);
         model.addAttribute("allEvents", allEvents);
         model.addAttribute("customByClub", clubCalendarService.customDatesByClub());
+        model.addAttribute("icsFeedPath", ClubIcsCalendar.publicFeedPathAll());
 
         return "pages/calendrierGlobal";
     }

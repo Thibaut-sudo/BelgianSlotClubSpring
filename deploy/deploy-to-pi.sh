@@ -108,9 +108,12 @@ sudo_cmd() {
 }
 
 if ! command -v java >/dev/null 2>&1; then
-  echo "Installation OpenJDK 21…"
+  echo "Installation OpenJDK 25…"
   sudo_cmd apt-get update -y
-  sudo_cmd apt-get install -y openjdk-21-jre-headless nginx
+  sudo_cmd apt-get install -y openjdk-25-jre-headless nginx
+else
+  echo "Installation / mise à jour OpenJDK 25…"
+  sudo_cmd apt-get install -y openjdk-25-jre-headless
 fi
 
 if ! command -v nginx >/dev/null 2>&1; then
@@ -118,14 +121,14 @@ if ! command -v nginx >/dev/null 2>&1; then
   sudo_cmd apt-get install -y nginx
 fi
 
-if [ ! -x /usr/bin/java ]; then
-  echo "Java introuvable après install" >&2
+JAVA25_HOME="$(ls -d /usr/lib/jvm/java-25-openjdk-* 2>/dev/null | head -1 || true)"
+if [ -z "$JAVA25_HOME" ] || [ ! -x "$JAVA25_HOME/bin/java" ]; then
+  echo "OpenJDK 25 introuvable après install" >&2
   exit 1
 fi
-
-# Adapter JAVA_HOME selon arch
-JAVA_HOME_DIR="$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")"
-sed -i "s|^Environment=JAVA_HOME=.*|Environment=JAVA_HOME=${JAVA_HOME_DIR}|" /tmp/belgianslotclub.service
+sudo_cmd update-alternatives --install /usr/bin/java java "$JAVA25_HOME/bin/java" 2500
+sudo_cmd update-alternatives --set java "$JAVA25_HOME/bin/java" || true
+sed -i "s|^Environment=JAVA_HOME=.*|Environment=JAVA_HOME=${JAVA25_HOME}|" /tmp/belgianslotclub.service
 
 sudo_cmd mkdir -p /etc/nginx/snippets /etc/nginx/conf.d /etc/ssl/cloudflare
 sudo_cmd cp /tmp/belgianslotclub.service /etc/systemd/system/belgianslotclub.service

@@ -10,7 +10,7 @@ Application web pour la gestion des résultats de courses de slot racing en Belg
 - Windows (avec WSL recommandé)
 
 ### Logiciels requis
-- **Java 21** ou supérieur
+- **Java 25** ou supérieur
 - **Maven 3.9** ou supérieur
 - **Git** (pour cloner le projet)
 
@@ -24,17 +24,17 @@ Application web pour la gestion des résultats de courses de slot racing en Belg
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Installer Java
-brew install openjdk@21
+brew install openjdk@25
 
 # Ajouter Java au PATH
-echo 'export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"' >> ~/.zshrc
+echo 'export PATH="/opt/homebrew/opt/openjdk@25/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
 #### Sur Linux (Ubuntu/Debian)
 ```bash
 sudo apt update
-sudo apt install openjdk-21-jdk
+sudo apt install openjdk-25-jdk
 ```
 
 #### Sur Windows
@@ -251,7 +251,7 @@ kill -9 <PID>
 - Vérifier que la base de données existe
 
 #### 3. Erreur de compilation Java
-- Vérifier la version de Java (Java 21 requis)
+- Vérifier la version de Java (Java 25 requis)
 - Vérifier que JAVA_HOME est configuré
 - Nettoyer et recompiler : `mvn clean compile`
 

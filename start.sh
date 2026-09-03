@@ -48,28 +48,34 @@ EOF
     esac
 done
 
-# --- Java 21 (requis par le projet) ---
+# --- Java 25 (requis par le projet) ---
 setup_java() {
     if [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/java" ]; then
         export PATH="$JAVA_HOME/bin:$PATH"
         return 0
     fi
+
+    local brew_home="/opt/homebrew/opt/openjdk@25/libexec/openjdk.jdk/Contents/Home"
+    if [ ! -x "$brew_home/bin/java" ]; then
+        brew_home="/usr/local/opt/openjdk@25/libexec/openjdk.jdk/Contents/Home"
+    fi
+    if [ -x "$brew_home/bin/java" ]; then
+        export JAVA_HOME="$brew_home"
+        export PATH="$JAVA_HOME/bin:$PATH"
+        return 0
+    fi
+
     if [ -x /usr/libexec/java_home ]; then
-        if JAVA_HOME_CANDIDATE="$(/usr/libexec/java_home -v 21 2>/dev/null)"; then
-            export JAVA_HOME="$JAVA_HOME_CANDIDATE"
-            export PATH="$JAVA_HOME/bin:$PATH"
-            return 0
-        fi
-        if JAVA_HOME_CANDIDATE="$(/usr/libexec/java_home 2>/dev/null)"; then
+        if JAVA_HOME_CANDIDATE="$(/usr/libexec/java_home -v 25 2>/dev/null)"; then
             export JAVA_HOME="$JAVA_HOME_CANDIDATE"
             export PATH="$JAVA_HOME/bin:$PATH"
             return 0
         fi
     fi
-    if ! command -v java >/dev/null 2>&1; then
-        echo "Java introuvable. Installe JDK 21 puis réessaie."
-        exit 1
-    fi
+
+    echo "Java 25 introuvable. Installe-le puis réessaie :"
+    echo "  brew install openjdk@25"
+    exit 1
 }
 
 maven_cmd() {

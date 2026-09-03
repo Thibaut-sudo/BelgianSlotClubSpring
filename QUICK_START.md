@@ -33,5 +33,5 @@ tail -f app.log
 
 ## Prérequis
 
-- **JDK 21** (détecté automatiquement via `/usr/libexec/java_home`)
+- **JDK 25** (Homebrew `openjdk@25`, ou `/usr/libexec/java_home -v 25`)
 - Le script utilise `./mvnw` (rien d’autre à installer pour Maven)

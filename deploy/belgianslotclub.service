@@ -15,7 +15,7 @@ MemoryMax=640M
 TasksMax=64
 LimitNOFILE=4096
 
-Environment=JAVA_HOME=/usr/lib/jvm/java-21-openjdk-arm64
+Environment=JAVA_HOME=/usr/lib/jvm/java-25-openjdk-arm64
 
 [Install]
 WantedBy=multi-user.target

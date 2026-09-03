@@ -1,37 +1,13 @@
-# Démarrage rapide — Belgian Slot Club
+# Démarrage rapide
 
-## Le plus simple (macOS)
-
-1. Double-clic sur **`Démarrer.command`**
-2. Attendre l’ouverture du navigateur → http://localhost:8080
-3. Pour arrêter : double-clic sur **`Arrêter.command`**
-
-Au premier lancement, macOS peut demander d’autoriser le script : clic droit → Ouvrir.
-
-## Depuis le terminal
+1. JDK 25 (`brew install openjdk@25`)
+2. Double-clic **`Démarrer.command`** → http://localhost:8080
+3. Arrêt : **`Arrêter.command`**
 
 ```bash
-./start.sh          # démarre + ouvre le navigateur
-./start.sh status   # déjà lancé ?
-./stop.sh           # arrête
+./start.sh              # terminal
+./start.sh --fg         # logs visibles
+./stop.sh
 ```
 
-### Options
-
-```bash
-./start.sh --fg         # logs dans le terminal
-./start.sh --restart    # force un redémarrage
-./start.sh --tunnel     # + URL publique (Cloudflare)
-./start.sh prod         # profil production
-```
-
-## Logs
-
-```bash
-tail -f app.log
-```
-
-## Prérequis
-
-- **JDK 25** (Homebrew `openjdk@25`, ou `/usr/libexec/java_home -v 25`)
-- Le script utilise `./mvnw` (rien d’autre à installer pour Maven)
+Le reste (profils, deploy, calendrier) est dans le [README](README.md).

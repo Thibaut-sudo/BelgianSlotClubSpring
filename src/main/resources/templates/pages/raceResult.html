@@ -266,14 +266,17 @@
     <footer th:replace="~{fragments/layout :: footer}"></footer>
     <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
-    <script src="/js/export-tables.js"></script>
+    <script src="/js/vendor/jspdf.umd.min.js"></script>
+    <script src="/js/vendor/jspdf.plugin.autotable.min.js"></script>
+    <script src="/js/export-tables.js?v=8"></script>
     <script th:inline="javascript">
         (function () {
             const raceDateLabel = /*[[${raceDate != null ? #temporals.format(raceDate, 'dd-MM-yyyy') : 'course'}]]*/ 'course';
+            const raceDateDisplay = /*[[${raceDate != null ? #temporals.format(raceDate, 'dd/MM/yyyy') : '—'}]]*/ '—';
             const categoryLabel = /*[[${raceCategory != null ? raceCategory : ''}]]*/ '';
             const clubLabel = /*[[${clubDisplayName != null ? clubDisplayName : club}]]*/ '';
+            const clubCode = /*[[${club}]]*/ '';
+            const winnerLabel = /*[[${winnerName != null ? winnerName : ''}]]*/ '';
             const baseName = ['resultats', clubLabel, categoryLabel, raceDateLabel]
                 .filter(Boolean).join('_');
 
@@ -355,18 +358,29 @@
             }
 
             function subtitle() {
-                return [clubLabel, categoryLabel, raceDateLabel.replace(/-/g, '/')].filter(Boolean).join(' · ');
+                return [clubLabel, categoryLabel, raceDateDisplay].filter(Boolean).join(' · ');
+            }
+
+            function racePdfMeta() {
+                return [
+                    { label: 'Club', value: clubLabel || '—' },
+                    { label: 'Catégorie', value: categoryLabel || '—' },
+                    { label: 'Date', value: raceDateDisplay || '—' }
+                ];
             }
 
             document.getElementById('exportRaceExcel')?.addEventListener('click', () => {
                 BscExport.exportToExcel(sheets(), baseName);
             });
             document.getElementById('exportRacePdf')?.addEventListener('click', () => {
-                BscExport.exportToPdf({
+                BscExport.exportRaceResultsPdf({
                     title: 'Résultats de course',
-                    subtitle: subtitle(),
                     filename: baseName,
-                    sheets: sheets()
+                    meta: racePdfMeta(),
+                    club: clubCode,
+                    winner: winnerLabel,
+                    qualifTable: '#qualifTable',
+                    raceTable: '#raceResultsTable'
                 });
             });
             document.getElementById('shareRacePage')?.addEventListener('click', async () => {

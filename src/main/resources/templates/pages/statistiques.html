@@ -151,7 +151,11 @@
                                 <tbody>
                                     <tr th:each="p, iter : ${stats.mostPresent()}">
                                         <td class="position" th:classappend="' position-' + ${iter.count}" th:text="${iter.count}">1</td>
-                                        <td class="pilot-name" th:text="${p.name()}">Pilote</td>
+                                        <td class="pilot-name">
+                                            <a class="pilot-link"
+                                               th:href="@{/statistiques/{club}/pilote(club=${club}, nom=${p.name()})}"
+                                               th:text="${p.name()}">Pilote</a>
+                                        </td>
                                         <td class="total-points" th:text="${p.count()}">0</td>
                                     </tr>
                                 </tbody>
@@ -174,7 +178,11 @@
                                 <tbody>
                                     <tr th:each="p, iter : ${stats.mostWins()}">
                                         <td class="position" th:classappend="' position-' + ${iter.count}" th:text="${iter.count}">1</td>
-                                        <td class="pilot-name" th:text="${p.name()}">Pilote</td>
+                                        <td class="pilot-name">
+                                            <a class="pilot-link"
+                                               th:href="@{/statistiques/{club}/pilote(club=${club}, nom=${p.name()})}"
+                                               th:text="${p.name()}">Pilote</a>
+                                        </td>
                                         <td class="total-points" th:text="${p.count()}">0</td>
                                     </tr>
                                 </tbody>

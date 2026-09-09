@@ -59,6 +59,11 @@
             return club ? '/selectRace/' + encodeURIComponent(club) : '/';
         }
 
+        const pilotStats = path.match(/^\/statistiques\/([^/]+)\/pilote$/);
+        if (pilotStats) {
+            return '/statistiques/' + encodeURIComponent(pilotStats[1]);
+        }
+
         const stats = path.match(/^\/statistiques(?:\/([^/]+))?$/);
         if (stats) {
             const statsClub = stats[1] || club;

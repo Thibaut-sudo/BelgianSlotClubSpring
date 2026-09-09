@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title=${stats.name() + ' — Statistiques — Belgian Slot Club'})}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: nav(active='courses', club=${club})}"></header>
+
+    <section class="page-hero page-hero--club" th:data-club="${club}">
+        <div class="page-hero-content container">
+            <p class="page-hero-eyebrow">
+                <a th:href="@{/statistiques/{club}(club=${club})}" class="page-hero-back">‹ Statistiques</a>
+            </p>
+            <h1 class="page-hero-title" th:text="${stats.name()}">Pilote</h1>
+            <p class="page-hero-sub">Statistiques de course dans ce club, toutes saisons confondues.</p>
+            <div class="page-hero-meta">
+                <span>Club : <strong th:text="${clubDisplayName}">Club</strong></span>
+            </div>
+            <div class="page-hero-actions cluster" style="margin-top: var(--space-5);">
+                <a th:href="@{/statistiques/{club}(club=${club})}" class="btn btn-secondary">Statistiques du club</a>
+                <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-primary">Voir les courses</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+
+            <th:block th:if="${stats.starts() == 0 and stats.poles() == 0 and stats.fastestQuali() == null}">
+                <div class="empty-state">
+                    <p>Aucune course enregistrée pour ce pilote dans ce club.</p>
+                    <a th:href="@{/statistiques/{club}(club=${club})}" class="btn btn-primary">Retour aux statistiques</a>
+                </div>
+            </th:block>
+
+            <th:block th:unless="${stats.starts() == 0 and stats.poles() == 0 and stats.fastestQuali() == null}">
+
+                <div class="stats-row stats-row--pilot">
+                    <div class="stat-block">
+                        <span class="stat-block-value" th:text="${stats.starts()}">0</span>
+                        <span class="stat-block-label">Départs</span>
+                    </div>
+                    <div class="stat-block">
+                        <span class="stat-block-value" th:text="${stats.wins()}">0</span>
+                        <span class="stat-block-label">Victoires</span>
+                    </div>
+                    <div class="stat-block">
+                        <span class="stat-block-value" th:text="${stats.podiums()}">0</span>
+                        <span class="stat-block-label">Podiums</span>
+                    </div>
+                    <div class="stat-block">
+                        <span class="stat-block-value" th:text="${stats.avgPosition()}">—</span>
+                        <span class="stat-block-label">Pos. moyenne</span>
+                    </div>
+                    <div class="stat-block">
+                        <span class="stat-block-value" th:text="${stats.poles()}">0</span>
+                        <span class="stat-block-label">Poles</span>
+                    </div>
+                    <div class="stat-block">
+                        <span class="stat-block-value" th:text="${stats.winRate()}">—</span>
+                        <span class="stat-block-label">Taux de victoire</span>
+                    </div>
+                </div>
+
+                <div class="stats-record-grid" th:if="${stats.fastestLap() != null or stats.fastestQuali() != null}">
+                    <article class="stats-record" th:if="${stats.fastestLap() != null}">
+                        <p class="stats-record-label">Meilleur tour</p>
+                        <p class="stats-record-value" th:text="${stats.fastestLap().time()}">0.000</p>
+                        <p class="stats-record-meta">
+                            <span th:text="${stats.fastestLap().category()}">Catégorie</span>
+                            <span th:text="' · ' + ${#temporals.format(stats.fastestLap().date(), 'dd/MM/yyyy')}"> · Date</span>
+                        </p>
+                    </article>
+                    <article class="stats-record" th:if="${stats.fastestQuali() != null}">
+                        <p class="stats-record-label">Meilleure quali</p>
+                        <p class="stats-record-value" th:text="${stats.fastestQuali().time()}">0.000</p>
+                        <p class="stats-record-meta">
+                            <span th:text="${#temporals.format(stats.fastestQuali().date(), 'dd/MM/yyyy')}">Date</span>
+                        </p>
+                    </article>
+                </div>
+
+                <div class="stats-panels" th:if="${!#lists.isEmpty(stats.byCategory())}">
+                    <section class="stats-panel">
+                        <h2 class="stats-panel-title">Départs par catégorie</h2>
+                        <div class="championship-table-wrap">
+                            <table class="championship-table">
+                                <thead>
+                                    <tr>
+                                        <th>Catégorie</th>
+                                        <th>Départs</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="row : ${stats.byCategory()}">
+                                        <td class="pilot-name" th:text="${row.label()}">Catégorie</td>
+                                        <td>
+                                            <span th:text="${row.count()}">0</span>
+                                            <span class="stats-bar" aria-hidden="true"><span th:style="'width:' + ${row.pct()} + '%'"></span></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="stats-panel" th:if="${!#lists.isEmpty(stats.races())}">
+                    <h2 class="stats-panel-title">Courses</h2>
+                    <p class="stats-panel-hint">Classement par course (plus de tours = mieux), du plus récent au plus ancien.</p>
+                    <div class="championship-table-wrap">
+                        <table class="championship-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Catégorie</th>
+                                    <th class="position">Pos</th>
+                                    <th>Peloton</th>
+                                    <th>Tours</th>
+                                    <th>Meilleur tour</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="race : ${stats.races()}">
+                                    <td th:text="${#temporals.format(race.date(), 'dd/MM/yyyy')}">01/01/2026</td>
+                                    <td class="pilot-name" th:text="${race.category()}">Catégorie</td>
+                                    <td class="position" th:classappend="${race.position() <= 3} ? ' position-' + ${race.position()} : ''"
+                                        th:text="${race.position()}">1</td>
+                                    <td th:text="${race.fieldSize()}">0</td>
+                                    <td class="total-laps" th:text="${race.totalTours()}">0.00</td>
+                                    <td class="best-time" th:text="${race.bestLap()}">—</td>
+                                    <td>
+                                        <a class="btn btn-outline btn-sm"
+                                           th:href="@{/processRaceDate(raceDate=${race.date()}, club=${club}, category=${race.category()})}">
+                                            Résultats
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <div class="actions-section" style="margin-top: var(--space-8);">
+                    <div class="navigation-actions cluster">
+                        <a th:href="@{/statistiques/{club}(club=${club})}" class="btn btn-secondary">Statistiques du club</a>
+                        <a th:href="@{/selectRace/{club}(club=${club})}" class="btn btn-primary">Voir les courses</a>
+                    </div>
+                </div>
+
+            </th:block>
+        </div>
+    </section>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+    <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

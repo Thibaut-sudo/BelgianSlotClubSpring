@@ -181,7 +181,8 @@
     flex: 1;
   }
 
-  .race-card-id strong {
+  .race-card-id strong,
+  .race-card-id a.pilot-link {
     display: block;
     font-size: 0.98rem;
     font-weight: 700;

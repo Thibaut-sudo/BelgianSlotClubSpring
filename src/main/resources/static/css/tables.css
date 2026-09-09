@@ -536,6 +536,19 @@
   color: var(--color-ink);
 }
 
+a.pilot-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+a.pilot-link:hover,
+a.pilot-link:focus-visible {
+  color: var(--color-accent);
+  border-bottom-style: solid;
+  border-bottom-color: var(--color-accent);
+}
+
 .best-time {
   font-variant-numeric: tabular-nums;
   font-weight: 600;

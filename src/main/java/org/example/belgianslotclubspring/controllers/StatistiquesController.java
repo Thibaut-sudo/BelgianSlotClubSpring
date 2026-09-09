@@ -2,8 +2,10 @@ package org.example.belgianslotclubspring.controllers;
 
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.models.ClubRaceStats;
+import org.example.belgianslotclubspring.models.PilotClubStats;
 import org.example.belgianslotclubspring.services.ClubRaceStatsService;
 import org.example.belgianslotclubspring.services.RaceResultService;
+import org.example.belgianslotclubspring.utils.PilotNames;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,5 +71,29 @@ public class StatistiquesController {
         model.addAttribute("stats", stats);
 
         return "pages/statistiques";
+    }
+
+    @GetMapping("/statistiques/{club}/pilote")
+    public String statistiquesPilote(
+            @PathVariable String club,
+            @RequestParam("nom") String nom,
+            Model model
+    ) {
+        String clubCode = Club.requireCode(club);
+        Club clubEnum = Club.fromCode(clubCode).orElseThrow();
+        if (clubEnum.isRallyOnly()) {
+            return "redirect:/rallye?club=" + clubCode;
+        }
+
+        String name = PilotNames.baseName(nom);
+        if (name.isBlank()) {
+            return "redirect:/statistiques/" + clubCode;
+        }
+
+        PilotClubStats stats = clubRaceStatsService.buildForPilot(clubCode, name);
+        model.addAttribute("club", clubCode);
+        model.addAttribute("clubDisplayName", clubEnum.getDisplayName());
+        model.addAttribute("stats", stats);
+        return "pages/statistiquesPilote";
     }
 }

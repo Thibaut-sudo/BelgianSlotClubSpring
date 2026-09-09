@@ -2,7 +2,7 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(title='Résultats — Belgian Slot Club')}"></head>
 <body class="page-race-results">
-    <link rel="stylesheet" href="/css/race-mobile.css?v=3">
+    <link rel="stylesheet" href="/css/race-mobile.css?v=4">
     <header th:replace="~{fragments/layout :: nav(active='courses', club=${club})}"></header>
 
     <section class="page-hero page-hero--club" th:data-club="${club}">
@@ -125,7 +125,11 @@
                                 <td class="position" th:classappend="${' position-' + stat.count}">
                                     <span class="pos-badge" th:text="${stat.count}"></span>
                                 </td>
-                                <td class="pilot-name" th:text="${quali.getPilotName()}"></td>
+                                <td class="pilot-name">
+                                    <a class="pilot-link"
+                                       th:href="@{/statistiques/{club}/pilote(club=${club}, nom=${quali.pilotName})}"
+                                       th:text="${quali.pilotName}"></a>
+                                </td>
                                 <td class="best-time" th:text="${#numbers.formatDecimal(quali.bestTime, 1, 'NONE', 3, 'POINT')}"></td>
                             </tr>
                         </tbody>
@@ -136,7 +140,9 @@
                         <span class="position" th:classappend="${' position-' + stat.count}">
                             <span class="pos-badge" th:text="${stat.count}"></span>
                         </span>
-                        <span class="pilot-name" th:text="${quali.getPilotName()}"></span>
+                        <a class="pilot-name pilot-link"
+                           th:href="@{/statistiques/{club}/pilote(club=${club}, nom=${quali.pilotName})}"
+                           th:text="${quali.pilotName}"></a>
                         <span class="best-time" th:text="${#numbers.formatDecimal(quali.bestTime, 1, 'NONE', 3, 'POINT')}"></span>
                     </li>
                 </ol>
@@ -178,7 +184,11 @@
                                 <td class="position" th:classappend="${' position-' + stat.count}">
                                     <span class="pos-badge" th:text="${stat.count}"></span>
                                 </td>
-                                <td class="pilot-name" th:text="${raceResult.getNom()}"></td>
+                                <td class="pilot-name">
+                                    <a class="pilot-link"
+                                       th:href="@{/statistiques/{club}/pilote(club=${club}, nom=${raceResult.nom})}"
+                                       th:text="${raceResult.nom}"></a>
+                                </td>
                                 <td class="total-laps" th:text="${#numbers.formatDecimal(raceResult.totalTours, 1, 'NONE', 2, 'POINT')}"></td>
                                 <th:block th:each="lap, iterStat : ${raceResult.lapsPerTrack}">
                                     <td th:class="'track-' + ${iterStat.index + 1} + ' laps'" th:text="${lap.laps}"></td>
@@ -197,7 +207,9 @@
                                 <span class="pos-badge" th:text="${stat.count}"></span>
                             </span>
                             <div class="race-card-id">
-                                <strong th:text="${raceResult.getNom()}">Pilote</strong>
+                                <a class="pilot-link"
+                                   th:href="@{/statistiques/{club}/pilote(club=${club}, nom=${raceResult.nom})}"
+                                   th:text="${raceResult.nom}">Pilote</a>
                                 <p class="race-card-total">
                                     Total <b th:text="${#numbers.formatDecimal(raceResult.totalTours, 1, 'NONE', 2, 'POINT')}">0.00</b> tours
                                 </p>

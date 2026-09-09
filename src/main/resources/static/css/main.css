@@ -1469,6 +1469,16 @@ tbody tr:hover {
   .stats-row {
     grid-template-columns: repeat(4, 1fr);
   }
+
+  .stats-row--pilot {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .stats-row--pilot {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -1887,6 +1897,10 @@ tbody tr:hover {
 
   .stats-row {
     grid-template-columns: 1fr;
+  }
+
+  .stats-row--pilot {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .modal-actions {

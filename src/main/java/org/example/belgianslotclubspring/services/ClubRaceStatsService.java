@@ -9,6 +9,8 @@ import org.example.belgianslotclubspring.models.ClubRaceStats.NamedCount;
 import org.example.belgianslotclubspring.models.ClubRaceStats.PilotCount;
 import org.example.belgianslotclubspring.models.ClubRaceStats.RaceCrowd;
 import org.example.belgianslotclubspring.models.ClubRaceStats.RecordHolder;
+import org.example.belgianslotclubspring.models.PilotClubStats;
+import org.example.belgianslotclubspring.models.PilotClubStats.Appearance;
 import org.example.belgianslotclubspring.repo.QualifRepo;
 import org.example.belgianslotclubspring.repo.RaceResultRepo;
 import org.example.belgianslotclubspring.utils.CategoryNames;
@@ -153,6 +155,193 @@ public class ClubRaceStatsService {
                         .limit(TOP_FIELDS)
                         .toList()
         );
+    }
+
+    public PilotClubStats buildForPilot(String club, String nom) {
+        String clubCode = Club.requireCode(club);
+        String name = PilotNames.baseName(nom);
+        if (name.isBlank()) {
+            return PilotClubStats.empty("");
+        }
+        return aggregatePilot(
+                name,
+                raceResultRepo.findAllByClub(clubCode),
+                qualifRepo.findAllByClub(clubCode)
+        );
+    }
+
+    static PilotClubStats aggregatePilot(String nom, List<RaceResult> allResults, List<Qualif> allQualifs) {
+        String wanted = PilotNames.baseName(nom);
+        if (wanted.isBlank()) {
+            return PilotClubStats.empty("");
+        }
+
+        record RaceKey(LocalDate date, String catKey) {
+        }
+
+        Map<RaceKey, List<RaceResult>> byRace = new LinkedHashMap<>();
+        for (RaceResult r : allResults) {
+            if (r.getDate() == null) {
+                continue;
+            }
+            RaceKey key = new RaceKey(r.getDate(), CategoryNames.key(r.getCategoryName()));
+            byRace.computeIfAbsent(key, k -> new ArrayList<>()).add(r);
+        }
+
+        String displayName = wanted;
+        List<Appearance> races = new ArrayList<>();
+        Map<String, Integer> byCategory = new HashMap<>();
+        int wins = 0;
+        int podiums = 0;
+        int posSum = 0;
+        RecordHolder fastestLap = null;
+        double fastestLapValue = Double.MAX_VALUE;
+
+        for (Map.Entry<RaceKey, List<RaceResult>> entry : byRace.entrySet()) {
+            List<RaceResult> field = entry.getValue();
+            RaceResult mine = null;
+            for (RaceResult r : field) {
+                if (samePilot(r.getNom(), wanted)) {
+                    mine = r;
+                    break;
+                }
+            }
+            if (mine == null) {
+                continue;
+            }
+
+            displayName = PilotNames.baseName(mine.getNom());
+            double myTours = mine.getTotalTours();
+            int position = 1;
+            for (RaceResult r : field) {
+                if (r.getTotalTours() > myTours) {
+                    position++;
+                }
+            }
+            if (position == 1) {
+                wins++;
+            }
+            if (position <= 3) {
+                podiums++;
+            }
+            posSum += position;
+
+            String category = CategoryNames.canonical(mine.getCategoryName());
+            if (category.isBlank()) {
+                category = "Sans catégorie";
+            }
+            byCategory.merge(category, 1, Integer::sum);
+
+            Double bestThisRace = bestLapOf(mine);
+            if (bestThisRace != null && bestThisRace < fastestLapValue) {
+                fastestLapValue = bestThisRace;
+                fastestLap = new RecordHolder(displayName, category, mine.getDate(), RallyeTimeFormat.format(bestThisRace));
+            }
+
+            races.add(new Appearance(
+                    mine.getDate(),
+                    category,
+                    position,
+                    field.size(),
+                    String.format(Locale.US, "%.2f", myTours),
+                    bestThisRace == null ? "—" : RallyeTimeFormat.format(bestThisRace)
+            ));
+        }
+
+        int poles = 0;
+        RecordHolder fastestQuali = null;
+        double fastestQualiValue = Double.MAX_VALUE;
+        Map<LocalDate, List<Qualif>> qualsByDate = new LinkedHashMap<>();
+        for (Qualif q : allQualifs) {
+            if (q.getDate() == null) {
+                continue;
+            }
+            qualsByDate.computeIfAbsent(q.getDate(), k -> new ArrayList<>()).add(q);
+        }
+        for (List<Qualif> field : qualsByDate.values()) {
+            Qualif mine = null;
+            for (Qualif q : field) {
+                if (samePilot(q.getPilotName(), wanted)) {
+                    mine = q;
+                    break;
+                }
+            }
+            if (mine == null) {
+                continue;
+            }
+            double myTime = mine.getBestTime();
+            int qualiPos = 1;
+            for (Qualif q : field) {
+                if (q.getBestTime() < myTime) {
+                    qualiPos++;
+                }
+            }
+            if (qualiPos == 1) {
+                poles++;
+            }
+            if (myTime >= MIN_LAP && myTime <= MAX_LAP && myTime < fastestQualiValue) {
+                fastestQualiValue = myTime;
+                fastestQuali = new RecordHolder(
+                        displayName,
+                        "Qualifications",
+                        mine.getDate(),
+                        RallyeTimeFormat.format(myTime)
+                );
+            }
+        }
+
+        if (races.isEmpty() && poles == 0 && fastestQuali == null) {
+            return PilotClubStats.empty(displayName);
+        }
+
+        races.sort(Comparator.comparing(Appearance::date).reversed()
+                .thenComparing(Appearance::category, String.CASE_INSENSITIVE_ORDER));
+
+        String avgPosition = races.isEmpty()
+                ? "—"
+                : String.format(Locale.FRANCE, "%.1f", (double) posSum / races.size());
+        String winRate = races.isEmpty()
+                ? "—"
+                : String.format(Locale.FRANCE, "%.0f %%", 100.0 * wins / races.size());
+
+        return new PilotClubStats(
+                displayName,
+                races.size(),
+                wins,
+                podiums,
+                poles,
+                avgPosition,
+                winRate,
+                fastestLap,
+                fastestQuali,
+                toNamedCounts(byCategory, Comparator.comparingInt(Map.Entry<String, Integer>::getValue).reversed()
+                        .thenComparing(Map.Entry::getKey)),
+                races
+        );
+    }
+
+    private static boolean samePilot(String stored, String wantedBase) {
+        return PilotNames.baseName(stored).equalsIgnoreCase(wantedBase);
+    }
+
+    private static Double bestLapOf(RaceResult result) {
+        if (result.getBestTime() == null) {
+            return null;
+        }
+        Double best = null;
+        for (BestTime t : result.getBestTime()) {
+            if (t == null) {
+                continue;
+            }
+            double v = t.getBestLapTime();
+            if (v < MIN_LAP || v > MAX_LAP) {
+                continue;
+            }
+            if (best == null || v < best) {
+                best = v;
+            }
+        }
+        return best;
     }
 
     private RecordHolder findFastestQuali(String clubCode, Integer year) {

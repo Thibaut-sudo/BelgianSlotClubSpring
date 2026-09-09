@@ -541,7 +541,11 @@
             ? document.querySelector(opts.qualifTable) : opts.qualifTable;
         const qualifRows = tableToMatrix(qualifTable);
         if (qualifRows.length < 2 || typeof doc.autoTable !== 'function') return;
-        const pad = Math.max(1.6, fontSize * 0.4);
+        const pad = Math.max(2.2, fontSize * 0.45);
+        const colPos = 44;
+        const colPilot = 200;
+        const colTime = 110;
+        const tableW = colPos + colPilot + colTime;
         doc.addPage();
         const bannerH = paintRaceBanner(doc, opts, 'Qualifications', margin, pageWidth);
         const sectionY = paintSectionKicker(doc, 'Grille de départ — meilleur temps', margin, bannerH + 12, clubTheme(opts));
@@ -551,18 +555,18 @@
             body: qualifRows.slice(1),
             theme: 'plain',
             styles: {
-                fontSize: Math.max(fontSize, 8),
+                fontSize: Math.max(fontSize, 9),
                 cellPadding: pad,
                 valign: 'middle',
                 textColor: INK,
                 lineColor: [216, 211, 201],
                 lineWidth: 0.4
             },
-            headStyles: { fontStyle: 'bold' },
+            headStyles: { fontStyle: 'bold', halign: 'center' },
             columnStyles: {
-                0: { halign: 'center', cellWidth: 48 },
-                1: { halign: 'left' },
-                2: { halign: 'right' }
+                0: { halign: 'center', cellWidth: colPos },
+                1: { halign: 'left', cellWidth: colPilot },
+                2: { halign: 'center', cellWidth: colTime, fontStyle: 'bold' }
             },
             didParseCell: function (data) {
                 const theme = clubTheme(opts);
@@ -584,8 +588,8 @@
                 doc.setLineWidth(0.35);
                 doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height);
             },
-            margin: { left: margin, right: margin, bottom: 24 },
-            tableWidth: 'auto'
+            margin: { left: margin, right: pageWidth - margin - tableW, bottom: 24 },
+            tableWidth: tableW
         });
     }
 

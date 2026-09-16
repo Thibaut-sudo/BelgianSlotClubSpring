@@ -1,5 +1,6 @@
 package org.example.belgianslotclubspring.controllers;
 
+import jakarta.servlet.http.HttpSession;
 import org.example.belgianslotclubspring.entities.ClubCalendarEvent;
 import org.example.belgianslotclubspring.models.CalendarCategory;
 import org.example.belgianslotclubspring.models.Club;
@@ -34,12 +35,13 @@ public class ClubCalendarEventController {
 
     @PostMapping("/{club}/events")
     public ResponseEntity<Map<String, Object>> save(@PathVariable String club,
-                                                    @RequestBody Map<String, String> body) {
+                                                    @RequestBody Map<String, String> body,
+                                                    HttpSession session) {
         Optional<Club> parsed = Club.fromCode(club);
         if (parsed.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!importAuthService.matches(body == null ? null : body.get("password"))) {
+        if (!importAuthService.authorized(session, body == null ? null : body.get("password"))) {
             return error(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect.");
         }
         try {
@@ -57,8 +59,9 @@ public class ClubCalendarEventController {
     }
 
     @PostMapping("/events")
-    public ResponseEntity<Map<String, Object>> saveAll(@RequestBody Map<String, String> body) {
-        if (!importAuthService.matches(body == null ? null : body.get("password"))) {
+    public ResponseEntity<Map<String, Object>> saveAll(@RequestBody Map<String, String> body,
+                                                       HttpSession session) {
+        if (!importAuthService.authorized(session, body == null ? null : body.get("password"))) {
             return error(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect.");
         }
         try {
@@ -76,12 +79,13 @@ public class ClubCalendarEventController {
 
     @PostMapping("/{club}/events/delete")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable String club,
-                                                      @RequestBody Map<String, String> body) {
+                                                      @RequestBody Map<String, String> body,
+                                                      HttpSession session) {
         Optional<Club> parsed = Club.fromCode(club);
         if (parsed.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!importAuthService.matches(body == null ? null : body.get("password"))) {
+        if (!importAuthService.authorized(session, body == null ? null : body.get("password"))) {
             return error(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect.");
         }
         try {
@@ -100,8 +104,9 @@ public class ClubCalendarEventController {
     }
 
     @PostMapping("/events/delete")
-    public ResponseEntity<Map<String, Object>> deleteAll(@RequestBody Map<String, String> body) {
-        if (!importAuthService.matches(body == null ? null : body.get("password"))) {
+    public ResponseEntity<Map<String, Object>> deleteAll(@RequestBody Map<String, String> body,
+                                                         HttpSession session) {
+        if (!importAuthService.authorized(session, body == null ? null : body.get("password"))) {
             return error(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect.");
         }
         try {
@@ -121,12 +126,13 @@ public class ClubCalendarEventController {
 
     @PostMapping("/{club}/categories")
     public ResponseEntity<Map<String, Object>> saveCategory(@PathVariable String club,
-                                                            @RequestBody Map<String, String> body) {
+                                                            @RequestBody Map<String, String> body,
+                                                            HttpSession session) {
         Optional<Club> parsed = Club.fromCode(club);
         if (parsed.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!importAuthService.matches(body == null ? null : body.get("password"))) {
+        if (!importAuthService.authorized(session, body == null ? null : body.get("password"))) {
             return error(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect.");
         }
         try {
@@ -146,12 +152,13 @@ public class ClubCalendarEventController {
 
     @PostMapping("/{club}/categories/delete")
     public ResponseEntity<Map<String, Object>> deleteCategory(@PathVariable String club,
-                                                              @RequestBody Map<String, String> body) {
+                                                              @RequestBody Map<String, String> body,
+                                                              HttpSession session) {
         Optional<Club> parsed = Club.fromCode(club);
         if (parsed.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!importAuthService.matches(body == null ? null : body.get("password"))) {
+        if (!importAuthService.authorized(session, body == null ? null : body.get("password"))) {
             return error(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect.");
         }
         try {

@@ -51,6 +51,10 @@
             return '/forum' + clubQuery(club);
         }
 
+        if (/^\/marketplace\/chat\//.test(path)) {
+            return '/marketplace' + clubQuery(club);
+        }
+
         if (/^\/marketplace\/(\d+)\/gerer$/.test(path)) {
             const id = path.match(/^\/marketplace\/(\d+)\/gerer$/)[1];
             return '/marketplace/' + id + clubQuery(club);

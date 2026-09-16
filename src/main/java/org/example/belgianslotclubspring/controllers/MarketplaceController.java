@@ -3,6 +3,8 @@ package org.example.belgianslotclubspring.controllers;
 import jakarta.servlet.http.HttpSession;
 import org.example.belgianslotclubspring.entities.MarketplaceListing;
 import org.example.belgianslotclubspring.models.Club;
+import org.example.belgianslotclubspring.services.AccountService;
+import org.example.belgianslotclubspring.services.MarketplaceChatService;
 import org.example.belgianslotclubspring.services.MarketplacePhotoStorage;
 import org.example.belgianslotclubspring.services.MarketplaceService;
 import org.springframework.core.io.Resource;
@@ -31,11 +33,14 @@ public class MarketplaceController {
 
     private final MarketplaceService marketplaceService;
     private final MarketplacePhotoStorage photoStorage;
+    private final MarketplaceChatService chatService;
 
     public MarketplaceController(MarketplaceService marketplaceService,
-                                 MarketplacePhotoStorage photoStorage) {
+                                 MarketplacePhotoStorage photoStorage,
+                                 MarketplaceChatService chatService) {
         this.marketplaceService = marketplaceService;
         this.photoStorage = photoStorage;
+        this.chatService = chatService;
     }
 
     @GetMapping
@@ -65,19 +70,26 @@ public class MarketplaceController {
             @RequestParam String contact,
             @RequestParam(required = false) String sellerClub,
             @RequestParam(required = false) String club,
-            @RequestParam String sellerPassword,
-            @RequestParam String sellerPasswordConfirm,
+            @RequestParam(required = false) String sellerPassword,
+            @RequestParam(required = false) String sellerPasswordConfirm,
             @RequestParam(value = "photos", required = false) List<MultipartFile> photos,
+            HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         String backClub = queryClub(club);
         try {
             MarketplaceListing listing = marketplaceService.publish(
                     title, description, category, price, sellerName, contact, sellerClub,
-                    sellerPassword, sellerPasswordConfirm, photos);
-            redirectAttributes.addFlashAttribute(
-                    "success",
-                    "Annonce publiée. Conservez le mot de passe de l’annonce pour la modifier ou la marquer vendue.");
+                    sellerPassword, sellerPasswordConfirm, AccountService.currentId(session), photos);
+            if (AccountService.current(session) != null) {
+                redirectAttributes.addFlashAttribute(
+                        "success",
+                        "Annonce publiée. Elle est liée à votre compte : vous pouvez la gérer sans mot de passe.");
+            } else {
+                redirectAttributes.addFlashAttribute(
+                        "success",
+                        "Annonce publiée. Conservez le mot de passe de l’annonce pour la modifier ou la marquer vendue.");
+            }
             return "redirect:/marketplace/" + listing.getId() + backClub;
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -136,8 +148,12 @@ public class MarketplaceController {
             model.addAttribute("listing", listing);
             model.addAttribute("categories", MarketplaceService.CATEGORIES);
             model.addAttribute("clubs", Club.values());
-            model.addAttribute("unlocked", isUnlocked(session, id));
+            model.addAttribute("unlocked", isUnlocked(session, listing));
             model.addAttribute("hasSellerLock", marketplaceService.hasSellerLock(listing));
+            model.addAttribute("hasOwnerAccount", marketplaceService.hasOwnerAccount(listing));
+            model.addAttribute("chats", isUnlocked(session, listing)
+                    ? chatService.listForListing(id)
+                    : List.of());
             model.addAttribute("photoSlots",
                     Math.max(0, MarketplacePhotoStorage.MAX_PHOTOS
                             - (listing.getPhotos() == null ? 0 : listing.getPhotos().size())));
@@ -159,7 +175,8 @@ public class MarketplaceController {
         String back = "/marketplace/" + id + "/gerer" + queryClub(club);
         try {
             MarketplaceListing listing = marketplaceService.require(id);
-            if (!marketplaceService.canManage(listing, password)) {
+            if (!marketplaceService.canManage(listing, password, AccountService.currentId(session),
+                    AccountService.isAdmin(session))) {
                 redirectAttributes.addFlashAttribute("error", "Mot de passe incorrect.");
                 return "redirect:" + back;
             }
@@ -191,7 +208,7 @@ public class MarketplaceController {
     ) {
         String manageUrl = "/marketplace/" + id + "/gerer" + queryClub(club);
         if (!isUnlocked(session, id)) {
-            redirectAttributes.addFlashAttribute("error", "Saisissez d’abord le mot de passe de l’annonce.");
+            redirectAttributes.addFlashAttribute("error", "Connectez-vous ou saisissez d’abord le mot de passe de l’annonce.");
             return "redirect:" + manageUrl;
         }
         try {
@@ -235,7 +252,7 @@ public class MarketplaceController {
     ) {
         String manageUrl = "/marketplace/" + id + "/gerer" + queryClub(club);
         if (!isUnlocked(session, id)) {
-            redirectAttributes.addFlashAttribute("error", "Saisissez d’abord le mot de passe de l’annonce.");
+            redirectAttributes.addFlashAttribute("error", "Connectez-vous ou saisissez d’abord le mot de passe de l’annonce.");
             return "redirect:" + manageUrl;
         }
         String listUrl = "/marketplace" + queryClub(club);
@@ -259,7 +276,7 @@ public class MarketplaceController {
     ) {
         String manageUrl = "/marketplace/" + id + "/gerer" + queryClub(club);
         if (!isUnlocked(session, id)) {
-            redirectAttributes.addFlashAttribute("error", "Saisissez d’abord le mot de passe de l’annonce.");
+            redirectAttributes.addFlashAttribute("error", "Connectez-vous ou saisissez d’abord le mot de passe de l’annonce.");
             return "redirect:" + manageUrl;
         }
         try {
@@ -274,8 +291,35 @@ public class MarketplaceController {
         }
     }
 
-    private static boolean isUnlocked(HttpSession session, Long id) {
-        return Boolean.TRUE.equals(session.getAttribute(MANAGE_SESSION + id));
+    private boolean isUnlocked(HttpSession session, Long id) {
+        if (Boolean.TRUE.equals(session.getAttribute(MANAGE_SESSION + id))) {
+            return true;
+        }
+        if (AccountService.isAdmin(session)) {
+            return true;
+        }
+        Long accountId = AccountService.currentId(session);
+        if (accountId == null) {
+            return false;
+        }
+        try {
+            return marketplaceService.ownedBy(marketplaceService.require(id), accountId);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private boolean isUnlocked(HttpSession session, MarketplaceListing listing) {
+        if (listing == null) {
+            return false;
+        }
+        if (Boolean.TRUE.equals(session.getAttribute(MANAGE_SESSION + listing.getId()))) {
+            return true;
+        }
+        if (AccountService.isAdmin(session)) {
+            return true;
+        }
+        return marketplaceService.ownedBy(listing, AccountService.currentId(session));
     }
 
     private static void unlock(HttpSession session, Long id) {

@@ -20,8 +20,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css?v=63">
-    <link rel="stylesheet" href="/css/tables.css?v=64">
+    <link rel="stylesheet" href="/css/main.css?v=65">
+    <link rel="stylesheet" href="/css/tables.css?v=65">
     <link rel="icon" type="image/png" href="/images/favicon.png">
 </head>
 
@@ -111,6 +111,12 @@
                        th:attr="aria-current=${active == 'marketplace'} ? 'page' : null">Marketplace</a>
                 </li>
                 <li>
+                    <a href="/compte" class="nav-link"
+                       th:classappend="${active == 'compte'} ? ' active' : ''"
+                       th:attr="aria-current=${active == 'compte'} ? 'page' : null"
+                       th:text="${account != null ? account.name : 'Compte'}">Compte</a>
+                </li>
+                <li>
                     <a href="/contact" class="nav-link"
                        th:classappend="${active == 'contact'} ? ' active' : ''"
                        th:attr="aria-current=${active == 'contact'} ? 'page' : null">Contact</a>
@@ -135,6 +141,7 @@
                 <li><a href="/contact">Contact</a></li>
                 <li><a href="/?goto=forum#clubs">Forum</a></li>
                 <li><a href="/marketplace">Marketplace</a></li>
+                <li><a href="/compte">Compte</a></li>
                 <li><a href="/selectRace/slot4000">Slot4000</a></li>
                 <li><a href="/reglement">Règlement Slot 4000</a></li>
                 <li><a href="/selectRace/srcs">SRCS</a></li>
@@ -219,8 +226,11 @@
             </form>
         </div>
     </div>
-    <script src="/js/navigation.js?v=6"></script>
-    <script src="/js/import-auth.js?v=1"></script>
+    <script th:inline="javascript">
+        window.BSC_ADMIN = /*[[${account != null and account.admin}]]*/ false;
+    </script>
+    <script src="/js/navigation.js?v=7"></script>
+    <script src="/js/import-auth.js?v=2"></script>
 </th:block>
 
 </body>

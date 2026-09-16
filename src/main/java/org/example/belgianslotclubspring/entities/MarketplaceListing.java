@@ -47,6 +47,10 @@ public class MarketplaceListing {
     @Column(name = "seller_password_hash", length = 128)
     private String sellerPasswordHash;
 
+    /** Compte vendeur optionnel : une fois connecté, plus besoin du mot de passe d’annonce. */
+    @Column(name = "owner_account_id")
+    private Long ownerAccountId;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

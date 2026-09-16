@@ -1,5 +1,6 @@
 package org.example.belgianslotclubspring.controllers;
 
+import jakarta.servlet.http.HttpSession;
 import org.example.belgianslotclubspring.services.ImportAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +28,10 @@ public class SecurityController {
      * @return 200 si correct, 401 sinon.
      */
     @PostMapping("/verify-password")
-    public ResponseEntity<Map<String, Boolean>> verifyPassword(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, Boolean>> verifyPassword(@RequestBody Map<String, String> request,
+                                                               HttpSession session) {
         String password = request == null ? null : request.get("password");
-        if (importAuthService.matches(password)) {
+        if (importAuthService.authorized(session, password)) {
             return ResponseEntity.ok(Collections.singletonMap("success", true));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("success", false));

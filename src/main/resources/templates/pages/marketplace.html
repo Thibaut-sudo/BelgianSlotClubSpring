@@ -85,7 +85,13 @@
             <aside class="forum-side">
                 <div class="filters-panel">
                     <h2 class="filters-panel-title">Déposer une annonce</h2>
-                    <p class="filters-panel-lead">Ouvert à tous les clubs. Choisissez un mot de passe pour modifier ou marquer vendue plus tard. Indiquez un moyen de contact (téléphone, e-mail ou Facebook).</p>
+                    <p class="filters-panel-lead" th:if="${account == null}">
+                        Ouvert à tous les clubs. Sans compte, choisissez un mot de passe pour modifier l’annonce plus tard.
+                        <a href="/compte?next=/marketplace">Créer un compte</a> évite ces mots de passe.
+                    </p>
+                    <p class="filters-panel-lead" th:if="${account != null}">
+                        Connecté : l’annonce sera liée à votre compte, sans mot de passe supplémentaire.
+                    </p>
                     <form th:action="@{/marketplace}" method="post" class="stack-form" enctype="multipart/form-data">
                         <input type="hidden" name="club" th:value="${club}">
                         <div class="form-group">
@@ -121,12 +127,14 @@
                         <div class="form-group">
                             <label class="form-label" for="sellerName">Votre nom</label>
                             <input class="form-input" type="text" id="sellerName" name="sellerName"
-                                   maxlength="40" required placeholder="Prénom">
+                                   maxlength="40" required placeholder="Prénom"
+                                   th:value="${account != null ? account.name : ''}">
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="contact">Contact</label>
                             <input class="form-input" type="text" id="contact" name="contact"
-                                   maxlength="120" required placeholder="Téléphone, e-mail ou Facebook">
+                                   maxlength="120" required placeholder="Téléphone, e-mail ou Facebook"
+                                   th:value="${account != null ? account.email : ''}">
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="sellerClub">Votre club</label>
@@ -138,14 +146,14 @@
                                         th:selected="${club == c.code}">Club</option>
                             </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" th:if="${account == null}">
                             <label class="form-label" for="sellerPassword">Mot de passe de l’annonce</label>
                             <input class="form-input" type="password" id="sellerPassword" name="sellerPassword"
                                    minlength="4" maxlength="80" required autocomplete="new-password"
                                    placeholder="Au moins 4 caractères">
                             <p class="form-hint">Il vous servira à modifier l’annonce ou à la marquer vendue. Conservez-le.</p>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" th:if="${account == null}">
                             <label class="form-label" for="sellerPasswordConfirm">Confirmer le mot de passe</label>
                             <input class="form-input" type="password" id="sellerPasswordConfirm"
                                    name="sellerPasswordConfirm"

@@ -35,6 +35,7 @@ public class WriteRateLimitFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         return !(path.startsWith("/forum")
                 || path.startsWith("/marketplace")
+                || path.startsWith("/compte")
                 || path.startsWith("/api/calendrier"));
     }
 

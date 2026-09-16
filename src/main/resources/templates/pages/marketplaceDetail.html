@@ -60,7 +60,53 @@
                 Gérer mon annonce
             </a>
         </div>
-        <p class="section-lead">Le vendeur utilise le mot de passe choisi à la publication. L’organisateur peut aussi gérer l’annonce avec le mot de passe d’import.</p>
+        <p class="section-lead" th:if="${account == null}">
+            Le vendeur utilise le mot de passe choisi à la publication, ou son compte.
+            L’organisateur peut aussi gérer l’annonce avec le mot de passe d’import.
+        </p>
+        <p class="section-lead" th:if="${account != null}">
+            Connecté : si c’est votre annonce, ouvrez « Gérer mon annonce » sans mot de passe.
+        </p>
+
+        <div class="filters-panel" style="margin-top: var(--space-8);"
+             th:unless="${listing.sold or (account != null and listing.ownerAccountId != null and account.id == listing.ownerAccountId)}">
+            <h2 class="filters-panel-title">Contacter le vendeur</h2>
+            <p class="filters-panel-lead" th:if="${account == null}">
+                Chat privé : seul vous et le vendeur pourrez le lire. Choisissez un mot de passe et conservez le lien,
+                ou <a th:href="@{/compte(next=${'/marketplace/' + listing.id})}">créez un compte</a> pour y revenir sans mot de passe.
+            </p>
+            <p class="filters-panel-lead" th:if="${account != null}">
+                Chat privé lié à votre compte : vous le retrouverez dans Compte, sans mot de passe de chat.
+            </p>
+            <form th:action="@{/marketplace/{id}/chat(id=${listing.id})}" method="post" class="stack-form">
+                <input type="hidden" name="club" th:value="${club}">
+                <div class="form-group">
+                    <label class="form-label" for="buyerName">Votre prénom</label>
+                    <input class="form-input" type="text" id="buyerName" name="buyerName"
+                           maxlength="40" required placeholder="Prénom"
+                           th:value="${account != null ? account.name : ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="message">Message</label>
+                    <textarea class="form-textarea" id="message" name="message" rows="4"
+                              maxlength="1000" required placeholder="Bonjour, l’article est-il toujours disponible ?"></textarea>
+                </div>
+                <div class="form-group" th:if="${account == null}">
+                    <label class="form-label" for="chatPassword">Mot de passe du chat</label>
+                    <input class="form-input" type="password" id="chatPassword" name="chatPassword"
+                           minlength="4" maxlength="80" required autocomplete="new-password"
+                           placeholder="Au moins 4 caractères">
+                    <p class="form-hint">Il vous servira à rouvrir cette conversation privée.</p>
+                </div>
+                <div class="form-group" th:if="${account == null}">
+                    <label class="form-label" for="chatPasswordConfirm">Confirmer le mot de passe</label>
+                    <input class="form-input" type="password" id="chatPasswordConfirm" name="chatPasswordConfirm"
+                           minlength="4" maxlength="80" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer le message</button>
+            </form>
+        </div>
+        <p class="section-lead" th:if="${listing.sold}">Cette annonce est vendue : le chat n’est plus ouvert aux nouveaux messages.</p>
     </div>
 </section>
 
@@ -69,17 +115,31 @@
 <script>
     (function () {
         var main = document.getElementById('marketplaceMainPhoto');
-        if (!main) return;
-        document.querySelectorAll('.marketplace-thumb').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var src = btn.getAttribute('data-src');
-                if (!src) return;
-                main.src = src;
-                document.querySelectorAll('.marketplace-thumb').forEach(function (other) {
-                    other.classList.toggle('is-active', other === btn);
+        if (main) {
+            document.querySelectorAll('.marketplace-thumb').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var src = btn.getAttribute('data-src');
+                    if (!src) return;
+                    main.src = src;
+                    document.querySelectorAll('.marketplace-thumb').forEach(function (other) {
+                        other.classList.toggle('is-active', other === btn);
+                    });
                 });
             });
-        });
+        }
+        var password = document.getElementById('chatPassword');
+        var confirm = document.getElementById('chatPasswordConfirm');
+        var form = password && password.form;
+        if (form && password && confirm) {
+            form.addEventListener('submit', function (e) {
+                if (password.value !== confirm.value) {
+                    e.preventDefault();
+                    confirm.setCustomValidity('Les deux mots de passe ne correspondent pas.');
+                    confirm.reportValidity();
+                    confirm.setCustomValidity('');
+                }
+            });
+        }
     })();
 </script>
 </body>

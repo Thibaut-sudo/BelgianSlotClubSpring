@@ -45,6 +45,8 @@ server:
 app:
   import:
     password: "Test1234="
+  admin:
+    emails: thibaut.lenertz@gmail.com
 
 
 

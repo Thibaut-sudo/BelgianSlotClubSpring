@@ -29,4 +29,6 @@ public interface MarketplaceListingRepo extends JpaRepository<MarketplaceListing
             WHERE l.id = :id
             """)
     Optional<MarketplaceListing> findDetailedById(@Param("id") Long id);
+
+    List<MarketplaceListing> findByOwnerAccountIdOrderByCreatedAtDesc(Long ownerAccountId);
 }

@@ -24,7 +24,11 @@
             <p class="filters-panel-lead" th:if="${hasSellerLock}">
                 Saisissez le mot de passe choisi à la publication, ou le mot de passe organisateur.
             </p>
-            <p class="filters-panel-lead" th:unless="${hasSellerLock}">
+            <p class="filters-panel-lead" th:if="${hasOwnerAccount}">
+                Si vous avez publié cette annonce avec un compte,
+                <a th:href="@{/compte(next=${'/marketplace/' + listing.id + '/gerer'})}">connectez-vous</a>.
+            </p>
+            <p class="filters-panel-lead" th:unless="${hasSellerLock or hasOwnerAccount}">
                 Cette annonce n’a pas de mot de passe vendeur. Seul l’organisateur peut la gérer.
             </p>
             <form th:action="@{/marketplace/{id}/gerer(id=${listing.id})}" method="post" class="stack-form">
@@ -40,6 +44,24 @@
         </div>
 
         <th:block th:if="${unlocked}">
+            <section class="filters-panel" th:if="${chats != null and !#lists.isEmpty(chats)}"
+                     style="margin-bottom: var(--space-6);">
+                <h2 class="filters-panel-title">Messages privés</h2>
+                <p class="filters-panel-lead">Conversations visibles uniquement par vous et chaque acheteur.</p>
+                <ul class="marketplace-chat-inbox">
+                    <li th:each="chat : ${chats}">
+                        <a th:href="@{/marketplace/chat/{id}(id=${chat.publicId()}, club=${club})}">
+                            <strong th:text="${chat.buyerName()}">Acheteur</strong>
+                            <span th:text="${chat.lastPreview()}">Dernier message</span>
+                            <time th:text="${#temporals.format(chat.updatedAt(), 'dd/MM/yyyy HH:mm')}">date</time>
+                        </a>
+                    </li>
+                </ul>
+            </section>
+            <p class="section-lead" th:if="${chats == null or #lists.isEmpty(chats)}">
+                Aucun message privé pour le moment.
+            </p>
+
             <form th:action="@{/marketplace/{id}/update(id=${listing.id})}" method="post"
                   class="stack-form filters-panel" enctype="multipart/form-data">
                 <input type="hidden" name="club" th:value="${club}">

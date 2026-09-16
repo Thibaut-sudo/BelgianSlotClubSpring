@@ -1,5 +1,6 @@
 package org.example.belgianslotclubspring.controllers;
 
+import jakarta.servlet.http.HttpSession;
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.services.ImportAuthService;
 import org.example.belgianslotclubspring.services.SaveExcelFilleService;
@@ -40,10 +41,11 @@ public class FileUploadController {
             @RequestParam(value = "file", required = false) MultipartFile singleFile,
             @RequestParam("club") String club,
             @RequestParam(value = "password", required = false) String password,
+            HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         String clubCode = Club.requireCode(club);
-        if (!importAuthService.matches(password)) {
+        if (!importAuthService.authorized(session, password)) {
             redirectAttributes.addFlashAttribute("error",
                     "Mot de passe incorrect. L'import a été refusé.");
             return "redirect:/selectRace/" + clubCode;

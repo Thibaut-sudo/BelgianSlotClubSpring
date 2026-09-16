@@ -21,26 +21,38 @@ public final class SellerPasswords {
     }
 
     public static String require(String raw) {
+        return require(raw, "Le mot de passe de l’annonce");
+    }
+
+    public static String require(String raw, String subject) {
         String value = raw == null ? "" : raw;
+        String label = (subject == null || subject.isBlank()) ? "Le mot de passe" : subject;
         if (value.length() < MIN_LENGTH) {
-            throw new IllegalArgumentException(
-                    "Le mot de passe de l’annonce doit faire au moins " + MIN_LENGTH + " caractères.");
+            throw new IllegalArgumentException(label + " doit faire au moins " + MIN_LENGTH + " caractères.");
         }
         if (value.length() > MAX_LENGTH) {
-            throw new IllegalArgumentException("Le mot de passe de l’annonce est trop long.");
+            throw new IllegalArgumentException(label + " est trop long.");
         }
         return value;
     }
 
     public static void requireMatch(String password, String confirm) {
-        String value = require(password);
+        requireMatch(password, confirm, "Les deux mots de passe");
+    }
+
+    public static void requireMatch(String password, String confirm, String subject) {
+        String value = require(password, subject);
         if (!value.equals(confirm == null ? "" : confirm)) {
             throw new IllegalArgumentException("Les deux mots de passe ne correspondent pas.");
         }
     }
 
     public static String hash(String raw) {
-        String password = require(raw);
+        return hash(raw, "Le mot de passe de l’annonce");
+    }
+
+    public static String hash(String raw, String subject) {
+        String password = require(raw, subject);
         byte[] salt = new byte[16];
         RANDOM.nextBytes(salt);
         return HEX.formatHex(salt) + ":" + digest(salt, password);

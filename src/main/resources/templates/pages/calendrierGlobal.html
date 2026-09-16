@@ -191,7 +191,7 @@
                         <input id="calendarEventColor" name="color" type="color" value="#0f766e"
                                style="width: 3.5rem; height: 2.5rem; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius); cursor: pointer;">
                     </p>
-                    <p>
+                    <p th:unless="${account != null and account.admin}">
                         <label class="form-label" for="calendarEventPassword">Mot de passe organisateur</label>
                         <input class="form-input" id="calendarEventPassword" name="password" type="password"
                                autocomplete="current-password" required>
@@ -811,7 +811,7 @@
             const name = nameInput ? nameInput.value.trim() : '';
             const color = colorInput ? colorInput.value : '';
 
-            if (!password) {
+            if (!password && !(window.BSC_ADMIN === true)) {
                 setEventError('Saisis le mot de passe organisateur.');
                 passwordInput?.focus();
                 return;

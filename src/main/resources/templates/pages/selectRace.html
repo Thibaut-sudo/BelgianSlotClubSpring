@@ -943,7 +943,7 @@
                 return;
             }
             const password = await promptImportPassword();
-            if (!password) return;
+            if (!window.BSC_ADMIN && !password) return;
 
             const passwordInput = document.getElementById('uploadPassword');
             if (passwordInput) passwordInput.value = password;
@@ -996,7 +996,7 @@
                 return;
             }
 
-            if (!passwordInput || !passwordInput.value) {
+            if (!window.BSC_ADMIN && (!passwordInput || !passwordInput.value)) {
                 alert('Mot de passe requis pour importer.');
                 return;
             }

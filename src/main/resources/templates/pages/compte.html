@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Compte — Belgian Slot Club')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(active='compte', club=${null})}"></header>
+
+<section class="page-hero">
+    <div class="page-hero-content container">
+        <h1 class="page-hero-title">Compte</h1>
+        <p class="page-hero-sub" th:if="${account == null}">
+            Créez un compte pour publier et discuter sur le marketplace sans mot de passe d’annonce.
+            Sans compte, les mots de passe restent disponibles.
+        </p>
+        <p class="page-hero-sub" th:if="${account != null}">
+            Connecté en tant que <strong th:text="${account.name}">Nom</strong>.
+            <span th:if="${account.admin}">Compte administrateur : imports, calendrier, forum et marketplace sans mot de passe organisateur.</span>
+            <span th:unless="${account.admin}">Vos annonces et conversations privées sont liées à ce compte.</span>
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
+        <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
+
+        <div class="account-grid" th:if="${account == null}">
+            <div class="filters-panel">
+                <h2 class="filters-panel-title">Connexion</h2>
+                <p class="filters-panel-lead">Déjà un compte ? Entrez votre e-mail et votre mot de passe.</p>
+                <form action="/compte/connexion" method="post" class="stack-form">
+                    <input type="hidden" name="next" th:value="${next}">
+                    <div class="form-group">
+                        <label class="form-label" for="loginEmail">E-mail</label>
+                        <input class="form-input" type="email" id="loginEmail" name="email"
+                               maxlength="120" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Mot de passe</label>
+                        <input class="form-input" type="password" id="loginPassword" name="password"
+                               minlength="6" maxlength="80" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Se connecter</button>
+                </form>
+            </div>
+            <div class="filters-panel">
+                <h2 class="filters-panel-title">Créer un compte</h2>
+                <p class="filters-panel-lead">Gratuit. Le mot de passe du compte sert uniquement à vous connecter.</p>
+                <form action="/compte/inscription" method="post" class="stack-form" id="registerForm">
+                    <input type="hidden" name="next" th:value="${next}">
+                    <div class="form-group">
+                        <label class="form-label" for="name">Prénom</label>
+                        <input class="form-input" type="text" id="name" name="name"
+                               maxlength="40" required autocomplete="name" placeholder="Prénom">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="email">E-mail</label>
+                        <input class="form-input" type="email" id="email" name="email"
+                               maxlength="120" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Mot de passe du compte</label>
+                        <input class="form-input" type="password" id="password" name="password"
+                               minlength="6" maxlength="80" required autocomplete="new-password"
+                               placeholder="Au moins 6 caractères">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="passwordConfirm">Confirmer le mot de passe</label>
+                        <input class="form-input" type="password" id="passwordConfirm" name="passwordConfirm"
+                               minlength="6" maxlength="80" required autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Créer le compte</button>
+                </form>
+            </div>
+        </div>
+
+        <th:block th:if="${account != null}">
+            <div class="filters-panel" style="margin-bottom: var(--space-6);">
+                <h2 class="filters-panel-title">Votre compte</h2>
+                <p class="filters-panel-lead">
+                    <span th:text="${account.name}">Nom</span>
+                    · <span th:text="${account.email}">email</span>
+                    <span th:if="${account.admin}"> · Administrateur</span>
+                </p>
+                <form action="/compte/deconnexion" method="post">
+                    <button type="submit" class="btn btn-secondary">Se déconnecter</button>
+                </form>
+            </div>
+
+            <div class="account-grid">
+                <section class="filters-panel">
+                    <h2 class="filters-panel-title">Mes annonces</h2>
+                    <p class="section-lead" th:if="${listings == null or #lists.isEmpty(listings)}">
+                        Aucune annonce liée à ce compte.
+                        <a href="/marketplace">Publier une annonce</a>
+                    </p>
+                    <ul class="marketplace-chat-inbox" th:unless="${listings == null or #lists.isEmpty(listings)}">
+                        <li th:each="card : ${listings}">
+                            <a th:href="@{/marketplace/{id}/gerer(id=${card.listing.id})}">
+                                <strong th:text="${card.listing.title}">Titre</strong>
+                                <span th:text="${card.listing.sold ? 'Vendue' : card.listing.category}">Catégorie</span>
+                                <time th:text="${#temporals.format(card.listing.createdAt, 'dd/MM/yyyy')}">date</time>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+                <section class="filters-panel">
+                    <h2 class="filters-panel-title">Mes conversations</h2>
+                    <p class="section-lead" th:if="${chats == null or #lists.isEmpty(chats)}">
+                        Aucune conversation privée pour le moment.
+                    </p>
+                    <ul class="marketplace-chat-inbox" th:unless="${chats == null or #lists.isEmpty(chats)}">
+                        <li th:each="chat : ${chats}">
+                            <a th:href="@{/marketplace/chat/{id}(id=${chat.publicId()})}">
+                                <strong th:text="${chat.listingTitle()}">Annonce</strong>
+                                <span th:text="${chat.lastPreview()}">Dernier message</span>
+                                <time th:text="${#temporals.format(chat.updatedAt(), 'dd/MM/yyyy HH:mm')}">date</time>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </th:block>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    (function () {
+        var form = document.getElementById('registerForm');
+        if (!form) return;
+        var password = document.getElementById('password');
+        var confirm = document.getElementById('passwordConfirm');
+        form.addEventListener('submit', function (e) {
+            if (password.value !== confirm.value) {
+                e.preventDefault();
+                confirm.setCustomValidity('Les deux mots de passe ne correspondent pas.');
+                confirm.reportValidity();
+                confirm.setCustomValidity('');
+            }
+        });
+    })();
+</script>
+</body>
+</html>

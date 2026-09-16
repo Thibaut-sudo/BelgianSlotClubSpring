@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Chat privé — Marketplace — Belgian Slot Club')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(active='marketplace', club=${club})}"></header>
+
+<section class="page-hero">
+    <div class="page-hero-content container">
+        <p class="page-hero-eyebrow">
+            <a th:href="@{/marketplace/{id}(id=${listing.id}, club=${club})}" class="page-hero-back">← Annonce</a>
+        </p>
+        <h1 class="page-hero-title">Chat privé</h1>
+        <p class="page-hero-sub" th:text="${listing.title}">Annonce</p>
+        <div class="page-hero-meta">
+            <span>Vendeur : <strong th:text="${listing.sellerName}">Vendeur</strong></span>
+            <span>Acheteur : <strong th:text="${thread.buyerName}">Acheteur</strong></span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container marketplace-chat-wrap">
+        <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
+        <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
+
+        <div class="filters-panel" th:unless="${unlocked}">
+            <h2 class="filters-panel-title">Conversation privée</h2>
+            <p class="filters-panel-lead">
+                Connectez-vous à votre compte, ou saisissez le mot de passe du chat (acheteur)
+                ou le mot de passe de l’annonce (vendeur / organisateur).
+            </p>
+            <p class="form-hint" style="margin-bottom: var(--space-4);">
+                <a th:href="@{/compte(next=${'/marketplace/chat/' + thread.publicId})}">Ouvrir la page Compte</a>
+            </p>
+            <form th:action="@{/marketplace/chat/{id}(id=${thread.publicId})}" method="post" class="stack-form">
+                <input type="hidden" name="club" th:value="${club}">
+                <div class="form-group">
+                    <label class="form-label" for="password">Mot de passe</label>
+                    <input class="form-input" type="password" id="password" name="password"
+                           required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary">Ouvrir le chat</button>
+            </form>
+        </div>
+
+        <th:block th:if="${unlocked}">
+            <p class="section-lead">
+                Visible uniquement par l’acheteur et le vendeur.
+                <span th:if="${role == 'seller'}">Vous répondez en tant que vendeur.</span>
+                <span th:if="${role == 'buyer'}">Vous répondez en tant qu’acheteur. Conservez ce lien.</span>
+            </p>
+
+            <ol class="marketplace-chat" th:if="${!#lists.isEmpty(thread.messages)}">
+                <li th:each="msg : ${thread.messages}"
+                    th:class="${msg.fromSeller} ? 'marketplace-bubble marketplace-bubble--seller' : 'marketplace-bubble marketplace-bubble--buyer'">
+                    <span class="marketplace-bubble__who"
+                          th:text="${msg.fromSeller} ? ${listing.sellerName} : ${thread.buyerName}">Nom</span>
+                    <p class="marketplace-bubble__body" th:text="${msg.body}">Message</p>
+                    <time class="marketplace-bubble__time"
+                          th:text="${#temporals.format(msg.createdAt, 'dd/MM/yyyy HH:mm')}">date</time>
+                </li>
+            </ol>
+
+            <form th:action="@{/marketplace/chat/{id}/message(id=${thread.publicId})}"
+                  method="post" class="stack-form marketplace-chat-form">
+                <input type="hidden" name="club" th:value="${club}">
+                <div class="form-group">
+                    <label class="form-label" for="message">Votre message</label>
+                    <textarea class="form-textarea" id="message" name="message" rows="3"
+                              maxlength="1000" required placeholder="Écrivez un message privé…"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+            </form>
+        </th:block>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

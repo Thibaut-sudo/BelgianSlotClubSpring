@@ -3,7 +3,14 @@
         return document.getElementById(id);
     }
 
+    function isSiteAdmin() {
+        return global.BSC_ADMIN === true;
+    }
+
     function promptImportPassword() {
+        if (isSiteAdmin()) {
+            return Promise.resolve('');
+        }
         return new Promise(function (resolve) {
             var modal = byId('importPasswordModal');
             var form = byId('importPasswordForm');
@@ -114,7 +121,7 @@
         if (!form || form.dataset.importProtected === '1') return;
         form.dataset.importProtected = '1';
         form.addEventListener('submit', async function (e) {
-            if (form.dataset.importUnlocked === '1') return;
+            if (form.dataset.importUnlocked === '1' || isSiteAdmin()) return;
             e.preventDefault();
             var password = await promptImportPassword();
             if (!password) return;

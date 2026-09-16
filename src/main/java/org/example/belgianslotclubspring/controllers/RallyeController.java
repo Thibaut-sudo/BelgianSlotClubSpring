@@ -1,5 +1,6 @@
 package org.example.belgianslotclubspring.controllers;
 
+import jakarta.servlet.http.HttpSession;
 import org.example.belgianslotclubspring.entities.Rallye;
 import org.example.belgianslotclubspring.entities.RallyePilot;
 import org.example.belgianslotclubspring.entities.RallyeStageTime;
@@ -361,9 +362,10 @@ public class RallyeController {
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "password", required = false) String password,
+            HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
-        if (!importAuthService.matches(password)) {
+        if (!importAuthService.authorized(session, password)) {
             redirectAttributes.addFlashAttribute("error",
                     "Mot de passe incorrect. L'import a été refusé.");
             return "redirect:/rallye/" + id + "#pilotes";

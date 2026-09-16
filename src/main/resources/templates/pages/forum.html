@@ -47,7 +47,12 @@
             <aside class="forum-side">
                 <div class="filters-panel">
                     <h2 class="filters-panel-title">Nouveau thème</h2>
-                    <p class="filters-panel-lead">Réservé aux organisateurs (mot de passe d’import).</p>
+                    <p class="filters-panel-lead" th:if="${account != null and account.admin}">
+                        Connecté en administrateur : vous pouvez ajouter un thème sans mot de passe.
+                    </p>
+                    <p class="filters-panel-lead" th:unless="${account != null and account.admin}">
+                        Réservé aux organisateurs (mot de passe d’import).
+                    </p>
                     <form id="forumCreateThemeForm" th:action="@{/forum/themes}" method="post" class="stack-form">
                         <input type="hidden" name="club" th:value="${club}">
                         <div class="form-group">

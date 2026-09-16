@@ -77,6 +77,8 @@ app:
     public-base-url: https://belgianslotclub.com
   import:
     password: "Test1234="
+  admin:
+    emails: thibaut.lenertz@gmail.com
 
 logging:
   level:

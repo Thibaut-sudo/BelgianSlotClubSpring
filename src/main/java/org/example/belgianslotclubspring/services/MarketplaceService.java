@@ -4,6 +4,7 @@ import org.example.belgianslotclubspring.entities.MarketplaceListing;
 import org.example.belgianslotclubspring.entities.MarketplacePhoto;
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.repo.MarketplaceListingRepo;
+import org.example.belgianslotclubspring.repo.MarketplaceThreadRepo;
 import org.example.belgianslotclubspring.utils.SellerPasswords;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,13 +44,16 @@ public class MarketplaceService {
     private final MarketplaceListingRepo listingRepo;
     private final MarketplacePhotoStorage photoStorage;
     private final ImportAuthService importAuthService;
+    private final MarketplaceThreadRepo threadRepo;
 
     public MarketplaceService(MarketplaceListingRepo listingRepo,
                               MarketplacePhotoStorage photoStorage,
-                              ImportAuthService importAuthService) {
+                              ImportAuthService importAuthService,
+                              MarketplaceThreadRepo threadRepo) {
         this.listingRepo = listingRepo;
         this.photoStorage = photoStorage;
         this.importAuthService = importAuthService;
+        this.threadRepo = threadRepo;
     }
 
     @Transactional(readOnly = true)
@@ -127,13 +131,34 @@ public class MarketplaceService {
     }
 
     public boolean canManage(MarketplaceListing listing, String password) {
+        return canManage(listing, password, null);
+    }
+
+    public boolean canManage(MarketplaceListing listing, String password, Long accountId) {
+        return canManage(listing, password, accountId, false);
+    }
+
+    public boolean canManage(MarketplaceListing listing, String password, Long accountId, boolean admin) {
         if (listing == null) {
             return false;
+        }
+        if (admin || ownedBy(listing, accountId)) {
+            return true;
         }
         if (importAuthService.matches(password)) {
             return true;
         }
         return SellerPasswords.matches(listing.getSellerPasswordHash(), password);
+    }
+
+    public boolean ownedBy(MarketplaceListing listing, Long accountId) {
+        return listing != null
+                && accountId != null
+                && accountId.equals(listing.getOwnerAccountId());
+    }
+
+    public boolean hasOwnerAccount(MarketplaceListing listing) {
+        return listing != null && listing.getOwnerAccountId() != null;
     }
 
     public boolean hasSellerLock(MarketplaceListing listing) {
@@ -148,6 +173,16 @@ public class MarketplaceService {
                 .orElseThrow(() -> new IllegalArgumentException("Annonce introuvable."));
     }
 
+    @Transactional(readOnly = true)
+    public List<ListingCard> listOwned(Long ownerAccountId) {
+        if (ownerAccountId == null) {
+            return List.of();
+        }
+        return listingRepo.findByOwnerAccountIdOrderByCreatedAtDesc(ownerAccountId).stream()
+                .map(ListingCard::from)
+                .toList();
+    }
+
     @Transactional
     public MarketplaceListing publish(String title,
                                       String description,
@@ -158,11 +193,15 @@ public class MarketplaceService {
                                       String club,
                                       String sellerPassword,
                                       String sellerPasswordConfirm,
+                                      Long ownerAccountId,
                                       List<MultipartFile> photos) {
         if (category == null || !CATEGORIES.contains(category)) {
             throw new IllegalArgumentException("Choisissez une catégorie.");
         }
-        SellerPasswords.requireMatch(sellerPassword, sellerPasswordConfirm);
+        boolean hasPassword = sellerPassword != null && !sellerPassword.isBlank();
+        if (ownerAccountId == null || hasPassword) {
+            SellerPasswords.requireMatch(sellerPassword, sellerPasswordConfirm);
+        }
         List<String> stored = photoStorage.saveAll(photos);
         try {
             MarketplaceListing listing = new MarketplaceListing();
@@ -174,7 +213,10 @@ public class MarketplaceService {
             listing.setContact(ForumService.cleanLine(contact, CONTACT_MAX, "un moyen de contact"));
             listing.setClubName(optionalClub(club));
             listing.setSold(false);
-            listing.setSellerPasswordHash(SellerPasswords.hash(sellerPassword));
+            listing.setOwnerAccountId(ownerAccountId);
+            if (ownerAccountId == null || hasPassword) {
+                listing.setSellerPasswordHash(SellerPasswords.hash(sellerPassword));
+            }
             listing.setCreatedAt(LocalDateTime.now());
             int order = 0;
             for (String storedName : stored) {
@@ -249,6 +291,7 @@ public class MarketplaceService {
         if (listing.getPhotos() != null) {
             listing.getPhotos().forEach(photo -> storedNames.add(photo.getStoredName()));
         }
+        threadRepo.deleteAll(threadRepo.findByListingIdOrderByUpdatedAtDesc(id));
         listingRepo.delete(listing);
         storedNames.forEach(photoStorage::deleteQuietly);
     }

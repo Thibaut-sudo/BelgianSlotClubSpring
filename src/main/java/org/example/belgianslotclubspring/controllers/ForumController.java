@@ -1,5 +1,6 @@
 package org.example.belgianslotclubspring.controllers;
 
+import jakarta.servlet.http.HttpSession;
 import org.example.belgianslotclubspring.entities.ForumAttachment;
 import org.example.belgianslotclubspring.entities.ForumQuestion;
 import org.example.belgianslotclubspring.entities.ForumTheme;
@@ -64,10 +65,11 @@ public class ForumController {
             @RequestParam String title,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) String password,
+            HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         String clubCode = Club.requireCode(club);
-        if (!importAuthService.matches(password)) {
+        if (!importAuthService.authorized(session, password)) {
             redirectAttributes.addFlashAttribute("error", "Mot de passe incorrect. Le thème n'a pas été créé.");
             return "redirect:/forum?club=" + clubCode;
         }
@@ -119,11 +121,12 @@ public class ForumController {
     public String deleteTheme(
             @PathVariable Long id,
             @RequestParam(required = false) String password,
+            HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         ForumTheme theme = forumService.requireTheme(id);
         String club = theme.getClubName();
-        if (!importAuthService.matches(password)) {
+        if (!importAuthService.authorized(session, password)) {
             redirectAttributes.addFlashAttribute("error", "Mot de passe incorrect.");
             return "redirect:/forum/theme/" + id;
         }
@@ -192,11 +195,12 @@ public class ForumController {
     public String deleteQuestion(
             @PathVariable Long id,
             @RequestParam(required = false) String password,
+            HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         ForumQuestion question = forumService.requireQuestion(id);
         Long themeId = question.getTheme().getId();
-        if (!importAuthService.matches(password)) {
+        if (!importAuthService.authorized(session, password)) {
             redirectAttributes.addFlashAttribute("error", "Mot de passe incorrect.");
             return "redirect:/forum/question/" + id;
         }
@@ -209,11 +213,12 @@ public class ForumController {
     public String deleteReply(
             @PathVariable Long id,
             @RequestParam(required = false) String password,
+            HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         var reply = forumService.requireReply(id);
         Long questionId = reply.getQuestion().getId();
-        if (!importAuthService.matches(password)) {
+        if (!importAuthService.authorized(session, password)) {
             redirectAttributes.addFlashAttribute("error", "Mot de passe incorrect.");
             return "redirect:/forum/question/" + questionId;
         }

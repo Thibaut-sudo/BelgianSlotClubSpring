@@ -12,8 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -27,6 +29,10 @@ public class MarketplaceService {
             "Électronique",
             "Divers"
     );
+
+    public static final String SORT_RANDOM = "aleatoire";
+    public static final String SORT_NEWEST = "recentes";
+    public static final String SORT_OLDEST = "anciennes";
 
     private static final int TITLE_MAX = 120;
     private static final int BODY_MAX = 4000;
@@ -48,6 +54,12 @@ public class MarketplaceService {
 
     @Transactional(readOnly = true)
     public List<ListingCard> list(String category) {
+        return list(category, SORT_RANDOM);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ListingCard> list(String category, String sort) {
+        String order = normalizeSort(sort);
         List<MarketplaceListing> listings;
         if (category == null || category.isBlank() || "tous".equalsIgnoreCase(category) || !CATEGORIES.contains(category)) {
             listings = listingRepo.findAllWithPhotos();
@@ -63,10 +75,47 @@ public class MarketplaceService {
                 available.add(listing);
             }
         }
-        Collections.shuffle(available);
-        Collections.shuffle(sold);
+        sortGroup(available, order);
+        sortGroup(sold, order);
         available.addAll(sold);
         return available.stream().map(ListingCard::from).toList();
+    }
+
+    public static String normalizeSort(String sort) {
+        if (sort == null) {
+            return SORT_RANDOM;
+        }
+        return switch (sort.trim().toLowerCase(Locale.ROOT)) {
+            case "recentes", "recente", "recent" -> SORT_NEWEST;
+            case "anciennes", "ancienne", "ancien" -> SORT_OLDEST;
+            default -> SORT_RANDOM;
+        };
+    }
+
+    static void sortGroup(List<MarketplaceListing> listings, String sort) {
+        if (listings == null || listings.size() < 2) {
+            return;
+        }
+        if (SORT_NEWEST.equals(sort)) {
+            listings.sort(byCreatedAt(false));
+        } else if (SORT_OLDEST.equals(sort)) {
+            listings.sort(byCreatedAt(true));
+        } else {
+            Collections.shuffle(listings);
+        }
+    }
+
+    private static Comparator<MarketplaceListing> byCreatedAt(boolean oldestFirst) {
+        Comparator<MarketplaceListing> byDate = Comparator.comparing(
+                MarketplaceListing::getCreatedAt,
+                Comparator.nullsLast(Comparator.naturalOrder())
+        );
+        Comparator<MarketplaceListing> byId = Comparator.comparing(
+                MarketplaceListing::getId,
+                Comparator.nullsLast(Comparator.naturalOrder())
+        );
+        Comparator<MarketplaceListing> order = byDate.thenComparing(byId);
+        return oldestFirst ? order : order.reversed();
     }
 
     public record ListingCard(MarketplaceListing listing, String sellerClubLabel, String coverUrl, int photoCount) {

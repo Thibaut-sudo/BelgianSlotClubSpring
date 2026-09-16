@@ -42,12 +42,15 @@ public class MarketplaceController {
     public String index(
             @RequestParam(required = false) String club,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) String tri,
             Model model
     ) {
         addClub(model, club);
+        String sort = MarketplaceService.normalizeSort(tri);
         model.addAttribute("categories", MarketplaceService.CATEGORIES);
         model.addAttribute("selectedCategory", category == null ? "" : category);
-        model.addAttribute("listings", marketplaceService.list(category));
+        model.addAttribute("selectedSort", sort);
+        model.addAttribute("listings", marketplaceService.list(category, sort));
         model.addAttribute("clubs", Club.values());
         return "pages/marketplace";
     }

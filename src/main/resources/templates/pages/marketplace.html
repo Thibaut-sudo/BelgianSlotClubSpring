@@ -27,13 +27,25 @@
 
                 <nav class="marketplace-cats" aria-label="Catégories">
                     <a class="marketplace-cat"
-                       th:href="@{/marketplace(club=${club})}"
+                       th:href="@{/marketplace(club=${club}, tri=${selectedSort})}"
                        th:classappend="${#strings.isEmpty(selectedCategory)} ? ' is-active'">Toutes</a>
                     <a class="marketplace-cat"
                        th:each="cat : ${categories}"
-                       th:href="@{/marketplace(category=${cat}, club=${club})}"
+                       th:href="@{/marketplace(category=${cat}, club=${club}, tri=${selectedSort})}"
                        th:classappend="${selectedCategory == cat} ? ' is-active'"
                        th:text="${cat}">Catégorie</a>
+                </nav>
+                <nav class="marketplace-cats marketplace-cats--sort" aria-label="Ordre d’affichage">
+                    <span class="marketplace-sort-label">Ordre</span>
+                    <a class="marketplace-cat"
+                       th:href="@{/marketplace(club=${club}, category=${selectedCategory})}"
+                       th:classappend="${selectedSort == 'aleatoire'} ? ' is-active'">Aléatoire</a>
+                    <a class="marketplace-cat"
+                       th:href="@{/marketplace(club=${club}, category=${selectedCategory}, tri='recentes')}"
+                       th:classappend="${selectedSort == 'recentes'} ? ' is-active'">Plus récentes</a>
+                    <a class="marketplace-cat"
+                       th:href="@{/marketplace(club=${club}, category=${selectedCategory}, tri='anciennes')}"
+                       th:classappend="${selectedSort == 'anciennes'} ? ' is-active'">Plus anciennes</a>
                 </nav>
 
                 <div th:if="${#lists.isEmpty(listings)}" class="empty-state">

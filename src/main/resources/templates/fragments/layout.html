@@ -20,8 +20,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css?v=66">
-    <link rel="stylesheet" href="/css/tables.css?v=66">
+    <link rel="stylesheet" href="/css/main.css?v=68">
+    <link rel="stylesheet" href="/css/tables.css?v=68">
     <link rel="icon" type="image/png" href="/images/favicon.png">
 </head>
 
@@ -112,7 +112,7 @@
                 </li>
                 <li>
                     <a href="/compte" class="nav-link"
-                       th:classappend="${(active == 'compte' ? ' active' : '') + (account != null ? ' nav-link--account' : '')}"
+                       th:classappend="${active == 'compte'} ? ' active' : ''"
                        th:attr="aria-current=${active == 'compte'} ? 'page' : null, title=${account != null ? account.name : 'Compte'}"
                        th:text="${account != null ? #strings.substringBefore(account.name + ' ', ' ') : 'Compte'}">Compte</a>
                 </li>

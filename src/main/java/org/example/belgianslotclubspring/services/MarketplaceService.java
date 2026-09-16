@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,11 +49,19 @@ public class MarketplaceService {
         } else {
             listings = listingRepo.findByCategoryWithPhotos(category);
         }
-        return unique(listings).stream()
-                .sorted(Comparator.comparing(MarketplaceListing::isSold)
-                        .thenComparing(MarketplaceListing::getCreatedAt, Comparator.reverseOrder()))
-                .map(ListingCard::from)
-                .toList();
+        List<MarketplaceListing> available = new ArrayList<>();
+        List<MarketplaceListing> sold = new ArrayList<>();
+        for (MarketplaceListing listing : unique(listings)) {
+            if (listing.isSold()) {
+                sold.add(listing);
+            } else {
+                available.add(listing);
+            }
+        }
+        Collections.shuffle(available);
+        Collections.shuffle(sold);
+        available.addAll(sold);
+        return available.stream().map(ListingCard::from).toList();
     }
 
     public record ListingCard(MarketplaceListing listing, String sellerClubLabel, String coverUrl, int photoCount) {

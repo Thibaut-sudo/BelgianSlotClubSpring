@@ -55,35 +55,18 @@
         </article>
 
         <div class="cluster">
-            <form id="marketplaceSoldForm"
-                  th:action="@{/marketplace/{id}/sold(id=${listing.id})}"
-                  method="post"
-                  class="forum-mod-form"
-                  th:if="${!listing.sold}"
-                  onsubmit="return confirm('Marquer cette annonce comme vendue ?');">
-                <input type="hidden" name="club" th:value="${club}">
-                <button type="submit" class="btn btn-secondary btn-sm">Marquer vendu</button>
-            </form>
-            <form id="marketplaceDeleteForm"
-                  th:action="@{/marketplace/{id}/delete(id=${listing.id})}"
-                  method="post"
-                  class="forum-mod-form"
-                  onsubmit="return confirm('Supprimer cette annonce ?');">
-                <input type="hidden" name="club" th:value="${club}">
-                <button type="submit" class="btn btn-ghost btn-sm">Supprimer</button>
-            </form>
+            <a class="btn btn-secondary"
+               th:href="@{/marketplace/{id}/gerer(id=${listing.id}, club=${club})}">
+                Gérer mon annonce
+            </a>
         </div>
-        <p class="section-lead">Marquer vendu ou supprimer : mot de passe d’import (organisateurs).</p>
+        <p class="section-lead">Le vendeur utilise le mot de passe choisi à la publication. L’organisateur peut aussi gérer l’annonce avec le mot de passe d’import.</p>
     </div>
 </section>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script>
-    if (typeof protectImportForm === 'function') {
-        protectImportForm(document.getElementById('marketplaceSoldForm'));
-        protectImportForm(document.getElementById('marketplaceDeleteForm'));
-    }
     (function () {
         var main = document.getElementById('marketplaceMainPhoto');
         if (!main) return;

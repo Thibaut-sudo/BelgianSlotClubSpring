@@ -4,6 +4,7 @@ import org.example.belgianslotclubspring.entities.MarketplaceListing;
 import org.example.belgianslotclubspring.entities.MarketplacePhoto;
 import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.repo.MarketplaceListingRepo;
+import org.example.belgianslotclubspring.utils.SellerPasswords;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,10 +36,14 @@ public class MarketplaceService {
 
     private final MarketplaceListingRepo listingRepo;
     private final MarketplacePhotoStorage photoStorage;
+    private final ImportAuthService importAuthService;
 
-    public MarketplaceService(MarketplaceListingRepo listingRepo, MarketplacePhotoStorage photoStorage) {
+    public MarketplaceService(MarketplaceListingRepo listingRepo,
+                              MarketplacePhotoStorage photoStorage,
+                              ImportAuthService importAuthService) {
         this.listingRepo = listingRepo;
         this.photoStorage = photoStorage;
+        this.importAuthService = importAuthService;
     }
 
     @Transactional(readOnly = true)
@@ -72,6 +77,22 @@ public class MarketplaceService {
         }
     }
 
+    public boolean canManage(MarketplaceListing listing, String password) {
+        if (listing == null) {
+            return false;
+        }
+        if (importAuthService.matches(password)) {
+            return true;
+        }
+        return SellerPasswords.matches(listing.getSellerPasswordHash(), password);
+    }
+
+    public boolean hasSellerLock(MarketplaceListing listing) {
+        return listing != null
+                && listing.getSellerPasswordHash() != null
+                && !listing.getSellerPasswordHash().isBlank();
+    }
+
     @Transactional(readOnly = true)
     public MarketplaceListing require(Long id) {
         return listingRepo.findDetailedById(id)
@@ -86,10 +107,13 @@ public class MarketplaceService {
                                       String sellerName,
                                       String contact,
                                       String club,
+                                      String sellerPassword,
+                                      String sellerPasswordConfirm,
                                       List<MultipartFile> photos) {
         if (category == null || !CATEGORIES.contains(category)) {
             throw new IllegalArgumentException("Choisissez une catégorie.");
         }
+        SellerPasswords.requireMatch(sellerPassword, sellerPasswordConfirm);
         List<String> stored = photoStorage.saveAll(photos);
         try {
             MarketplaceListing listing = new MarketplaceListing();
@@ -101,6 +125,7 @@ public class MarketplaceService {
             listing.setContact(ForumService.cleanLine(contact, CONTACT_MAX, "un moyen de contact"));
             listing.setClubName(optionalClub(club));
             listing.setSold(false);
+            listing.setSellerPasswordHash(SellerPasswords.hash(sellerPassword));
             listing.setCreatedAt(LocalDateTime.now());
             int order = 0;
             for (String storedName : stored) {
@@ -117,9 +142,54 @@ public class MarketplaceService {
     }
 
     @Transactional
-    public void markSold(Long id) {
+    public MarketplaceListing update(Long id,
+                                     String title,
+                                     String description,
+                                     String category,
+                                     String price,
+                                     String sellerName,
+                                     String contact,
+                                     String club,
+                                     String newSellerPassword,
+                                     String newSellerPasswordConfirm,
+                                     List<MultipartFile> photos) {
+        if (category == null || !CATEGORIES.contains(category)) {
+            throw new IllegalArgumentException("Choisissez une catégorie.");
+        }
         MarketplaceListing listing = require(id);
-        listing.setSold(true);
+        listing.setTitle(ForumService.cleanLine(title, TITLE_MAX, "un titre"));
+        listing.setDescription(ForumService.cleanBody(description, BODY_MAX, "une description"));
+        listing.setCategory(category);
+        listing.setPrice(ForumService.cleanOptionalLine(price, PRICE_MAX));
+        listing.setSellerName(ForumService.cleanLine(sellerName, NAME_MAX, "votre nom"));
+        listing.setContact(ForumService.cleanLine(contact, CONTACT_MAX, "un moyen de contact"));
+        listing.setClubName(optionalClub(club));
+        if (newSellerPassword != null && !newSellerPassword.isBlank()) {
+            SellerPasswords.requireMatch(newSellerPassword, newSellerPasswordConfirm);
+            listing.setSellerPasswordHash(SellerPasswords.hash(newSellerPassword));
+        }
+        int existing = listing.getPhotos() == null ? 0 : listing.getPhotos().size();
+        int remaining = MarketplacePhotoStorage.MAX_PHOTOS - existing;
+        List<String> stored = photoStorage.saveAll(photos, remaining);
+        try {
+            int order = existing;
+            for (String storedName : stored) {
+                MarketplacePhoto photo = new MarketplacePhoto();
+                photo.setStoredName(storedName);
+                photo.setSortOrder(order++);
+                listing.addPhoto(photo);
+            }
+            return listingRepo.save(listing);
+        } catch (RuntimeException e) {
+            stored.forEach(photoStorage::deleteQuietly);
+            throw e;
+        }
+    }
+
+    @Transactional
+    public void markSold(Long id, boolean sold) {
+        MarketplaceListing listing = require(id);
+        listing.setSold(sold);
         listingRepo.save(listing);
     }
 

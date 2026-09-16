@@ -43,6 +43,10 @@ public class MarketplaceListing {
     @Column(nullable = false)
     private boolean sold = false;
 
+    /** Hash sel:sha256 du mot de passe vendeur. Vide sur les anciennes annonces. */
+    @Column(name = "seller_password_hash", length = 128)
+    private String sellerPasswordHash;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Gérer l’annonce — Marketplace — Belgian Slot Club')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav(active='marketplace', club=${club})}"></header>
+
+<section class="page-hero">
+    <div class="page-hero-content container">
+        <p class="page-hero-eyebrow">
+            <a th:href="@{/marketplace/{id}(id=${listing.id}, club=${club})}" class="page-hero-back">← Annonce</a>
+        </p>
+        <h1 class="page-hero-title">Gérer l’annonce</h1>
+        <p class="page-hero-sub" th:text="${listing.title}">Titre</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container" style="max-width: 40rem;">
+        <div th:if="${success}" class="flash flash--success" th:text="${success}"></div>
+        <div th:if="${error}" class="flash flash--error" th:text="${error}"></div>
+
+        <div class="filters-panel" th:unless="${unlocked}">
+            <h2 class="filters-panel-title">Mot de passe</h2>
+            <p class="filters-panel-lead" th:if="${hasSellerLock}">
+                Saisissez le mot de passe choisi à la publication, ou le mot de passe organisateur.
+            </p>
+            <p class="filters-panel-lead" th:unless="${hasSellerLock}">
+                Cette annonce n’a pas de mot de passe vendeur. Seul l’organisateur peut la gérer.
+            </p>
+            <form th:action="@{/marketplace/{id}/gerer(id=${listing.id})}" method="post" class="stack-form">
+                <input type="hidden" name="club" th:value="${club}">
+                <div class="form-group">
+                    <label class="form-label" for="password">Mot de passe</label>
+                    <input class="form-input" type="password" id="password" name="password"
+                           required autocomplete="current-password"
+                           placeholder="Mot de passe de l’annonce">
+                </div>
+                <button type="submit" class="btn btn-primary">Déverrouiller</button>
+            </form>
+        </div>
+
+        <th:block th:if="${unlocked}">
+            <form th:action="@{/marketplace/{id}/update(id=${listing.id})}" method="post"
+                  class="stack-form filters-panel" enctype="multipart/form-data">
+                <input type="hidden" name="club" th:value="${club}">
+                <h2 class="filters-panel-title">Modifier l’annonce</h2>
+                <div class="form-group">
+                    <label class="form-label" for="title">Titre</label>
+                    <input class="form-input" type="text" id="title" name="title"
+                           maxlength="120" required th:value="${listing.title}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="category">Catégorie</label>
+                    <select class="form-select" id="category" name="category" required>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat}"
+                                th:text="${cat}"
+                                th:selected="${listing.category == cat}">Catégorie</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="price">Prix</label>
+                    <input class="form-input" type="text" id="price" name="price"
+                           maxlength="40" th:value="${listing.price}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea class="form-textarea" id="description" name="description" rows="5"
+                              maxlength="4000" required th:text="${listing.description}"></textarea>
+                </div>
+                <div class="form-group" th:if="${photoSlots > 0}">
+                    <label class="form-label" for="photos">Ajouter des photos</label>
+                    <input class="form-input" type="file" id="photos" name="photos"
+                           accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
+                           multiple>
+                    <p class="form-hint"
+                       th:text="'Encore ' + ${photoSlots} + ' photo(s) possible(s), 5 Mo chacune.'">Encore des photos.</p>
+                </div>
+                <p class="form-hint" th:if="${photoSlots == 0}">Le maximum de 6 photos est atteint.</p>
+                <div class="form-group">
+                    <label class="form-label" for="sellerName">Votre nom</label>
+                    <input class="form-input" type="text" id="sellerName" name="sellerName"
+                           maxlength="40" required th:value="${listing.sellerName}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="contact">Contact</label>
+                    <input class="form-input" type="text" id="contact" name="contact"
+                           maxlength="120" required th:value="${listing.contact}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="sellerClub">Votre club</label>
+                    <select class="form-select" id="sellerClub" name="sellerClub">
+                        <option value="">Non précisé</option>
+                        <option th:each="c : ${clubs}"
+                                th:value="${c.code}"
+                                th:text="${c.displayName}"
+                                th:selected="${listing.clubName == c.code}">Club</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="newSellerPassword">Nouveau mot de passe (optionnel)</label>
+                    <input class="form-input" type="password" id="newSellerPassword" name="newSellerPassword"
+                           minlength="4" maxlength="80" autocomplete="new-password"
+                           placeholder="Laisser vide pour conserver l’actuel">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="newSellerPasswordConfirm">Confirmer le nouveau mot de passe</label>
+                    <input class="form-input" type="password" id="newSellerPasswordConfirm"
+                           name="newSellerPasswordConfirm"
+                           minlength="4" maxlength="80" autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </form>
+
+            <div class="cluster" style="margin-top: var(--space-6);">
+                <form th:if="${!listing.sold}"
+                      th:action="@{/marketplace/{id}/sold(id=${listing.id})}"
+                      method="post"
+                      onsubmit="return confirm('Marquer cette annonce comme vendue ?');">
+                    <input type="hidden" name="club" th:value="${club}">
+                    <button type="submit" class="btn btn-secondary">Marquer vendu</button>
+                </form>
+                <form th:if="${listing.sold}"
+                      th:action="@{/marketplace/{id}/reopen(id=${listing.id})}"
+                      method="post"
+                      onsubmit="return confirm('Remettre cette annonce en vente ?');">
+                    <input type="hidden" name="club" th:value="${club}">
+                    <button type="submit" class="btn btn-secondary">Remettre en vente</button>
+                </form>
+                <form th:action="@{/marketplace/{id}/delete(id=${listing.id})}"
+                      method="post"
+                      onsubmit="return confirm('Supprimer définitivement cette annonce ?');">
+                    <input type="hidden" name="club" th:value="${club}">
+                    <button type="submit" class="btn btn-ghost">Supprimer</button>
+                </form>
+            </div>
+        </th:block>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

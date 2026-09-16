@@ -24,8 +24,13 @@ public class MarketplacePhotoStorage {
             "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.(jpg|png|webp|gif)$");
 
     public List<String> saveAll(List<MultipartFile> files) {
+        return saveAll(files, MAX_PHOTOS);
+    }
+
+    public List<String> saveAll(List<MultipartFile> files, int maxKeep) {
         List<String> stored = new ArrayList<>();
-        if (files == null || files.isEmpty()) {
+        int cap = Math.min(MAX_PHOTOS, Math.max(0, maxKeep));
+        if (files == null || files.isEmpty() || cap == 0) {
             return stored;
         }
         try {
@@ -35,7 +40,7 @@ public class MarketplacePhotoStorage {
                 if (file == null || file.isEmpty()) {
                     continue;
                 }
-                if (kept >= MAX_PHOTOS) {
+                if (kept >= cap) {
                     break;
                 }
                 stored.add(saveOne(file));

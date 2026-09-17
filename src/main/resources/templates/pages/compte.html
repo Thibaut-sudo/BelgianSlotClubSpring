@@ -82,6 +82,7 @@
                     · <span th:text="${account.email}">email</span>
                     <span th:if="${account.admin}"> · Administrateur</span>
                 </p>
+                <p class="filters-panel-lead">Vous restez connecté sur cet appareil. Utilisez « Se déconnecter » pour oublier le compte.</p>
                 <form action="/compte/deconnexion" method="post">
                     <button type="submit" class="btn btn-secondary">Se déconnecter</button>
                 </form>

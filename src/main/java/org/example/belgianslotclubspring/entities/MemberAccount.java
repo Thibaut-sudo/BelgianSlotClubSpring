@@ -30,6 +30,12 @@ public class MemberAccount {
     @Column(name = "password_hash", nullable = false, length = 128)
     private String passwordHash;
 
+    @Column(name = "remember_token_hash", length = 128)
+    private String rememberTokenHash;
+
+    @Column(name = "remember_until")
+    private LocalDateTime rememberUntil;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }

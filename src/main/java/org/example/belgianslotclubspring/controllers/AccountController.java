@@ -1,6 +1,9 @@
 package org.example.belgianslotclubspring.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.example.belgianslotclubspring.services.AccountCookies;
 import org.example.belgianslotclubspring.services.AccountService;
 import org.example.belgianslotclubspring.services.AccountService.AccountView;
 import org.example.belgianslotclubspring.services.MarketplaceChatService;
@@ -49,13 +52,15 @@ public class AccountController {
             @RequestParam String password,
             @RequestParam String passwordConfirm,
             @RequestParam(required = false) String next,
+            HttpServletRequest request,
+            HttpServletResponse response,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         String back = "/compte" + nextQuery(next);
         try {
             AccountView view = accountService.register(name, email, password, passwordConfirm);
-            AccountService.login(session, view);
+            persistLogin(request, response, session, view);
             redirectAttributes.addFlashAttribute(
                     "success",
                     view.admin()
@@ -73,13 +78,15 @@ public class AccountController {
             @RequestParam String email,
             @RequestParam String password,
             @RequestParam(required = false) String next,
+            HttpServletRequest request,
+            HttpServletResponse response,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         String back = "/compte" + nextQuery(next);
         try {
             AccountView view = accountService.authenticate(email, password);
-            AccountService.login(session, view);
+            persistLogin(request, response, session, view);
             redirectAttributes.addFlashAttribute(
                     "success",
                     view.admin()
@@ -93,15 +100,43 @@ public class AccountController {
     }
 
     @GetMapping("/compte/deconnexion")
-    public String logoutGet(HttpSession session, RedirectAttributes redirectAttributes) {
-        return logout(session, redirectAttributes);
+    public String logoutGet(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        return logout(request, response, session, redirectAttributes);
     }
 
     @PostMapping("/compte/deconnexion")
-    public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
+    public String logout(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        AccountView current = AccountService.current(session);
+        if (current != null) {
+            accountService.forget(current.id());
+        }
         AccountService.logout(session);
+        session.invalidate();
+        AccountCookies.clear(request, response);
         redirectAttributes.addFlashAttribute("success", "Vous êtes déconnecté.");
         return "redirect:/compte";
+    }
+
+    private void persistLogin(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            HttpSession session,
+            AccountView view
+    ) {
+        session.invalidate();
+        HttpSession fresh = request.getSession(true);
+        AccountService.login(fresh, view);
+        AccountCookies.write(request, response, accountService.issueRememberToken(view));
     }
 
     static String safeNext(String next) {

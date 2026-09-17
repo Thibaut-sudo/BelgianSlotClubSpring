@@ -38,6 +38,10 @@ public class MarketplaceSchemaPatch {
                     "ALTER TABLE marketplace_listing ADD COLUMN IF NOT EXISTS owner_account_id BIGINT");
             addColumn(statement, "MARKETPLACE_THREAD", "BUYER_ACCOUNT_ID",
                     "ALTER TABLE marketplace_thread ADD COLUMN IF NOT EXISTS buyer_account_id BIGINT");
+            addColumn(statement, "MEMBER_ACCOUNT", "REMEMBER_TOKEN_HASH",
+                    "ALTER TABLE member_account ADD COLUMN IF NOT EXISTS remember_token_hash VARCHAR(128)");
+            addColumn(statement, "MEMBER_ACCOUNT", "REMEMBER_UNTIL",
+                    "ALTER TABLE member_account ADD COLUMN IF NOT EXISTS remember_until TIMESTAMP");
             makeNullable(statement, "MARKETPLACE_THREAD", "BUYER_PASSWORD_HASH");
         } catch (SQLException e) {
             log.warn("Impossible d’appliquer le patch marketplace : {}", e.getMessage());

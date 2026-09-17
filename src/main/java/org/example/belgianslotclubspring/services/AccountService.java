@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -18,11 +20,17 @@ import java.util.regex.Pattern;
 public class AccountService {
 
     public static final String SESSION_KEY = "account.view";
+    public static final String REMEMBER_COOKIE = "bsc_remember";
     public static final int PASSWORD_MIN = 6;
+    public static final int REMEMBER_DAYS = 60;
+    public static final int REMEMBER_MAX_AGE = REMEMBER_DAYS * 24 * 60 * 60;
     public static final String DEFAULT_ADMIN_EMAIL = "thibaut.lenertz@gmail.com";
 
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
     private static final String PASSWORD_LABEL = "Le mot de passe du compte";
+    private static final String TOKEN_LABEL = "Le jeton de connexion";
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final HexFormat HEX = HexFormat.of();
 
     private final MemberAccountRepo accountRepo;
     private final Set<String> adminEmails;
@@ -48,15 +56,86 @@ public class AccountService {
 
     public static void login(HttpSession session, AccountView view) {
         session.setAttribute(SESSION_KEY, view);
+        session.setMaxInactiveInterval(REMEMBER_MAX_AGE);
     }
 
     public static void logout(HttpSession session) {
-        session.removeAttribute(SESSION_KEY);
+        if (session != null) {
+            session.removeAttribute(SESSION_KEY);
+        }
     }
 
     public static boolean isAdmin(HttpSession session) {
         AccountView view = current(session);
         return view != null && view.admin();
+    }
+
+    @Transactional
+    public String issueRememberToken(AccountView view) {
+        if (view == null || view.id() == null) {
+            return null;
+        }
+        MemberAccount account = accountRepo.findById(view.id()).orElse(null);
+        if (account == null) {
+            return null;
+        }
+        byte[] bytes = new byte[32];
+        RANDOM.nextBytes(bytes);
+        String token = HEX.formatHex(bytes);
+        account.setRememberTokenHash(SellerPasswords.hash(token, TOKEN_LABEL));
+        account.setRememberUntil(LocalDateTime.now().plusDays(REMEMBER_DAYS));
+        accountRepo.save(account);
+        return view.id() + "." + token;
+    }
+
+    @Transactional
+    public AccountView restoreFromRememberToken(String cookieValue) {
+        RememberCookie parsed = parseRememberCookie(cookieValue);
+        if (parsed == null) {
+            return null;
+        }
+        MemberAccount account = accountRepo.findById(parsed.accountId()).orElse(null);
+        if (account == null || account.getRememberTokenHash() == null || account.getRememberUntil() == null) {
+            return null;
+        }
+        if (account.getRememberUntil().isBefore(LocalDateTime.now())
+                || !SellerPasswords.matches(account.getRememberTokenHash(), parsed.token())) {
+            forget(account.getId());
+            return null;
+        }
+        return toView(account);
+    }
+
+    @Transactional
+    public void forget(Long accountId) {
+        if (accountId == null) {
+            return;
+        }
+        accountRepo.findById(accountId).ifPresent(account -> {
+            account.setRememberTokenHash(null);
+            account.setRememberUntil(null);
+            accountRepo.save(account);
+        });
+    }
+
+    static RememberCookie parseRememberCookie(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        int sep = raw.indexOf('.');
+        if (sep <= 0 || sep == raw.length() - 1) {
+            return null;
+        }
+        try {
+            long id = Long.parseLong(raw.substring(0, sep));
+            String token = raw.substring(sep + 1);
+            if (id <= 0 || token.length() < 16 || token.length() > 80) {
+                return null;
+            }
+            return new RememberCookie(id, token);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     public boolean isAdminEmail(String email) {
@@ -131,5 +210,8 @@ public class AccountService {
     }
 
     public record AccountView(Long id, String name, String email, boolean admin) {
+    }
+
+    record RememberCookie(long accountId, String token) {
     }
 }

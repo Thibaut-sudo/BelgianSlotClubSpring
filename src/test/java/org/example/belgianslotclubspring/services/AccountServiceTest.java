@@ -33,4 +33,15 @@ class AccountServiceTest {
         assertFalse(service.isAdminEmail("autre@example.com"));
         assertFalse(service.isAdminEmail(null));
     }
+
+    @Test
+    void rememberCookieParsesAccountIdAndToken() {
+        AccountService.RememberCookie parsed = AccountService.parseRememberCookie("12.aabbccddeeff0011");
+        assertEquals(12L, parsed.accountId());
+        assertEquals("aabbccddeeff0011", parsed.token());
+        assertEquals(null, AccountService.parseRememberCookie(null));
+        assertEquals(null, AccountService.parseRememberCookie("abc"));
+        assertEquals(null, AccountService.parseRememberCookie("0.aabbccddeeff0011"));
+        assertEquals(null, AccountService.parseRememberCookie("12.short"));
+    }
 }

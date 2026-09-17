@@ -34,13 +34,18 @@
                 <img id="marketplaceMainPhoto"
                      class="marketplace-gallery__main"
                      th:src="${listing.photos[0].url}"
-                     th:alt="${listing.title}">
+                     th:alt="${listing.title}"
+                     th:attr="data-lightbox=${listing.photos[0].url}"
+                     data-lightbox-group="listing-photos"
+                     title="Voir la photo en grand">
                 <div class="marketplace-thumbs" th:if="${#lists.size(listing.photos) > 1}">
                     <button type="button"
                             class="marketplace-thumb"
                             th:each="photo, iter : ${listing.photos}"
                             th:classappend="${iter.first} ? ' is-active'"
                             th:data-src="${photo.url}"
+                            th:attr="data-lightbox=${photo.url}"
+                            data-lightbox-group="listing-photos"
                             th:aria-label="'Photo ' + ${iter.count}">
                         <img th:src="${photo.url}" alt="" loading="lazy">
                     </button>
@@ -121,6 +126,7 @@
                     var src = btn.getAttribute('data-src');
                     if (!src) return;
                     main.src = src;
+                    main.setAttribute('data-lightbox', src);
                     document.querySelectorAll('.marketplace-thumb').forEach(function (other) {
                         other.classList.toggle('is-active', other === btn);
                     });

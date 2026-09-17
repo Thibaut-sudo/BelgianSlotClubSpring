@@ -57,7 +57,9 @@
                         <a class="marketplace-card"
                            th:classappend="${(card.listing.sold ? ' marketplace-card--sold' : '') + (!#strings.isEmpty(card.coverUrl) ? ' marketplace-card--photo' : '')}"
                            th:href="@{/marketplace/{id}(id=${card.listing.id}, club=${club})}">
-                            <span class="marketplace-card__photo" th:if="${!#strings.isEmpty(card.coverUrl)}">
+                            <span class="marketplace-card__photo" th:if="${!#strings.isEmpty(card.coverUrl)}"
+                                  th:attr="data-lightbox=${card.coverUrl}"
+                                  title="Voir la photo en grand">
                                 <img th:src="${card.coverUrl}" alt="" loading="lazy" decoding="async">
                                 <span class="marketplace-card__count" th:if="${card.photoCount > 1}"
                                       th:text="${card.photoCount} + ' photos'">2 photos</span>
@@ -186,6 +188,8 @@
                     var img = document.createElement('img');
                     img.src = URL.createObjectURL(file);
                     img.alt = file.name;
+                    img.setAttribute('data-lightbox', img.src);
+                    img.setAttribute('data-lightbox-group', 'photo-preview');
                     box.appendChild(img);
                 });
             });

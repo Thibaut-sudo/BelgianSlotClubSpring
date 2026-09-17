@@ -3029,6 +3029,7 @@ input[readonly].time-box {
 .marketplace-card__photo {
   position: relative;
   display: block;
+  cursor: zoom-in;
 }
 
 .marketplace-card__photo img {
@@ -3038,6 +3039,7 @@ input[readonly].time-box {
   object-fit: cover;
   border-radius: var(--radius);
   background: var(--color-border);
+  pointer-events: none;
 }
 
 .marketplace-card__count {
@@ -3130,6 +3132,7 @@ input[readonly].time-box {
   object-fit: cover;
   border-radius: var(--radius);
   border: 1px solid var(--color-border);
+  cursor: zoom-in;
 }
 
 .marketplace-chat-wrap {
@@ -3228,6 +3231,7 @@ input[readonly].time-box {
   object-fit: contain;
   background: #111;
   border-radius: var(--radius-lg);
+  cursor: zoom-in;
 }
 
 .marketplace-thumbs {
@@ -3242,7 +3246,7 @@ input[readonly].time-box {
   border: 2px solid transparent;
   border-radius: var(--radius);
   background: none;
-  cursor: pointer;
+  cursor: zoom-in;
 }
 
 .marketplace-thumb.is-active,
@@ -3256,6 +3260,84 @@ input[readonly].time-box {
   height: 4.5rem;
   object-fit: cover;
   border-radius: calc(var(--radius) - 2px);
+  pointer-events: none;
+}
+
+body.lightbox-open {
+  overflow: hidden;
+}
+
+.photo-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 280;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-12);
+  background: rgb(17 17 17 / 0.88);
+}
+
+.photo-lightbox.is-open {
+  display: flex;
+}
+
+.photo-lightbox img {
+  display: block;
+  max-width: min(96vw, 72rem);
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+
+.photo-lightbox__close,
+.photo-lightbox__nav {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+  cursor: pointer;
+}
+
+.photo-lightbox__close {
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.photo-lightbox__nav {
+  top: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  font-size: 2rem;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+.photo-lightbox__nav[hidden] {
+  display: none;
+}
+
+.photo-lightbox__nav--prev {
+  left: var(--space-3);
+}
+
+.photo-lightbox__nav--next {
+  right: var(--space-3);
+}
+
+.photo-lightbox__close:hover,
+.photo-lightbox__nav:hover {
+  background: rgb(255 255 255 / 0.24);
 }
 
 @media (max-width: 599px) {
@@ -3265,6 +3347,10 @@ input[readonly].time-box {
 
   .marketplace-card__photo img {
     height: 11rem;
+  }
+
+  .photo-lightbox {
+    padding: var(--space-10) var(--space-4);
   }
 }
 

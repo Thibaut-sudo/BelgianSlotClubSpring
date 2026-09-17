@@ -20,8 +20,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/main.css?v=68">
-    <link rel="stylesheet" href="/css/tables.css?v=68">
+    <link rel="stylesheet" href="/css/main.css?v=69">
+    <link rel="stylesheet" href="/css/tables.css?v=69">
     <link rel="icon" type="image/png" href="/images/favicon.png">
 </head>
 
@@ -229,8 +229,15 @@
     <script th:inline="javascript">
         window.BSC_ADMIN = /*[[${account != null and account.admin}]]*/ false;
     </script>
+    <div id="photoLightbox" class="photo-lightbox" hidden role="dialog" aria-modal="true" aria-label="Photo en grand">
+        <button type="button" class="photo-lightbox__close" data-lightbox-close aria-label="Fermer">×</button>
+        <button type="button" class="photo-lightbox__nav photo-lightbox__nav--prev" data-lightbox-prev hidden aria-label="Photo précédente">‹</button>
+        <img data-lightbox-image alt="">
+        <button type="button" class="photo-lightbox__nav photo-lightbox__nav--next" data-lightbox-next hidden aria-label="Photo suivante">›</button>
+    </div>
     <script src="/js/navigation.js?v=7"></script>
     <script src="/js/import-auth.js?v=2"></script>
+    <script src="/js/photo-lightbox.js?v=1"></script>
 </th:block>
 
 </body>

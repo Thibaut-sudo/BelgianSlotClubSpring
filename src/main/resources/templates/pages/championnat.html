@@ -173,7 +173,7 @@
             </div>
 
             <!-- Classement Catégorie Bis -->
-            <div class="table-container championship-table-container bis-table-container">
+            <div class="table-container championship-table-container bis-table-container" id="bisTableContainer" hidden>
                 <div class="table-header">
                     <h2>Classement catégorie bis</h2>
                     <p>Classement des pilotes en catégorie bis</p>
@@ -468,6 +468,7 @@
         const excludedHeader = document.getElementById("excludedHeaderRow");
         const tableBody = document.getElementById("raceBody");
         const excludedBody = document.getElementById("excludedBody");
+        const bisTableContainer = document.getElementById("bisTableContainer");
         const sortButton = document.getElementById("sortTotal1");
 
         const dates = Object.keys(raceResults);
@@ -590,14 +591,13 @@
 
             validPilotes.forEach(p => appendToTable(tableBody, p));
             if (excludedPilotes.length === 0) {
-                let tr = document.createElement("tr");
-                let td = document.createElement("td");
-                td.colSpan = 4 + dates.length;
-                td.className = "empty-bis";
-                td.textContent = "Aucun pilote catégorie bis pour cette sélection.";
-                tr.appendChild(td);
-                excludedBody.appendChild(tr);
+                if (bisTableContainer) {
+                    bisTableContainer.hidden = true;
+                }
             } else {
+                if (bisTableContainer) {
+                    bisTableContainer.hidden = false;
+                }
                 excludedPilotes.forEach(p => appendToTable(excludedBody, p, true));
             }
         }
@@ -667,6 +667,14 @@
             location.reload();
         }
 
+        function getChampionshipSheets() {
+            const sheets = [{ name: 'Général', table: '#raceTable' }];
+            if (bisTableContainer && !bisTableContainer.hidden) {
+                sheets.push({ name: 'Catégorie bis', table: '#excludedTable' });
+            }
+            return sheets;
+        }
+
         // Fonctions d'export
         function exportToExcel() {
             if (typeof BscExport === 'undefined') {
@@ -675,10 +683,7 @@
             }
             const year = document.getElementById('year')?.value || '';
             const cat = document.getElementById('categorie')?.value || '';
-            BscExport.exportToExcel([
-                { name: 'Général', table: '#raceTable' },
-                { name: 'Catégorie bis', table: '#excludedTable' }
-            ], ['championnat', cat, year].filter(Boolean).join('_'));
+            BscExport.exportToExcel(getChampionshipSheets(), ['championnat', cat, year].filter(Boolean).join('_'));
         }
 
         function exportToPDF() {
@@ -692,10 +697,7 @@
                 title: 'Classement championnat',
                 subtitle: [cat, year].filter(Boolean).join(' · '),
                 filename: ['championnat', cat, year].filter(Boolean).join('_'),
-                sheets: [
-                    { name: 'Général', table: '#raceTable' },
-                    { name: 'Catégorie bis', table: '#excludedTable' }
-                ]
+                sheets: getChampionshipSheets()
             });
         }
 

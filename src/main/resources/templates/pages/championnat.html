@@ -47,10 +47,6 @@
                         <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}" th:selected="${selectedCategory == cat}"></option>
                     </select>
                 </div>
-                <div class="filter-group" style="flex: 0;">
-                    <label class="filter-label sr-only" for="refreshBtn">Actualiser</label>
-                    <button type="button" id="refreshBtn" class="btn btn-primary" onclick="refreshData()">Actualiser</button>
-                </div>
             </div>
 
             <!-- Statistiques -->
@@ -165,7 +161,7 @@
                                 <th class="position">Pos</th>
                                 <th>Pilote</th>
                                 <th>Total</th>
-                                <th id="sortTotal1" class="sortable">Total − 1</th>
+                                <th>Total − 1</th>
                             </tr>
                         </thead>
                         <tbody id="raceBody"></tbody>
@@ -475,7 +471,6 @@
         const statsRow = document.getElementById("statsRow");
         const heroSubtitle = document.getElementById("heroSubtitle");
         const exportActions = document.getElementById("exportActions");
-        const sortButton = document.getElementById("sortTotal1");
 
         const dates = Object.keys(raceResults || {});
 
@@ -683,11 +678,6 @@
             window.location.href = url.toString();
         }
 
-        // Actualisation des données
-        function refreshData() {
-            location.reload();
-        }
-
         function getChampionshipSheets() {
             const sheets = [];
             if (generalTableScroll && !generalTableScroll.hidden) {
@@ -742,10 +732,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeTable();
         });
-
-        if (sortButton) {
-            sortButton.addEventListener("click", processPilotes);
-        }
 
         // Fonction pour basculer l'affichage du système de points
         function togglePointsSystem() {

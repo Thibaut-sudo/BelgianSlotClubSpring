@@ -7,7 +7,7 @@
 
 <section class="page-hero page-hero--club" th:data-club="${club}">
     <div class="page-hero-content container">
-        <h1 class="page-hero-title">Championnat 2026</h1>
+        <h1 class="page-hero-title">Championnat <span th:text="${table.year()}">2026</span></h1>
         <p class="page-hero-sub">Points par catégorie, +1 au scratch, bonus de présence. Sur 6 manches, les 5 meilleurs résultats comptent.</p>
         <div class="page-hero-meta">
             <span th:text="${clubDisplayName}">Championnat de Belgique des Rallyes Slot</span>

@@ -6,6 +6,7 @@ import org.example.belgianslotclubspring.models.Club;
 import org.example.belgianslotclubspring.services.QualifService;
 import org.example.belgianslotclubspring.services.RaceDayRecapService;
 import org.example.belgianslotclubspring.services.RaceResultService;
+import org.example.belgianslotclubspring.utils.RankingPlaces;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,6 +61,8 @@ public class RacedataController {
         model.addAttribute("club", clubCode);
         model.addAttribute("clubDisplayName",
                 Club.fromCode(clubCode).map(Club::getDisplayName).orElse(clubCode));
+        model.addAttribute("racePlaces", List.of());
+        model.addAttribute("qualiPlaces", List.of());
 
         if (raceDate != null && !raceDate.isEmpty()) {
             LocalDate selectedDate = LocalDate.parse(raceDate);
@@ -69,7 +72,9 @@ public class RacedataController {
             List<Qualif> qualiResults = qualifService.getQualifByDateAndClub(selectedDate, clubCode);
 
             model.addAttribute("raceResultDate", raceResults);
+            model.addAttribute("racePlaces", RankingPlaces.olympic(raceResults, RaceResult::getTotalTours));
             model.addAttribute("qualiResult", qualiResults);
+            model.addAttribute("qualiPlaces", RankingPlaces.olympic(qualiResults, q -> q.getBestTime()));
             model.addAttribute("raceDate", selectedDate);
             model.addAttribute("raceCategory", category);
             model.addAttribute("recap", raceDayRecapService.build(qualiResults, raceResults));

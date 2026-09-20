@@ -121,9 +121,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="quali, stat : ${qualiResult}" th:class="${stat.count <= 3 ? 'top-' + stat.count : ''}">
-                                <td class="position" th:classappend="${' position-' + stat.count}">
-                                    <span class="pos-badge" th:text="${stat.count}"></span>
+                            <tr th:each="quali, stat : ${qualiResult}"
+                                th:with="place=${qualiPlaces[stat.index]}"
+                                th:class="${place <= 3 ? 'top-' + place : ''}">
+                                <td class="position" th:classappend="${' position-' + place}">
+                                    <span class="pos-badge" th:text="${place}"></span>
                                 </td>
                                 <td class="pilot-name">
                                     <a class="pilot-link"
@@ -136,9 +138,11 @@
                     </table>
                 </div>
                 <ol class="race-mobile-qualif">
-                    <li th:each="quali, stat : ${qualiResult}" th:class="${stat.count <= 3 ? 'top-' + stat.count : ''}">
-                        <span class="position" th:classappend="${' position-' + stat.count}">
-                            <span class="pos-badge" th:text="${stat.count}"></span>
+                    <li th:each="quali, stat : ${qualiResult}"
+                        th:with="place=${qualiPlaces[stat.index]}"
+                        th:class="${place <= 3 ? 'top-' + place : ''}">
+                        <span class="position" th:classappend="${' position-' + place}">
+                            <span class="pos-badge" th:text="${place}"></span>
                         </span>
                         <a class="pilot-name pilot-link"
                            th:href="@{/statistiques/{club}/pilote(club=${club}, nom=${quali.pilotName})}"
@@ -180,9 +184,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="raceResult, stat : ${raceResultDate}" th:class="${stat.count <= 3 ? 'top-' + stat.count : ''}">
-                                <td class="position" th:classappend="${' position-' + stat.count}">
-                                    <span class="pos-badge" th:text="${stat.count}"></span>
+                            <tr th:each="raceResult, stat : ${raceResultDate}"
+                                th:with="place=${racePlaces[stat.index]}"
+                                th:class="${place <= 3 ? 'top-' + place : ''}">
+                                <td class="position" th:classappend="${' position-' + place}">
+                                    <span class="pos-badge" th:text="${place}"></span>
                                 </td>
                                 <td class="pilot-name">
                                     <a class="pilot-link"
@@ -201,10 +207,11 @@
                 </div>
                 <div class="race-mobile-results">
                     <article class="race-card" th:each="raceResult, stat : ${raceResultDate}"
-                             th:classappend="${stat.count <= 3 ? ' top-' + stat.count : ''}">
+                             th:with="place=${racePlaces[stat.index]}"
+                             th:classappend="${place <= 3 ? ' top-' + place : ''}">
                         <header class="race-card-head">
-                            <span class="position" th:classappend="${' position-' + stat.count}">
-                                <span class="pos-badge" th:text="${stat.count}"></span>
+                            <span class="position" th:classappend="${' position-' + place}">
+                                <span class="pos-badge" th:text="${place}"></span>
                             </span>
                             <div class="race-card-id">
                                 <a class="pilot-link"

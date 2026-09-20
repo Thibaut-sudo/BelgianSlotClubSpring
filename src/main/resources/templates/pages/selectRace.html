@@ -189,7 +189,7 @@
                                             class="race-card race-tile"
                                             th:attr="data-club=${club}, data-category=${race.category()}, data-date=${race.date()}">
                                         <div class="race-tile-header">
-                                            <span class="race-tile-title race-date" th:text="${race.date()}"></span>
+                                            <span class="race-tile-title race-date" th:text="${#temporals.format(race.date(), 'dd/MM/yyyy')}"></span>
                                             <span class="race-category" th:text="${race.category()}"></span>
                                         </div>
                                         <span class="race-text">Voir les résultats</span>
@@ -207,7 +207,7 @@
                                       method="post"
                                       class="race-delete-form"
                                       onsubmit="return confirm('Supprimer la course ' + this.dataset.label + ' ? Cette action est définitive.');"
-                                      th:attr="data-label=${race.category() + ' — ' + race.date()}">
+                                      th:attr="data-label=${race.category() + ' — ' + #temporals.format(race.date(), 'dd/MM/yyyy')}">
                                     <input type="hidden" name="raceDate" th:value="${race.date()}">
                                     <input type="hidden" name="category" th:value="${race.category()}">
                                     <button type="submit" class="btn btn-ghost btn-sm race-delete-btn" title="Supprimer la course">

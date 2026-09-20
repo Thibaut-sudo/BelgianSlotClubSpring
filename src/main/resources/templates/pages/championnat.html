@@ -7,13 +7,13 @@
     <section class="page-hero page-hero--club" th:data-club="${club}">
         <div class="page-hero-content container">
             <h1 class="page-hero-title">Classement Championnat</h1>
-            <p class="page-hero-sub">Suivez le classement général et la catégorie bis pour la saison en cours.</p>
+            <p class="page-hero-sub" id="heroSubtitle">Suivez le classement général pour la saison en cours.</p>
             <div class="page-hero-meta">
                 <span>Club : <strong th:text="${clubDisplayName != null ? clubDisplayName : club}">Club</strong></span>
                 <span>Saison : <strong th:text="${selectedYear}">2025</strong></span>
                 <span>Catégorie : <strong th:text="${selectedCategory}">Catégorie</strong></span>
             </div>
-            <div class="page-hero-stats">
+            <div class="page-hero-stats" id="heroStats" hidden>
                 <div class="page-hero-stat">
                     <span class="page-hero-stat-value" id="heroTotalPilotes">0</span>
                     <span class="page-hero-stat-label">Pilotes</span>
@@ -54,7 +54,7 @@
             </div>
 
             <!-- Statistiques -->
-            <div class="stats-row">
+            <div class="stats-row" id="statsRow" hidden>
                 <div class="stat-block">
                     <span class="stat-block-value" id="totalPilotes">0</span>
                     <span class="stat-block-label">Pilotes</span>
@@ -78,7 +78,7 @@
                 <div class="points-system-header" onclick="togglePointsSystem()" role="button" tabindex="0" aria-expanded="false" aria-controls="pointsSystemContent">
                     <div class="header-content">
                         <h2>Système de points du championnat</h2>
-                        <p>Calcul des points selon le règlement officiel Slot 4000</p>
+                        <p>Calcul des points selon le règlement <span th:text="${clubDisplayName != null ? clubDisplayName : club}">Club</span></p>
                     </div>
                     <div class="toggle-button" aria-hidden="true">
                         <span class="toggle-icon">▼</span>
@@ -146,18 +146,19 @@
                             <li>À tours égaux, les pilotes reçoivent les mêmes points (ex-æquo)</li>
                             <li><strong>Total − 1</strong> : on retire le plus mauvais résultat (joker) — une absence compte comme 0 et est écartée en priorité</li>
                             <li>Le classement officiel est basé sur le <strong>Total − 1</strong></li>
+                            <li>À Total − 1 égal, les pilotes sont ex-æquo (même place)</li>
                         </ul>
                     </div>
                 </div>
             </div>
 
             <!-- Classement Général -->
-            <div class="table-container championship-table-container">
+            <div class="table-container championship-table-container" id="generalTableContainer">
                 <div class="table-header">
                     <h2>Classement général</h2>
                     <p>Classement principal du championnat</p>
                 </div>
-                <div class="table-scroll">
+                <div class="table-scroll" id="generalTableScroll" hidden>
                     <table class="championship-table" id="raceTable">
                         <thead>
                             <tr id="headerRow">
@@ -170,6 +171,9 @@
                         <tbody id="raceBody"></tbody>
                     </table>
                 </div>
+                <p class="empty-state championship-empty" id="generalEmpty">
+                    Aucune course importée pour cette saison et cette catégorie. Les points apparaîtront dès qu’une course sera ajoutée.
+                </p>
             </div>
 
             <!-- Classement Catégorie Bis -->
@@ -195,7 +199,7 @@
 
             <!-- Actions -->
             <div class="actions-section">
-                <div class="export-actions cluster">
+                <div class="export-actions cluster" id="exportActions" hidden>
                     <button type="button" class="btn-export excel" onclick="exportToExcel()">Exporter Excel</button>
                     <button type="button" class="btn-export pdf" onclick="exportToPDF()">Exporter PDF</button>
                     <button type="button" class="btn-export share" onclick="shareChampionship()">Partager</button>
@@ -413,11 +417,8 @@
             color: var(--color-ink);
         }
 
-        .empty-bis {
-            text-align: center;
-            color: var(--color-muted);
-            padding: var(--space-5);
-            font-size: 0.9375rem;
+        .championship-empty {
+            margin: 0 var(--space-6) var(--space-6);
         }
 
         /* Actions bar */
@@ -463,19 +464,45 @@
     </style>
 
     <script>
-        // Variables globales
         const tableHeader = document.getElementById("headerRow");
         const excludedHeader = document.getElementById("excludedHeaderRow");
         const tableBody = document.getElementById("raceBody");
         const excludedBody = document.getElementById("excludedBody");
         const bisTableContainer = document.getElementById("bisTableContainer");
+        const generalTableScroll = document.getElementById("generalTableScroll");
+        const generalEmpty = document.getElementById("generalEmpty");
+        const heroStats = document.getElementById("heroStats");
+        const statsRow = document.getElementById("statsRow");
+        const heroSubtitle = document.getElementById("heroSubtitle");
+        const exportActions = document.getElementById("exportActions");
         const sortButton = document.getElementById("sortTotal1");
 
-        const dates = Object.keys(raceResults);
+        const dates = Object.keys(raceResults || {});
 
-        // Initialisation
+        function isBisPilot(name) {
+            return typeof name === "string" && /[*∗＊]/.test(name);
+        }
+
+        function displayPilotName(name) {
+            return String(name || "")
+                .replace(/[＊∗*]/g, "")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
+        function rankingPositions(sorted) {
+            let lastScore = null;
+            let lastPos = 0;
+            return sorted.map((pilote, index) => {
+                if (lastScore === null || pilote.total1 !== lastScore) {
+                    lastPos = index + 1;
+                    lastScore = pilote.total1;
+                }
+                return lastPos;
+            });
+        }
+
         function initializeTable() {
-            // Ajouter les colonnes de dates
             dates.forEach(date => {
                 let th1 = document.createElement("th");
                 th1.textContent = formatDate(date);
@@ -487,10 +514,8 @@
             });
 
             processPilotes();
-            updateStats();
         }
 
-        // Traitement des pilotes
         function processPilotes() {
             tableBody.innerHTML = "";
             excludedBody.innerHTML = "";
@@ -525,29 +550,14 @@
             let excludedPilotes = pilotes.filter(p => isBisPilot(p.name));
             let validPilotes = pilotes.filter(p => !isBisPilot(p.name));
 
-            // Trier les pilotes valides par total1 (décroissant)
             validPilotes.sort((a, b) => b.total1 - a.total1);
-
-            // Trier les pilotes avec * (catégorie bis) par total1 (décroissant)
             excludedPilotes.sort((a, b) => b.total1 - a.total1);
 
-            function isBisPilot(name) {
-                return typeof name === "string" && /[*∗＊]/.test(name);
-            }
-
-            function displayPilotName(name) {
-                return String(name || "")
-                    .replace(/[＊∗*]/g, "")
-                    .replace(/\s+/g, " ")
-                    .trim();
-            }
-
-            function appendToTable(body, pilote, isBis = false) {
+            function appendToTable(body, pilote, isBis, position) {
                 let tr = document.createElement("tr");
 
                 let tdPosition = document.createElement("td");
                 tdPosition.className = "position";
-                let position = body.children.length + 1;
                 if (position <= 3) {
                     tdPosition.className += ` position-${position}`;
                 }
@@ -589,49 +599,60 @@
                 body.appendChild(tr);
             }
 
-            validPilotes.forEach(p => appendToTable(tableBody, p));
-            if (excludedPilotes.length === 0) {
-                if (bisTableContainer) {
-                    bisTableContainer.hidden = true;
+            if (validPilotes.length === 0) {
+                if (generalTableScroll) generalTableScroll.hidden = true;
+                if (generalEmpty) {
+                    generalEmpty.hidden = false;
+                    generalEmpty.textContent = dates.length === 0
+                        ? "Aucune course importée pour cette saison et cette catégorie. Les points apparaîtront dès qu’une course sera ajoutée."
+                        : "Aucun pilote au classement général pour cette sélection.";
                 }
             } else {
-                if (bisTableContainer) {
-                    bisTableContainer.hidden = false;
-                }
-                excludedPilotes.forEach(p => appendToTable(excludedBody, p, true));
+                if (generalTableScroll) generalTableScroll.hidden = false;
+                if (generalEmpty) generalEmpty.hidden = true;
+                const positions = rankingPositions(validPilotes);
+                validPilotes.forEach((p, i) => appendToTable(tableBody, p, false, positions[i]));
+            }
+
+            if (excludedPilotes.length === 0) {
+                if (bisTableContainer) bisTableContainer.hidden = true;
+            } else {
+                if (bisTableContainer) bisTableContainer.hidden = false;
+                const bisPositions = rankingPositions(excludedPilotes);
+                excludedPilotes.forEach((p, i) => appendToTable(excludedBody, p, true, bisPositions[i]));
+            }
+
+            updateHeroSubtitle(excludedPilotes.length > 0);
+            updateStats(validPilotes);
+            if (exportActions) {
+                exportActions.hidden = validPilotes.length === 0 && excludedPilotes.length === 0;
             }
         }
 
-        // Mise à jour des statistiques
-        function updateStats() {
-            let allNames = new Set();
-            dates.forEach(date => {
-                Object.keys(raceResults[date]).forEach(name => allNames.add(name));
-            });
+        function updateHeroSubtitle(hasBis) {
+            if (!heroSubtitle) return;
+            heroSubtitle.textContent = hasBis
+                ? "Suivez le classement général et la catégorie bis pour la saison en cours."
+                : "Suivez le classement général pour la saison en cours.";
+        }
 
-            let pilotes = [...allNames].map(name => {
-                let total = 0;
-                dates.forEach(date => {
-                    total += raceResults[date][name] ?? 0;
-                });
-                return { name, total };
-            });
+        function updateStats(validPilotes) {
+            const hasRaces = dates.length > 0;
+            if (heroStats) heroStats.hidden = !hasRaces;
+            if (statsRow) statsRow.hidden = !hasRaces;
 
-            pilotes.sort((a, b) => b.total - a.total);
+            const leaderPts = validPilotes.length > 0 ? validPilotes[0].total1 : 0;
+            const avgPoints = validPilotes.length > 0
+                ? Math.round(validPilotes.reduce((sum, p) => sum + p.total, 0) / validPilotes.length)
+                : 0;
 
-            // Statistiques principales
-            document.getElementById("totalPilotes").textContent = allNames.size;
+            document.getElementById("totalPilotes").textContent = validPilotes.length;
             document.getElementById("totalCourses").textContent = dates.length;
-            document.getElementById("leaderPoints").textContent = pilotes.length > 0 ? pilotes[0].total : 0;
-
-            let avgPoints = pilotes.length > 0 ?
-                Math.round(pilotes.reduce((sum, p) => sum + p.total, 0) / pilotes.length) : 0;
+            document.getElementById("leaderPoints").textContent = leaderPts;
             document.getElementById("totalPoints").textContent = avgPoints;
-
-            // Statistiques de l'en-tête
-            document.getElementById("heroTotalPilotes").textContent = allNames.size;
+            document.getElementById("heroTotalPilotes").textContent = validPilotes.length;
             document.getElementById("heroTotalCourses").textContent = dates.length;
-            document.getElementById("heroLeaderPoints").textContent = pilotes.length > 0 ? pilotes[0].total : 0;
+            document.getElementById("heroLeaderPoints").textContent = leaderPts;
         }
 
         // Formatage de date
@@ -668,7 +689,10 @@
         }
 
         function getChampionshipSheets() {
-            const sheets = [{ name: 'Général', table: '#raceTable' }];
+            const sheets = [];
+            if (generalTableScroll && !generalTableScroll.hidden) {
+                sheets.push({ name: 'Général', table: '#raceTable' });
+            }
             if (bisTableContainer && !bisTableContainer.hidden) {
                 sheets.push({ name: 'Catégorie bis', table: '#excludedTable' });
             }
@@ -719,8 +743,9 @@
             initializeTable();
         });
 
-        // Gestionnaire de tri
-        sortButton.addEventListener("click", processPilotes);
+        if (sortButton) {
+            sortButton.addEventListener("click", processPilotes);
+        }
 
         // Fonction pour basculer l'affichage du système de points
         function togglePointsSystem() {
